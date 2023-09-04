@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="365.70065mm"
+   height="133.31952mm"
+   viewBox="0 0 365.70065 133.31952"
+   version="1.1"
+   id="svg766"
+   inkscape:version="1.2 (dc2aeda, 2022-05-15)"
+   sodipodi:docname="stitchimpute_name_light.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview768"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.24346639"
+     inkscape:cx="449.75407"
+     inkscape:cy="172.50841"
+     inkscape:window-width="1440"
+     inkscape:window-height="776"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs763" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-33.190428,-13.062545)">
+    <text
+       xml:space="preserve"
+       style="font-size:10.5833px;line-height:1.25;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Normal';stroke-width:0.264583"
+       x="30.203388"
+       y="59.148304"
+       id="text772"><tspan
+         sodipodi:role="line"
+         id="tspan770"
+         x="30.203388"
+         y="59.148304"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:60.96px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583">birneylab/</tspan><tspan
+         sodipodi:role="line"
+         x="30.203388"
+         y="135.3483"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:60.96px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+         id="tspan774">stitchimpute</tspan></text>
+  </g>
+</svg>
