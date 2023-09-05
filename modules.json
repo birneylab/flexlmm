@@ -10,11 +10,6 @@
             "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
             "installed_by": ["modules"]
           },
-          "bcftools/query": {
-            "branch": "master",
-            "git_sha": "b5cc8edd887e27c51a48387e34549d4405d9769f",
-            "installed_by": ["modules"]
-          },
           "custom/dumpsoftwareversions": {
             "branch": "master",
             "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",

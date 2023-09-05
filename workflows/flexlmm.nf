@@ -5,7 +5,6 @@
 */
 
 include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
-include { WorkflowFlexlmm } from '../lib/WorkflowFLexlmm.groovy'
 
 def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
 def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
@@ -14,7 +13,7 @@ def summary_params = paramsSummaryMap(workflow)
 // Print parameter summary log to screen
 log.info logo + paramsSummaryLog(workflow) + citation
 
-WorkflowFLexlmm.initialise(workflow, params, log)
+WorkflowFLexlmm.initialise(params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +42,7 @@ def pheno_cov_table = file( params.pheno_cov_table )
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 
-//include { PREPROCESSING } from '../subworkflows/local/preprocessing'
+include { PREPROCESSING } from '../subworkflows/local/preprocessing'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,8 +65,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 workflow FLEXLMM {
     versions = Channel.empty ()
 
-    print(vcf)
-    print(pheno_cov_table)
+    PREPROCESSING ( vcf, pheno_cov_table )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')
