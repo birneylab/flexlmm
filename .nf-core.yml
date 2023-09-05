@@ -1,0 +1,24 @@
+repository_type: pipeline
+lint:
+  files_unchanged:
+    - docs/README.md
+    - .github/CONTRIBUTING.md
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/ISSUE_TEMPLATE/feature_request.yml
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/branch.yml
+  nextflow_config:
+    - manifest.name
+    - manifest.homePage
+  merge_markers:
+    - assets/test_data/cram/test_sample1.cram
+  multiqc_config:
+    - assets/multiqc_config.yml
+  files_exist:
+    - assets/multiqc_config.yml
+    - .github/workflows/branch.yml
+    - .github/workflows/ci.yml
+    - .github/workflows/linting_comment.yml
+    - .github/workflows/linting.yml
+

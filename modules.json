@@ -1,67 +1,27 @@
 {
-    "name": "birneylab/stitchimpute",
-    "homePage": "https://github.com/birneylab/stitchimpute",
-    "repos": {
-        "https://github.com/nf-core/modules.git": {
-            "modules": {
-                "nf-core": {
-                    "bcftools/concat": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
-                    },
-                    "bcftools/index": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
-                    },
-                    "bcftools/query": {
-                        "branch": "master",
-                        "git_sha": "b5cc8edd887e27c51a48387e34549d4405d9769f",
-                        "installed_by": ["modules"]
-                    },
-                    "cat/cat": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
-                    },
-                    "custom/dumpsoftwareversions": {
-                        "branch": "master",
-                        "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",
-                        "installed_by": ["modules"]
-                    },
-                    "glimpse2/concordance": {
-                        "branch": "master",
-                        "git_sha": "d82bbdfa209f7b58d3838a6fef4e0a2364d21059",
-                        "installed_by": ["modules"]
-                    },
-                    "samtools/coverage": {
-                        "branch": "master",
-                        "git_sha": "2fe9363ae3b3ab1c79f43dae9b1a4074694c57d6",
-                        "installed_by": ["modules"]
-                    },
-                    "samtools/faidx": {
-                        "branch": "master",
-                        "git_sha": "fd742419940e01ba1c5ecb172c3e32ec840662fe",
-                        "installed_by": ["modules"]
-                    },
-                    "samtools/index": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
-                    },
-                    "samtools/view": {
-                        "branch": "master",
-                        "git_sha": "3ffae3598260a99e8db3207dead9f73f87f90d1f",
-                        "installed_by": ["modules"]
-                    },
-                    "stitch": {
-                        "branch": "master",
-                        "git_sha": "f732bfc9c8a90fbbe72e98ae29fde0dd146acb03",
-                        "installed_by": ["modules"]
-                    }
-                }
-            }
+  "name": "birneylab/stitchimpute",
+  "homePage": "https://github.com/birneylab/stitchimpute",
+  "repos": {
+    "https://github.com/nf-core/modules.git": {
+      "modules": {
+        "nf-core": {
+          "bcftools/index": {
+            "branch": "master",
+            "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+            "installed_by": ["modules"]
+          },
+          "bcftools/query": {
+            "branch": "master",
+            "git_sha": "b5cc8edd887e27c51a48387e34549d4405d9769f",
+            "installed_by": ["modules"]
+          },
+          "custom/dumpsoftwareversions": {
+            "branch": "master",
+            "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",
+            "installed_by": ["modules"]
+          }
         }
+      }
     }
+  }
 }

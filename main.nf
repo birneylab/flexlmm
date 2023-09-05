@@ -1,23 +1,15 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    birneylab/stitchimpute
+    birneylab/flexlmm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Started July 2023 as a birneylab pipeline using the nf-core template
+    Started September 2023 as a birneylab pipeline using the nf-core template
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/birneylab/stitchimpute
 ----------------------------------------------------------------------------------------
 */
 
 nextflow.enable.dsl = 2
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    GENOME PARAMETER VALUES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,13 +41,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { STITCHIMPUTE } from './workflows/stitchimpute'
+include { FLEXLMM } from './workflows/flexlmm'
 
 //
 // WORKFLOW: Run main birneylab/stitchimpute analysis pipeline
 //
-workflow BIRNEYLAB_STITCHIMPUTE {
-    STITCHIMPUTE ()
+workflow BIRNEYLAB_FLEXLMM {
+    FLEXLMM ()
 }
 
 /*
@@ -69,7 +61,7 @@ workflow BIRNEYLAB_STITCHIMPUTE {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    BIRNEYLAB_STITCHIMPUTE ()
+    BIRNEYLAB_FLEXLMM ()
 }
 
 /*
