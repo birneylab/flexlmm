@@ -1,0 +1,16 @@
+Sept-05 12:38:02.402 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --outdir /Users/saul/test/out -work-dir /tmp/nextflow/work
+Sept-05 12:38:02.461 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sept-05 12:38:02.486 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/saul/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sept-05 12:38:02.499 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sept-05 12:38:02.500 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sept-05 12:38:02.503 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sept-05 12:38:02.514 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sept-05 12:38:02.540 [main] DEBUG nextflow.scm.ProviderConfig - Using SCM config path: /Users/saul/.nextflow/scm
+Sept-05 12:38:03.050 [main] DEBUG nextflow.scm.ProviderConfig - Detected SCM config: [providers:[github:[user:saulpierotti-ebi, password:ghp****]]]
+Sept-05 12:38:03.078 [main] DEBUG nextflow.scm.RepositoryFactory - Found Git repository result: [RepositoryFactory]
+Sept-05 12:38:03.094 [main] DEBUG nextflow.cli.Launcher - Operation aborted
+nextflow.exception.AbortOperationException: Cannot find script file: main.nf
+	at nextflow.cli.CmdRun.getScriptFile(CmdRun.groovy:462)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:314)
+	at nextflow.cli.Launcher.run(Launcher.groovy:494)
+	at nextflow.cli.Launcher.main(Launcher.groovy:653)

@@ -5,18 +5,17 @@
 import nextflow.Nextflow
 import groovy.text.SimpleTemplateEngine
 
-class WorkflowStitchimpute {
+class WorkflowFlexlmm {
 
     //
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-
-        genomeExistsError(params, log)
-
-
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (!params.vcf) {
+            Nextflow.error "Vcf file not specified with e.g. '--vcf in.vcf.gz' or via a detectable config file."
+        }
+        if (!params.pheno_cov_table) {
+            Nextflow.error "Phenotype and covariate table file not specified with e.g. '--pheno_cov_table myfile.csv' or via a detectable config file."
         }
     }
 

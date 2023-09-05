@@ -1,0 +1,120 @@
+Sept-05 12:32:51.668 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf -profile test --outdir /Users/saul/test/out -work-dir /tmp/nextflow/work
+Sept-05 12:32:51.758 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sept-05 12:32:51.785 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/saul/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sept-05 12:32:51.801 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sept-05 12:32:51.803 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sept-05 12:32:51.807 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sept-05 12:32:51.821 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sept-05 12:32:51.840 [main] DEBUG nextflow.config.ConfigBuilder - Found config home: /Users/saul/.nextflow/config
+Sept-05 12:32:51.841 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/saul/flexlmm/nextflow.config
+Sept-05 12:32:51.842 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/saul/.nextflow/config
+Sept-05 12:32:51.843 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/saul/flexlmm/nextflow.config
+Sept-05 12:32:51.872 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `test`
+Sept-05 12:32:52.427 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `test`
+Sept-05 12:32:53.892 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [cfc_dev, ifb_core, denbi_qbic, alice, mjolnir_globe, uppmax, incliva, uge, rosalind_uge, lugh, unibe_ibu, vai, czbiohub_aws, jax, ccga_med, scw, tigem, tubingen_apg, google, apollo, ipop_up, googlels, eddie, medair, biowulf, apptainer, bi, bigpurple, sbc_sharc, adcra, cedars, vsc_kul_uhasselt, pawsey_nimbus, ucl_myriad, test_grid_search, utd_ganymede, charliecloud, test_snp_set_refinement, icr_davros, ceres, munin, arm, rosalind, hasta, cfc, uzh, ebi_codon_slurm, ebc, ku_sund_dangpu, ccga_dx, crick, marvin, biohpc_gen, shifter, mana, mamba, unc_lccc, wehi, awsbatch, wustl_htcf, imperial, maestro, genotoul, nci_gadi, abims, janelia, nu_genomics, googlebatch, oist, sahmri, test_imputation, mpcdf, leicester, vsc_ugent, sage, cambridge, podman, ebi_codon, cheaha, xanadu, test, computerome, ucd_sonic, seg_globe, sanger, dkfz, pasteur, test_full, azurebatch, hki, crukmi, docker, engaging, gis, hypatia, psmn, eva, fgcz, conda, crg, singularity, uw_hyak_pedslabs, prince, utd_sysbio, debug, genouest, cbe, phoenix, gitpod, seawulf, fub_curta, uct_hpc, aws_tower, binac]
+Sept-05 12:32:53.931 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sept-05 12:32:53.946 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [dreamy_engelbart] DSL2 - revision: 77989ce394
+Sept-05 12:32:53.947 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
+Sept-05 12:32:53.948 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sept-05 12:32:53.948 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
+Sept-05 12:32:53.948 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
+Sept-05 12:32:54.201 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.1' resolved
+Sept-05 12:32:54.201 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.1'
+Sept-05 12:32:54.207 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.1
+Sept-05 12:32:54.216 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/saul/.nextflow/secrets/store.json
+Sept-05 12:32:54.219 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@740a0d5e] - activable => nextflow.secret.LocalSecretsProvider@740a0d5e
+Sept-05 12:32:54.278 [main] DEBUG nextflow.Session - Session UUID: cb18bd1c-c8b0-4f11-b3e0-59a15ecb854e
+Sept-05 12:32:54.278 [main] DEBUG nextflow.Session - Run name: dreamy_engelbart
+Sept-05 12:32:54.278 [main] DEBUG nextflow.Session - Executor pool size: 8
+Sept-05 12:32:54.289 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sept-05 12:32:54.308 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.04.1 build 5866
+  Created: 15-04-2023 06:51 UTC (08:51 CEST)
+  System: Mac OS X 13.4.1
+  Runtime: Groovy 3.0.16 on OpenJDK 64-Bit Server VM 20+36
+  Encoding: UTF-8 (UTF-8)
+  Process: 26492@C02G20DAML7J [192.168.160.117]
+  CPUs: 8 - Mem: 16 GB (1.8 GB) - Swap: 6 GB (1.6 GB)
+Sept-05 12:32:54.328 [main] DEBUG nextflow.Session - Work-dir: /tmp/nextflow/work [Mac OS X]
+Sept-05 12:32:54.328 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /Users/saul/flexlmm/bin
+Sept-05 12:32:54.340 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sept-05 12:32:54.350 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sept-05 12:32:54.428 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sept-05 12:32:54.439 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
+Sept-05 12:32:54.508 [main] DEBUG nextflow.Session - Session start
+Sept-05 12:32:54.512 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /Users/saul/test/out/pipeline_info/execution_trace_2023-09-05_12-32-53.txt
+Sept-05 12:32:54.523 [main] DEBUG nextflow.Session - Using default localLib path: /Users/saul/flexlmm/lib
+Sept-05 12:32:54.526 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/saul/flexlmm/lib
+Sept-05 12:32:54.527 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/saul/flexlmm/lib/nfcore_external_java_deps.jar
+Sept-05 12:32:54.927 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sept-05 12:32:54.946 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
+Sept-05 12:32:54.963 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Sept-05 12:32:55.088 [main] DEBUG nextflow.validation.SchemaValidator - Finishing parameters validation
+Sept-05 12:32:55.172 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog, paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-validation
+Sept-05 12:32:55.188 [main] INFO  nextflow.Nextflow - 
+
+-[2m----------------------------------------------------[0m-
+[0;35m  birneylab/stitchimpute v8.1dev[0m
+-[2m----------------------------------------------------[0m-
+[1mCore Nextflow options[0m
+  [0;34mrunName                   : [0;32mdreamy_engelbart[0m
+  [0;34mcontainerEngine           : [0;32mdocker[0m
+  [0;34mlaunchDir                 : [0;32m/Users/saul/flexlmm[0m
+  [0;34mworkDir                   : [0;32m/tmp/nextflow/work[0m
+  [0;34mprojectDir                : [0;32m/Users/saul/flexlmm[0m
+  [0;34muserName                  : [0;32msaul[0m
+  [0;34mprofile                   : [0;32mtest[0m
+  [0;34mconfigFiles               : [0;32m[0m
+
+[1mInput/output options[0m
+  [0;34mvcf                       : [0;32m/Users/saul/flexlmm/assets/test_data/vcf/in.vcf.gz[0m
+  [0;34mpheno_cov_table           : [0;32m/Users/saul/flexlmm/assets/test_data/csv/pheno_cov_table.csv[0m
+  [0;34moutdir                    : [0;32m/Users/saul/test/out[0m
+
+[1mInstitutional config options[0m
+  [0;34mconfig_profile_name       : [0;32mTest profile[0m
+  [0;34mconfig_profile_description: [0;32mMinimal test dataset to check pipeline function[0m
+
+[1mMax job request options[0m
+  [0;34mmax_cpus                  : [0;32m2[0m
+  [0;34mmax_memory                : [0;32m6.GB[0m
+  [0;34mmax_time                  : [0;32m6.h[0m
+
+!! Only displaying parameters that differ from the pipeline defaults !!
+-[2m----------------------------------------------------[0m-
+If you use birneylab/stitchimpute for your analysis please cite:
+
+* The nf-core framework
+  https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+  https://github.com/birneylab/stitchimpute/blob/master/CITATIONS.md
+
+Sept-05 12:32:55.341 [main] INFO  nextflow.script.BaseScript - /Users/saul/flexlmm/assets/test_data/vcf/in.vcf.gz
+Sept-05 12:32:55.342 [main] INFO  nextflow.script.BaseScript - /Users/saul/flexlmm/assets/test_data/csv/pheno_cov_table.csv
+Sept-05 12:32:55.489 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BIRNEYLAB_FLEXLMM:FLEXLMM:CUSTOM_DUMPSOFTWAREVERSIONS
+Sept-05 12:32:55.492 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:CUSTOM_DUMPSOFTWAREVERSIONS` matches process BIRNEYLAB_FLEXLMM:FLEXLMM:CUSTOM_DUMPSOFTWAREVERSIONS
+Sept-05 12:32:55.500 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Sept-05 12:32:55.500 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sept-05 12:32:55.508 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Sept-05 12:32:55.518 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=8; memory=16 GB; capacity=8; pollInterval=100ms; dumpInterval=5m
+Sept-05 12:32:55.602 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: BIRNEYLAB_FLEXLMM:FLEXLMM:CUSTOM_DUMPSOFTWAREVERSIONS, CUSTOM_DUMPSOFTWAREVERSIONS
+Sept-05 12:32:55.605 [main] DEBUG nextflow.Session - Igniting dataflow network (2)
+Sept-05 12:32:55.607 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BIRNEYLAB_FLEXLMM:FLEXLMM:CUSTOM_DUMPSOFTWAREVERSIONS
+Sept-05 12:32:55.607 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Sept-05 12:32:55.608 [main] DEBUG nextflow.Session - Session await
+Sept-05 12:32:55.613 [Actor Thread 7] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Sept-05 12:32:55.624 [main] DEBUG nextflow.Session - Session await > all processes finished
+Sept-05 12:32:55.627 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Sept-05 12:32:55.632 [main] INFO  nextflow.Nextflow - -[0;35m[birneylab/stitchimpute][0;32m Pipeline completed successfully[0m-
+Sept-05 12:32:55.639 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=0; peakCpus=0; peakMemory=0; ]
+Sept-05 12:32:55.639 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
+Sept-05 12:32:55.641 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
+Sept-05 12:32:55.641 [main] DEBUG nextflow.trace.ReportObserver - Execution report summary data:
+  []
+Sept-05 12:32:56.343 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
+Sept-05 12:32:56.481 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Sept-05 12:32:56.481 [main] INFO  org.pf4j.AbstractPluginManager - Stop plugin 'nf-validation@0.3.1'
+Sept-05 12:32:56.481 [main] DEBUG nextflow.plugin.BasePlugin - Plugin stopped nf-validation
+Sept-05 12:32:56.497 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
+Sept-05 12:32:56.498 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
