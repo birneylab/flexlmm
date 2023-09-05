@@ -1,0 +1,2 @@
+2023-09-05 12:26:41	-	hopeful_shannon	-	77989ce394ef88022b52a6e2231d2ab0	cb18bd1c-c8b0-4f11-b3e0-59a15ecb854e	nextflow run main.nf -profile test --outdir /Users/saul/test/out -work-dir /tmp/nextflow/work
+2023-09-05 12:27:05	-	determined_lamarck	-	77989ce394ef88022b52a6e2231d2ab0	cb18bd1c-c8b0-4f11-b3e0-59a15ecb854e	nextflow run main.nf -profile test --outdir /Users/saul/test/out -work-dir /tmp/nextflow/work

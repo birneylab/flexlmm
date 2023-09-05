@@ -13,9 +13,6 @@ def summary_params = paramsSummaryMap(workflow)
 // Print parameter summary log to screen
 log.info logo + paramsSummaryLog(workflow) + citation
 
-// Validate input parameters
-WorkflowStitchimpute.initialise(params, log)
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Check mandatory file parameters
@@ -28,6 +25,9 @@ def checkPathParamList = [
 ]
 
 for (param in checkPathParamList) if (param) file(param, checkIfExists: true)
+
+def vcf             = file( params.vcf             )
+def pheno_cov_table = file( params.pheno_cov_table )
 
 
 /*
@@ -62,6 +62,9 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 workflow FLEXLMM {
     versions = Channel.empty ()
+
+    print(vcf)
+    print(pheno_cov_table)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')

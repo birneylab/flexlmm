@@ -1,0 +1,82 @@
+Sept-05 12:27:02.559 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf -profile test --outdir /Users/saul/test/out -work-dir /tmp/nextflow/work
+Sept-05 12:27:02.636 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sept-05 12:27:02.659 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/saul/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sept-05 12:27:02.669 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sept-05 12:27:02.670 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sept-05 12:27:02.673 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sept-05 12:27:02.684 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sept-05 12:27:02.702 [main] DEBUG nextflow.config.ConfigBuilder - Found config home: /Users/saul/.nextflow/config
+Sept-05 12:27:02.703 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/saul/flexlmm/nextflow.config
+Sept-05 12:27:02.705 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/saul/.nextflow/config
+Sept-05 12:27:02.705 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/saul/flexlmm/nextflow.config
+Sept-05 12:27:02.732 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `test`
+Sept-05 12:27:03.247 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `test`
+Sept-05 12:27:04.607 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [cfc_dev, ifb_core, denbi_qbic, alice, mjolnir_globe, uppmax, incliva, uge, rosalind_uge, lugh, unibe_ibu, vai, czbiohub_aws, jax, ccga_med, scw, tigem, tubingen_apg, google, apollo, ipop_up, googlels, eddie, medair, biowulf, apptainer, bi, bigpurple, sbc_sharc, adcra, cedars, vsc_kul_uhasselt, pawsey_nimbus, ucl_myriad, test_grid_search, utd_ganymede, charliecloud, test_snp_set_refinement, icr_davros, ceres, munin, arm, rosalind, hasta, cfc, uzh, ebi_codon_slurm, ebc, ku_sund_dangpu, ccga_dx, crick, marvin, biohpc_gen, shifter, mana, mamba, unc_lccc, wehi, awsbatch, wustl_htcf, imperial, maestro, genotoul, nci_gadi, abims, janelia, nu_genomics, googlebatch, oist, sahmri, test_imputation, mpcdf, leicester, vsc_ugent, sage, cambridge, podman, ebi_codon, cheaha, xanadu, test, computerome, ucd_sonic, seg_globe, sanger, dkfz, pasteur, test_full, azurebatch, hki, crukmi, docker, engaging, gis, hypatia, psmn, eva, fgcz, conda, crg, singularity, uw_hyak_pedslabs, prince, utd_sysbio, debug, genouest, cbe, phoenix, gitpod, seawulf, fub_curta, uct_hpc, aws_tower, binac]
+Sept-05 12:27:04.648 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sept-05 12:27:04.666 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [determined_lamarck] DSL2 - revision: 77989ce394
+Sept-05 12:27:04.667 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
+Sept-05 12:27:04.668 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sept-05 12:27:04.668 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
+Sept-05 12:27:04.668 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
+Sept-05 12:27:04.962 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.1' resolved
+Sept-05 12:27:04.963 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.1'
+Sept-05 12:27:04.968 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.1
+Sept-05 12:27:04.977 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/saul/.nextflow/secrets/store.json
+Sept-05 12:27:04.980 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@696b52bc] - activable => nextflow.secret.LocalSecretsProvider@696b52bc
+Sept-05 12:27:05.034 [main] DEBUG nextflow.Session - Session UUID: cb18bd1c-c8b0-4f11-b3e0-59a15ecb854e
+Sept-05 12:27:05.034 [main] DEBUG nextflow.Session - Run name: determined_lamarck
+Sept-05 12:27:05.034 [main] DEBUG nextflow.Session - Executor pool size: 8
+Sept-05 12:27:05.045 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sept-05 12:27:05.066 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.04.1 build 5866
+  Created: 15-04-2023 06:51 UTC (08:51 CEST)
+  System: Mac OS X 13.4.1
+  Runtime: Groovy 3.0.16 on OpenJDK 64-Bit Server VM 20+36
+  Encoding: UTF-8 (UTF-8)
+  Process: 25326@C02G20DAML7J [192.168.160.117]
+  CPUs: 8 - Mem: 16 GB (1.4 GB) - Swap: 6 GB (1.5 GB)
+Sept-05 12:27:05.085 [main] DEBUG nextflow.Session - Work-dir: /tmp/nextflow/work [Mac OS X]
+Sept-05 12:27:05.103 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sept-05 12:27:05.113 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sept-05 12:27:05.189 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sept-05 12:27:05.200 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
+Sept-05 12:27:05.272 [main] DEBUG nextflow.Session - Session start
+Sept-05 12:27:05.277 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /Users/saul/test/out/pipeline_info/execution_trace_2023-09-05_12-27-04.txt
+Sept-05 12:27:05.289 [main] DEBUG nextflow.Session - Using default localLib path: /Users/saul/flexlmm/lib
+Sept-05 12:27:05.292 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/saul/flexlmm/lib
+Sept-05 12:27:05.293 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/saul/flexlmm/lib/nfcore_external_java_deps.jar
+Sept-05 12:27:05.707 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sept-05 12:27:05.725 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
+Sept-05 12:27:05.743 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Sept-05 12:27:05.891 [main] DEBUG nextflow.validation.SchemaValidator - Finishing parameters validation
+Sept-05 12:27:05.900 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `input` -- Initialise it to a default value eg. `params.input = some_value`
+Sept-05 12:27:05.906 [main] DEBUG nextflow.Session - Session aborted -- Cause: Please provide an input samplesheet to the pipeline e.g. '--input samplesheet.csv'
+Sept-05 12:27:05.917 [main] ERROR nextflow.cli.Launcher - @unknown
+nextflow.exception.WorkflowScriptErrorException: Please provide an input samplesheet to the pipeline e.g. '--input samplesheet.csv'
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:67)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:484)
+	at org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:72)
+	at org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSiteNoUnwrapNoCoerce.callConstructor(ConstructorSite.java:105)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallConstructor(CallSiteArray.java:59)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callConstructor(AbstractCallSite.java:263)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callConstructor(AbstractCallSite.java:277)
+	at nextflow.Nextflow.error(Nextflow.groovy:215)
+	at nextflow.Nextflow$error$0.call(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCall(CallSiteArray.java:47)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:125)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:139)
+	at WorkflowMain.initialise(WorkflowMain.groovy:49)
+	at WorkflowMain$initialise.call(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCall(CallSiteArray.java:47)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:125)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:157)
+	at Script_e8ee7c90.runScript(Script_e8ee7c90:36)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:145)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:192)
+	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:229)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:224)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:130)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:368)
+	at nextflow.cli.Launcher.run(Launcher.groovy:494)
+	at nextflow.cli.Launcher.main(Launcher.groovy:653)
