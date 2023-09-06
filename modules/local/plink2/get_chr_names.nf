@@ -21,15 +21,15 @@ process GET_CHR_NAMES {
     def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    cat $pvar    | \\
+    plink2 --zst-decompress $pvar | \\
     grep -v '^#' | \\
-    cut -f1      | \\
-    sort -u      > \\
+    cut -f1 | \\
+    sort -u > \\
     ${prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        zstd: \$(zstd --version | sed 's/.*v\\(.*\\),.*/\\1/')
+        plink2: \$(plink2 --version 2>&1 | sed 's/^PLINK v//; s/ 64.*\$//' )
     END_VERSIONS
     """
 
@@ -43,7 +43,7 @@ process GET_CHR_NAMES {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        zstd: \$(zstd --version | sed 's/.*v\\(.*\\),.*/\\1/')
+        plink2: \$(plink2 --version 2>&1 | sed 's/^PLINK v//; s/ 64.*\$//' )
     END_VERSIONS
     """
 }

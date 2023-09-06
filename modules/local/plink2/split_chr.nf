@@ -1,4 +1,4 @@
-process VCF_TO_PGEN {
+process SPLIT_CHR {
     tag "$meta.id"
     label 'process_low'
 
@@ -8,32 +8,32 @@ process VCF_TO_PGEN {
         'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
 
     input:
-    tuple val(meta), path(vcf)
+    tuple val(meta), path(pgen), path(psam), path(pvar)
+    val chr
 
     output:
     tuple val(meta), path("*.pgen"    ) , emit: pgen
-    tuple val(meta), path("*.psam"    ) , emit: psam
     tuple val(meta), path("*.pvar.zst") , emit: pvar
-    path "versions.yml"                 , emit: versions
+    path "versions.yml"                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args   = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}.${chr}"
     def mem_mb = task.memory.toMega()
     """
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --vcf $vcf \\
-        --set-missing-var-ids @_#_\\\$r_\\\$a \\
-        --min-alleles 2 \\
-        --max-alleles 2 \\
+        --pgen $pgen \\
+        --psam $psam \\
+        --pvar $pvar \\
+        --chr $chr \\
+        --out $prefix \\
         --make-pgen vzs \\
-        ${args} \\
-        --out ${prefix}
+        ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -43,11 +43,10 @@ process VCF_TO_PGEN {
 
     stub:
     def args   = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}.${chr}"
     def mem_mb = task.memory.toMega()
     """
     touch ${prefix}.pgen
-    touch ${prefix}.psam
     touch ${prefix}.pvar.zst
 
     cat <<-END_VERSIONS > versions.yml

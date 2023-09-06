@@ -50,10 +50,8 @@ process TRANSFORM_PHENOTYPES {
     def args        = task.ext.args ?: ''
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def mem_mb      = task.memory.toMega()
-    def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
-    def freq_cmd    = freq ? "--read-freq ${freq}" : ""
     """
-    touch plink2.rel.bin
+    touch pheno_transformed.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
