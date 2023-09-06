@@ -43,7 +43,7 @@ workflow PREPROCESSING {
     LOCO_GRM ( full_genome_pgen.first(), freq, chr )
 
     SPLIT_CHR ( full_genome_pgen.first(), chr )
-    SPLIT_CHR.out.pgen.view()
+    SPLIT_CHR.out.pvar.view()
 
     TRANSFORM_PHENOTYPES ( full_genome_pgen.combine ( [ pheno ] ) )
     TRANSFORM_PHENOTYPES.out.pheno
