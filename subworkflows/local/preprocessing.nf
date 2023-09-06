@@ -37,7 +37,6 @@ workflow PREPROCESSING {
     .ifEmpty ( [ [id: "freq"], [] ] )
     .set { freq }
 
-    GET_VAR_LIST ( freq )
     FULL_GRM ( full_genome_pgen.first(), freq, []  )
     LOCO_GRM ( full_genome_pgen.first(), freq, chr )
 
