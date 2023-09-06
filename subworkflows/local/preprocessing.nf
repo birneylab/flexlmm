@@ -1,8 +1,9 @@
 include { VCF_TO_PGEN          } from '../../modules/local/plink2/vcf_to_pgen'
 include { ESTIMATE_FREQ        } from '../../modules/local/plink2/estimate_freq'
+include { GET_CHR_NAMES        } from '../../modules/local/get_chr_names'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
-include { GET_CHR_NAMES        } from '../../modules/local/get_chr_names'
+include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
 
 
 workflow PREPROCESSING {
@@ -40,9 +41,18 @@ workflow PREPROCESSING {
     FULL_GRM ( full_genome_pgen.first(), freq, []  )
     LOCO_GRM ( full_genome_pgen.first(), freq, chr )
 
+
+    TRANSFORM_PHENOTYPES ( full_genome_pgen.combine ( [ pheno ] ) )
+    TRANSFORM_PHENOTYPES.out.pheno
+    .ifEmpty ( [ [id: "input"], pheno ] )
+    .set { pheno }
+
+    pheno.view()
+
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions   ) .set { versions }
     versions.mix ( GET_CHR_NAMES.out.versions ) .set { versions }
+    versions.mix ( ESTIMATE_FREQ.out.versions ) .set { versions }
     versions.mix ( FULL_GRM.out.versions      ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions      ) .set { versions }
 

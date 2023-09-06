@@ -34,6 +34,10 @@ def pheno = file( params.pheno )
 def freq  = params.freq  ? file(params.freq , checkIfExists: true) : ""
 def covar = params.covar ? file(params.covar, checkIfExists: true) : ""
 
+if ( params.quantile_normalise && params.standardise ) {
+    error "Activating both quantile_normalise and standardise at the same time is not allowed"
+}
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
