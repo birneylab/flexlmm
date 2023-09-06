@@ -10,13 +10,21 @@
       "type": "object",
       "fa_icon": "fas fa-terminal",
       "description": "Define where the pipeline should find input data and save output data.",
-      "required": ["outdir"],
+      "required": ["vcf", "pheno", "outdir"],
       "properties": {
         "vcf": {
           "type": "string",
           "fa_icon": "fas fa-file"
         },
-        "pheno_cov_table": {
+        "pheno": {
+          "type": "string",
+          "fa_icon": "fas fa-file"
+        },
+        "covar": {
+          "type": "string",
+          "fa_icon": "fas fa-file"
+        },
+        "freq": {
           "type": "string",
           "fa_icon": "fas fa-file"
         },

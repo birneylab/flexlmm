@@ -9,11 +9,12 @@ process MAKE_GRM {
 
     input:
     tuple val(meta), path(pgen), path(psam), path(pvar)
+    tuple val(meta), path(freq)
     val chr_exclude
 
     output:
-    tuple val(meta), path("*.{rel,king}*") , emit: grm
-    path "versions.yml"                    , emit: versions
+    tuple val(meta), path("plink2.rel.bin") , emit: grm
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,6 +24,7 @@ process MAKE_GRM {
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def mem_mb      = task.memory.toMega()
     def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
+    def freq_cmd    = freq ? "--read-freq ${freq}" : ""
     """
     plink2 \\
         --threads $task.cpus \\
@@ -31,6 +33,8 @@ process MAKE_GRM {
         --psam $psam \\
         --pvar $pvar \\
         ${exclude_cmd} \\
+        ${freq_cmd} \\
+        --make-rel bin \\
         ${args}
 
     cat <<-END_VERSIONS > versions.yml
@@ -44,6 +48,7 @@ process MAKE_GRM {
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def mem_mb      = task.memory.toMega()
     def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
+    def freq_cmd    = freq ? "--read-freq ${freq}" : ""
     """
     touch plink2.rel.bin
 

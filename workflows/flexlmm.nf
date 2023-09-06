@@ -31,6 +31,7 @@ for (param in checkPathParamList) if (param) file(param, checkIfExists: true)
 def vcf   = file( params.vcf   )
 def pheno = file( params.pheno )
 
+def freq  = params.freq  ? file(params.freq , checkIfExists: true) : ""
 def covar = params.covar ? file(params.covar, checkIfExists: true) : ""
 
 
@@ -67,7 +68,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 workflow FLEXLMM {
     versions = Channel.empty ()
 
-    PREPROCESSING ( vcf, pheno, covar )
+    PREPROCESSING ( vcf, pheno, covar, freq )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')

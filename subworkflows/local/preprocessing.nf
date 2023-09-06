@@ -1,4 +1,5 @@
 include { VCF_TO_PGEN          } from '../../modules/local/plink2/vcf_to_pgen'
+include { ESTIMATE_FREQ        } from '../../modules/local/plink2/estimate_freq'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { GET_CHR_NAMES        } from '../../modules/local/get_chr_names'
@@ -9,11 +10,12 @@ workflow PREPROCESSING {
     vcf   // value: [mandatory] vcf_file
     pheno // value: [mandatory] phenotypes
     covar // value: [optional ] covariates
+    freq  // value: [optional ] vcf_file
 
     main:
     versions = Channel.empty()
 
-    VCF_TO_PGEN ( [[id: "input"], vcf ] )
+    VCF_TO_PGEN ( [ [id: "input"], vcf ] )
     VCF_TO_PGEN.out.pgen
     .join(
         VCF_TO_PGEN.out.psam, failOnMismatch: true, failOnDuplicate: true
@@ -30,8 +32,13 @@ workflow PREPROCESSING {
     .map { it.trim() }
     .set { chr }
 
-    FULL_GRM ( full_genome_pgen.first(), []  )
-    LOCO_GRM ( full_genome_pgen.first(), chr )
+    ESTIMATE_FREQ ( [ [id: null], freq ] )
+    ESTIMATE_FREQ.out.freq
+    .ifEmpty ( [ [id: null], [] ] )
+    .set { freq }
+
+    FULL_GRM ( full_genome_pgen.first(), freq, []  )
+    LOCO_GRM ( full_genome_pgen.first(), freq, chr )
 
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions   ) .set { versions }

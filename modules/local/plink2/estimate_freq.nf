@@ -1,4 +1,4 @@
-process VCF_TO_PGEN {
+process ESTIMATE_FREQ {
     tag "$meta.id"
     label 'process_low'
 
@@ -11,10 +11,8 @@ process VCF_TO_PGEN {
     tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("*.pgen")  , emit: pgen
-    tuple val(meta), path("*.psam")  , emit: psam
-    tuple val(meta), path("*.pvar") , emit: pvar
-    path "versions.yml"              , emit: versions
+    tuple val(meta), path("plink2.afreq.zst") , emit: freq
+    path "versions.yml"                       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,11 +26,10 @@ process VCF_TO_PGEN {
         --threads $task.cpus \\
         --memory $mem_mb \\
         --vcf $vcf \\
-        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
-        --make-pgen ${args} \\
-        --out ${prefix}
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
+        --freq zs ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -45,9 +42,7 @@ process VCF_TO_PGEN {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def mem_mb = task.memory.toMega()
     """
-    touch ${prefix}.pgen
-    touch ${prefix}.psam
-    touch ${prefix}.pvar
+    touch plink2.afreq.zst
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
