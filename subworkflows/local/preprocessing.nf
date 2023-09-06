@@ -32,9 +32,9 @@ workflow PREPROCESSING {
     .map { it.trim() }
     .set { chr }
 
-    ESTIMATE_FREQ ( [ [id: null], freq ] )
+    ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
     ESTIMATE_FREQ.out.freq
-    .ifEmpty ( [ [id: null], [] ] )
+    .ifEmpty ( [ [id: "freq"], [] ] )
     .set { freq }
 
     FULL_GRM ( full_genome_pgen.first(), freq, []  )
