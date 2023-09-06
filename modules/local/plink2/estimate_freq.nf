@@ -28,7 +28,7 @@ process ESTIMATE_FREQ {
         --vcf $vcf \\
         --min-alleles 2 \\
         --max-alleles 2 \\
-        --set-missing-var-ids @_#_\\\\\$r_\\\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --freq zs ${args}
 
     cat <<-END_VERSIONS > versions.yml

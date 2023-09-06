@@ -28,7 +28,7 @@ process VCF_TO_PGEN {
         --threads $task.cpus \\
         --memory $mem_mb \\
         --vcf $vcf \\
-        --set-missing-var-ids @_#_\\\\\$r_\\\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         --make-pgen ${args} \\
