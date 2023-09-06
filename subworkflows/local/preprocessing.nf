@@ -6,8 +6,9 @@ include { GET_CHR_NAMES        } from '../../modules/local/get_chr_names'
 
 workflow PREPROCESSING {
     take:
-    vcf               // value: [mandatory] vcf_file
-    pheno_cov_table   // value: [mandatory] pheno_cov_table
+    vcf   // value: [mandatory] vcf_file
+    pheno // value: [mandatory] phenotypes
+    covar // value: [optional ] covariates
 
     main:
     versions = Channel.empty()

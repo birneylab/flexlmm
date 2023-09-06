@@ -14,8 +14,8 @@ class WorkflowFlexlmm {
         if (!params.vcf) {
             Nextflow.error "Vcf file not specified with e.g. '--vcf in.vcf.gz' or via a detectable config file."
         }
-        if (!params.pheno_cov_table) {
-            Nextflow.error "Phenotype and covariate table file not specified with e.g. '--pheno_cov_table myfile.csv' or via a detectable config file."
+        if (!params.pheno) {
+            Nextflow.error "Phenotype file not specified with e.g. '--pheno myfile.txt' or via a detectable config file."
         }
     }
 

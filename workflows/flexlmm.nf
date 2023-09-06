@@ -23,13 +23,15 @@ WorkflowFLexlmm.initialise(params, log)
 
 def checkPathParamList = [
     params.vcf,
-    params.pheno_cov_table
+    params.pheno
 ]
 
 for (param in checkPathParamList) if (param) file(param, checkIfExists: true)
 
-def vcf             = file( params.vcf             )
-def pheno_cov_table = file( params.pheno_cov_table )
+def vcf   = file( params.vcf   )
+def pheno = file( params.pheno )
+
+def covar = params.covar ? file(params.covar, checkIfExists: true) : ""
 
 
 /*
@@ -65,7 +67,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 workflow FLEXLMM {
     versions = Channel.empty ()
 
-    PREPROCESSING ( vcf, pheno_cov_table )
+    PREPROCESSING ( vcf, pheno, covar )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')
