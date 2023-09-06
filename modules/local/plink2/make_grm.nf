@@ -32,6 +32,7 @@ process MAKE_GRM {
         --pgen $pgen \\
         --psam $psam \\
         --pvar $pvar \\
+        --maf \\
         ${exclude_cmd} \\
         ${freq_cmd} \\
         --make-rel bin \\
