@@ -15,7 +15,7 @@ process GET_DESIGN_MATRIX {
     val null_model_formula
 
     output:
-    tuple val(meta), path("*.gcta_qcovar.tsv") , emit: gcta_qcovar
+    tuple val(meta), path("*.gcta_qcovar.tsv") , emit: mat
     path "versions.yml"                        , emit: versions
 
     when:

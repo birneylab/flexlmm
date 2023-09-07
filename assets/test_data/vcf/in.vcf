@@ -1,0 +1,45 @@
+##fileformat=VCFv4.0
+##FILTER=<ID=PASS,Description="All filters passed">
+##INFO=<ID=INFO_SCORE,Number=.,Type=Float,Description="Info score">
+##INFO=<ID=EAF,Number=.,Type=Float,Description="Estimated allele frequency">
+##INFO=<ID=HWE,Number=.,Type=Float,Description="Hardy-Weinberg p-value">
+##INFO=<ID=ERC,Number=.,Type=Float,Description="Estimated number of copies of the reference allele from the pileup">
+##INFO=<ID=EAC,Number=.,Type=Float,Description="Estimated number of copies of the alternate allele from the pileup">
+##INFO=<ID=PAF,Number=.,Type=Float,Description="Estimated allele frequency using the pileup of reference and alternate alleles">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Best Guessed Genotype with posterior probability threshold of 0.9">
+##FORMAT=<ID=GP,Number=3,Type=Float,Description="Posterior genotype probability of 0/0, 0/1, and 1/1">
+##FORMAT=<ID=DS,Number=1,Type=Float,Description="Dosage">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Depth">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Posterior likelyhoods">
+##contig=<ID=15>
+##contig=<ID=14>
+##bcftools_concatVersion=1.17+htslib-1.17
+##bcftools_concatCommand=concat --output joint_stitch_output.vcf.gz --threads 2 chromosome_15.vcf.gz chromosome_14.vcf.gz; Date=Mon Aug  7 10:23:49 2023
+##manually added FORMAT/DP and FORMAT/PL fields; Date=Tue Aug 29 13:43:00 2023
+##bcftools_viewVersion=1.16+htslib-1.16
+##bcftools_viewCommand=view -o ground_truth.vcf.gz ground_truth.vcf; Date=Tue Aug 29 13:59:56 2023
+##bcftools_viewVersion=1.17+htslib-1.17
+##bcftools_viewCommand=view -Oz -o assets/test_data/vcf/in.vcf.gz assets/test_data/vcf/in.vcf; Date=Thu Sep  7 16:21:07 2023
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample1	sample2	sample3	sample4	sample5	sample6
+15	18000000	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+15	18000100	.	A	G	.	PASS	EAF=0.0015;INFO_SCORE=1;HWE=1;ERC=0.20567;EAC=0.26478;PAF=0.43718	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+15	18000200	.	A	G	.	PASS	EAF=1;INFO_SCORE=1;HWE=1;ERC=0.36904;EAC=0.21032;PAF=0.63698	GT:GP:DS:DP:PL	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0
+15	18000300	.	A	G	.	PASS	EAF=0.01925;INFO_SCORE=0.0324;HWE=1;ERC=0.5069;EAC=45.1428;PAF=0.0111	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0
+15	18000400	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0.00601;EAC=39.982;PAF=0.00015	GT:GP:DS:DP:PL	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0
+15	18000500	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	1/1:1,0,0:0:100:1,0
+15	18000600	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0.00654;EAC=43.9804;PAF=0.00015	GT:GP:DS:DP:PL	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	1/0:1,0,0:0:100:1,0	1/0:1,0,0:0:100:1,0	1/0:1,0,0:0:100:1,0
+15	18000700	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0.00848;EAC=47.9745;PAF=0.00018	GT:GP:DS:DP:PL	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	1/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0
+15	18000800	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+15	18000900	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0.00875;EAC=49.9738;PAF=0.00018	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+15	18001000	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18000000	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18000100	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0.41134;EAC=0.52955;PAF=0.43718	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0
+14	18000200	.	A	G	.	PASS	EAF=1;INFO_SCORE=1;HWE=1;ERC=0.73809;EAC=0.42064;PAF=0.63698	GT:GP:DS:DP:PL	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0
+14	18000300	.	A	G	.	PASS	EAF=1;INFO_SCORE=1;HWE=1;ERC=0.99763;EAC=0.33412;PAF=0.74911	GT:GP:DS:DP:PL	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0	1/1:0,0,1:2:100:1,0
+14	18000400	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	1/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18000500	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	1/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18000600	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18000700	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	1/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18000800	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0	0/0:1,0,0:0:100:1,0
+14	18000900	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0
+14	18001000	.	A	G	.	PASS	EAF=0;INFO_SCORE=1;HWE=1;ERC=0;EAC=0;PAF=0	GT:GP:DS:DP:PL	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0	0/1:1,0,0:0:100:1,0

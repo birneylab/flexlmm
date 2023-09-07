@@ -54,6 +54,7 @@ if ( params.quantile_normalise && params.standardise ) {
 //
 
 include { PREPROCESSING } from '../subworkflows/local/preprocessing'
+include { LMM           } from '../subworkflows/local/lmm'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,10 +80,16 @@ workflow FLEXLMM {
     PREPROCESSING (
         vcf,
         pheno,
-        null_model_formula,
         covar,
         qcovar,
-        freq
+        freq,
+        null_model_formula
+    )
+
+    LMM (
+        PREPROCESSING.out.loco_grm,
+        PREPROCESSING.out.null_design_matrix,
+        PREPROCESSING.out.pheno
     )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

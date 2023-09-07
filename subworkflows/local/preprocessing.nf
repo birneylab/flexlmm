@@ -5,17 +5,17 @@ include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
 include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
-include { GREML                } from '../../modules/local/gcta/greml'
 
 
 workflow PREPROCESSING {
     take:
     vcf                // value: [mandatory] vcf_file
     pheno              // value: [mandatory] phenotypes
-    null_model_formula // value: [mandatory] null model R formula
     covar              // value: [optional ] covariates
     qcovar             // value: [optional ] covariates
     freq               // value: [optional ] vcf_file
+
+    null_model_formula // value: [mandatory] null model R formula
 
     main:
     versions = Channel.empty()
@@ -61,39 +61,10 @@ workflow PREPROCESSING {
 
     TRANSFORM_PHENOTYPES ( full_genome_pgen.combine ( [ pheno ] ) )
     TRANSFORM_PHENOTYPES.out.pheno
-    .ifEmpty ( [ [id: "input"], pheno ] )
+    .ifEmpty ( [ [id: "pheno"], pheno ] )
     .set { pheno }
 
-    pheno
-    .map { meta, pheno -> pheno }
-    .splitCsv ( header: false, limit: 1, sep: "\t" )
-    .map { it[1..(it.size()-1)] } // remove #IID col
-    .first ()
-    .set { pheno_names }
-
-    pheno_names
-    .map { it.size() }
-    .flatMap { n_phenos -> 0..(n_phenos-1) }
-    .set { pheno_idx }
-
-    LOCO_GRM.out.grm
-    .combine ( pheno_names.map { [ it ] } )
-    .combine ( pheno_idx )
-    .map {
-        meta, grm, grm_id, pheno_names, pheno_idx ->
-        def new_meta = meta.clone()
-        new_meta.pheno = pheno_names[pheno_idx]
-        [new_meta, grm, grm_id, pheno_idx]
-    }
-    .set { greml_in }
-
     GET_DESIGN_MATRIX ( [ [id: "covar"], covar, qcovar ], null_model_formula )
-
-    GREML (
-        greml_in,
-        pheno,
-        GET_DESIGN_MATRIX.out.gcta_qcovar
-    )
 
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
@@ -102,12 +73,11 @@ workflow PREPROCESSING {
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
-    versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
 
     emit:
-    //chr_pgen
-    pheno
-    covar
+    loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, gr,_id ]
+    null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, X ]
+    pheno                                          // channel: [ meta, pheno ]
 
-    versions          // channel: [ versions.yml ]
+    versions // channel: [ versions.yml ]
 }
