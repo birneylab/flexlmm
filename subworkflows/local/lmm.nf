@@ -39,6 +39,8 @@ workflow LMM {
         null_design_matrix
     )
 
+    GREML.out.hsq.view()
+
     // Gather versions of all tools used
     versions.mix ( GREML.out.versions ) .set { versions }
 
