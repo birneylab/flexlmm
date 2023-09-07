@@ -9,7 +9,7 @@ process GREML {
         'biocontainers/gcta:1.94.1--h9ee0642_0' }"
 
     input:
-    tuple val(meta) , path(grm), path(grm_id), val(pheno_idx)
+    tuple val(meta) , path(grm), path(grm_id), path(grm_n), val(pheno_idx)
     tuple val(meta2), path(pheno)
     tuple val(meta3), path(qcovar)
 

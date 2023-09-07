@@ -79,5 +79,5 @@ workflow PREPROCESSING {
     null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, X ]
     pheno                                          // channel: [ meta, pheno ]
 
-    versions // channel: [ versions.yml ]
+    versions                                       // channel: [ versions.yml ]
 }

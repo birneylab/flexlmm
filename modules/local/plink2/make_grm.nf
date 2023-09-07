@@ -12,8 +12,8 @@ process MAKE_GRM {
     tuple val(meta2), path(freq)
 
     output:
-    tuple val(meta), path("*.grm.bin"), path("*.grm.id") , emit: grm
-    path "versions.yml"                                  , emit: versions
+    tuple val(meta), path("*.grm.bin"), path("*.grm.id"), path("*.grm.N.bin") , emit: grm
+    path "versions.yml"                                                       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,5 +1,6 @@
-include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
-include { GREML                } from '../../modules/local/gcta/greml'
+include { GET_DESIGN_MATRIX } from '../../modules/local/r/get_design_matrix'
+include { GREML             } from '../../modules/local/gcta/greml'
+include { CHOLESKY          } from '../../modules/local/r/cholesky'
 
 
 workflow LMM {
@@ -26,20 +27,24 @@ workflow LMM {
     loco_grm.combine ( pheno_names.map { [ it ] } )
     .combine ( pheno_idx )
     .map {
-        meta, grm, grm_id, pheno_names, pheno_idx ->
+        meta, grm, grm_id, grm_n, pheno_names, pheno_idx ->
         def new_meta = meta.clone()
         new_meta.pheno = pheno_names[pheno_idx]
-        [new_meta, grm, grm_id, pheno_idx]
+        [new_meta, grm, grm_id, grm_n, pheno_idx]
     }
     .set { greml_in }
 
     GREML (
         greml_in,
-        pheno,
+        pheno.first(),
         null_design_matrix
     )
 
-    GREML.out.hsq.view()
+    greml_in.map { meta, grm, grm_id, grm_n, pheno_idx -> [meta, grm, grm_id, grm_n] }
+    .join ( GREML.out.hsq, failOnMismatch: true, failOnDuplicate: true )
+    .set { variance_components }
+
+    CHOLESKY ( variance_components )
 
     // Gather versions of all tools used
     versions.mix ( GREML.out.versions ) .set { versions }
