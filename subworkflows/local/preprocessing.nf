@@ -1,10 +1,11 @@
 include { VCF_TO_PGEN          } from '../../modules/local/plink2/vcf_to_pgen'
 include { ESTIMATE_FREQ        } from '../../modules/local/plink2/estimate_freq'
 include { GET_CHR_NAMES        } from '../../modules/local/plink2/get_chr_names'
-include { SPLIT_CHR            } from '../../modules/local/plink2/split_chr'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
+include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
+include { GREML                } from '../../modules/local/gcta/greml'
 
 
 workflow PREPROCESSING {
@@ -42,9 +43,6 @@ workflow PREPROCESSING {
     FULL_GRM ( full_genome_pgen.first(), freq, []  )
     LOCO_GRM ( full_genome_pgen.first(), freq, chr )
 
-    SPLIT_CHR ( full_genome_pgen.first(), chr )
-    SPLIT_CHR.out.pvar.view()
-
     TRANSFORM_PHENOTYPES ( full_genome_pgen.combine ( [ pheno ] ) )
     TRANSFORM_PHENOTYPES.out.pheno
     .ifEmpty ( [ [id: "input"], pheno ] )
@@ -57,7 +55,6 @@ workflow PREPROCESSING {
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
-    versions.mix ( SPLIT_CHR.out.versions            ) .set { versions }
 
     emit:
     //chr_pgen

@@ -14,13 +14,14 @@ process SPLIT_CHR {
     output:
     tuple val(meta), path("*.pgen"    ) , emit: pgen
     tuple val(meta), path("*.pvar.zst") , emit: pvar
-    path "versions.yml"                  , emit: versions
+    path "versions.yml"                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args   = task.ext.args ?: ''
+    def args   = task.ext.args   ?: ''
+    def args2  = task.ext.args2  ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}.${chr}"
     def mem_mb = task.memory.toMega()
     """
@@ -32,8 +33,8 @@ process SPLIT_CHR {
         --pvar $pvar \\
         --chr $chr \\
         --out $prefix \\
-        --make-pgen vzs \\
-        ${args}
+        $args \\
+        --make-pgen vzs $args2 \\
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

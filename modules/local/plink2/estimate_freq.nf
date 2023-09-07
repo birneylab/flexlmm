@@ -11,14 +11,15 @@ process ESTIMATE_FREQ {
     tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("plink2.afreq.zst") , emit: freq
-    path "versions.yml"                       , emit: versions
+    tuple val(meta), path("*.afreq.zst") , emit: freq
+    path "versions.yml"                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def args   = task.ext.args   ?: ''
+    def args2  = task.ext.args2  ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def mem_mb = task.memory.toMega()
     """
@@ -29,7 +30,10 @@ process ESTIMATE_FREQ {
         --min-alleles 2 \\
         --max-alleles 2 \\
         --set-missing-var-ids @_#_\\\$r_\\\$a \\
-        --freq zs ${args}
+        --new-id-max-allele-len 10 missing \\
+        --out $prefix \\
+        $args \\
+        --freq zs $args2
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -38,11 +42,11 @@ process ESTIMATE_FREQ {
     """
 
     stub:
-    def args = task.ext.args ?: ''
+    def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def mem_mb = task.memory.toMega()
     """
-    touch plink2.afreq.zst
+    touch ${prefix}.afreq.zst
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

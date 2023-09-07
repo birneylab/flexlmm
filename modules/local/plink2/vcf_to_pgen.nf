@@ -20,20 +20,22 @@ process VCF_TO_PGEN {
     task.ext.when == null || task.ext.when
 
     script:
-    def args   = task.ext.args ?: ''
+    def args   = task.ext.args  ?: ''
+    def args2  = task.ext.args2 ?: ''
+    def args3  = task.ext.args3 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def mem_mb = task.memory.toMega()
     """
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --vcf $vcf \\
         --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
-        --make-pgen vzs \\
-        ${args} \\
-        --out ${prefix}
+        --out $prefix \\
+        $args \\
+        --vcf $vcf $args2 \\
+        --make-pgen vzs $args3
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

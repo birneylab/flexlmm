@@ -1,21 +1,24 @@
-process TRANSFORM_PHENOTYPES {
+process GREML {
     tag "$meta.id"
     label 'process_low'
 
-    conda "bioconda::plink2=2.00a3.7"
+    conda "bioconda::gcta=1.94.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/plink2:2.00a3.7--h4ac6f70_4' :
-        'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
+        'https://depot.galaxyproject.org/singularity/gcta:1.94.1--h9ee0642_0' :
+        'biocontainers/gcta:1.94.1--h9ee0642_0' }"
 
     input:
-    tuple val(meta), path(pgen), path(psam), path(pvar), path(pheno)
+    tuple val(meta), path(grm), val(pheno_idx)
+    tuple val(meta), path(pheno)
+    tuple val(meta), path(covar)
+    tuple val(meta), path(qcovar)
 
     output:
-    tuple val(meta), path("*.cov") , emit: pheno
+    tuple val(meta), path("*.hsq") , emit: hsq
     path "versions.yml"            , emit: versions
 
     when:
-    params.quantile_normalise || params.standardise
+    task.ext.when == null || task.ext.when
 
     script:
     def args   = task.ext.args ?: ''
@@ -27,16 +30,14 @@ process TRANSFORM_PHENOTYPES {
         "--variance-standardize" :
         ""
     """
-    plink2 \\
+    gcta64 \\
         --threads $task.cpus \\
-        --memory $mem_mb \\
+        --grm-bin $grm \\
         --pheno $pheno \\
-        --pgen $pgen \\
-        --psam $psam \\
-        --pvar $pvar \\
-        $cmd \\
-        --write-covar 'cols=maybefid,maybesid,phenos' \\
+        $covar_cmd \\
+        $qcovar_cmd \\
         --out $prefix \\
+        --reml \\
         $args
 
     cat <<-END_VERSIONS > versions.yml
@@ -50,7 +51,7 @@ process TRANSFORM_PHENOTYPES {
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def mem_mb      = task.memory.toMega()
     """
-    touch ${prefix}.cov
+    touch ${prefix}.hsq
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
