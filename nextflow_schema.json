@@ -24,6 +24,10 @@
                     "type": "string",
                     "fa_icon": "fas fa-file"
                 },
+                "qcovar": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file"
+                },
                 "freq": {
                     "type": "string",
                     "fa_icon": "fas fa-file"
@@ -65,6 +69,26 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-check",
                     "description": "Should the phenotypes be standardised?"
+                }
+            }
+        },
+        "statistical_models": {
+            "title": "Statistical models",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "required": ["null_model_formula", "model_formula"],
+            "fa_icon": "fas fa-blind",
+            "properties": {
+                "null_model_formula": {
+                    "type": "string",
+                    "fa_icon": "fas fa-check",
+                    "description": ""
+                },
+                "model_formula": {
+                    "type": "string",
+                    "fa_icon": "fas fa-check",
+                    "description": ""
                 }
             }
         },

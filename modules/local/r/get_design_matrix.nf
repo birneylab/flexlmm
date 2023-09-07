@@ -4,21 +4,19 @@ process GET_DESIGN_MATRIX {
     tag "$meta.id"
     label 'process_low'
 
-    conda "bioconda::gcta=1.94.1"
+    // mulled r-data.table
+    conda "bioconda::mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68==f20c3bc5c88913df9b835378643ab86f517a3dcf-0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gcta:1.94.1--h9ee0642_0' :
-        'biocontainers/gcta:1.94.1--h9ee0642_0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' :
+        'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
 
     input:
-    tuple val(meta), path(covar)
-    tuple val(meta), path(qcovar)
-    val formula_raw
+    tuple val(meta), path(covar), path(qcovar)
+    val null_model_formula
 
     output:
-    tuple val(meta), path("*.pheno" ) , emit: pheno
-    tuple val(meta), path("*.covar" ) , emit: covar
-    tuple val(meta), path("*.qcovar") , emit: qcovar
-    path "versions.yml"               , emit: versions
+    tuple val(meta), path("*.gcta_qcovar.tsv") , emit: gcta_qcovar
+    path "versions.yml"                        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,54 +24,73 @@ process GET_DESIGN_MATRIX {
     script:
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
-    def formula =
     """
     #!/usr/bin/env Rscript
 
-    covar <- read.table(
+    library("data.table")
+
+    setDTthreads(${task.cpus})
+
+    covar <- fread(
         "${covar}" ,
         header = TRUE,
-        comment.char = "",
+        sep = "\\t",
         check.names = FALSE,
-        colClasses = "factor",
+        colClasses = "character"
     )
 
-    qcovar_names <- names(read.table(
+    qcovar <- fread(
         "${qcovar}",
         header = TRUE,
-        comment.char = "",
+        sep = "\\t",
         check.names = FALSE,
-        nrows = 1
-    ))
-
-    qcovar_classes <- sapply(
-        qcovar_names,
-        function(x){if (x == "#ID") "factor" else "numeric"}
+        colClasses = "character"
     )
 
-    qcovar <- read.table(
-        "${qcovar}",
-        header = FALSE,
-        col.names = qcovar_names,
-        colClasses = qcovar_classes
+    qcovar <- cbind(
+        qcovar[, .(`#IID`)],
+        qcovar[, lapply(.SD, as.numeric), .SDcols = !"#IID"]
     )
 
-    df <- merge(covar, qcovar, by = "#ID")
-    C <- model.matrix(${formula}, data = df)
-    out <- data.frame(ID = df["#ID"], FID = 0, C)
-    write.table(out, "${prefix}.gcta_qcovar.tsv", sep = "\\t")
+    null_model <- formula(${null_model_formula})
+    formula    <- update(null_model, NULL ~ .)
+
+    message(paste("Design matrix formula:", deparse(formula)))
+
+    df <- merge(covar, qcovar, by = "#IID")
+    C <- model.matrix(formula, data = df)
+    out <- data.table(`#IID` = df[["#IID"]], C, check.names = FALSE)
+    fwrite(
+        out,
+        "${prefix}.gcta_qcovar.tsv",
+        sep = "\\t",
+        col.names = TRUE
+    )
+
+    ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
+    ver_datatable <- utils::packageVersion("data.table")
+    system(
+        paste(
+            "cat <<-END_VERSIONS > versions.yml",
+            "\\"${task.process}\\":",
+            sprintf("    r-base: %s", ver_r),
+            sprintf("    r-data.table: %s", ver_datatable),
+            "END_VERSIONS",
+            sep = "\\n"
+        )
+    )
     """
 
     stub:
     def args        = task.ext.args ?: ''
     def prefix      = task.ext.prefix ?: "${meta.id}"
-    def mem_mb      = task.memory.toMega()
     """
     touch ${prefix}.gcta_qcovar.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        plink2: \$(plink2 --version 2>&1 | sed 's/^PLINK v//; s/ 64.*\$//' )
+        r-base: \$(Rscript -e "cat(strsplit(as.character(R.version[\\"version.string\\"]), \\" \\")[[1]][3])")
+        r-data.table: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"data.table\\")))")
     END_VERSIONS
     """
 }

@@ -8,13 +8,12 @@ process MAKE_GRM {
         'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
 
     input:
-    tuple val(meta), path(pgen), path(psam), path(pvar)
-    tuple val(meta), path(freq)
-    val chr_exclude
+    tuple val(meta) , path(pgen), path(psam), path(pvar), val(chr_exclude)
+    tuple val(meta2), path(freq)
 
     output:
-    tuple val(meta), path("*.grm.bin") , emit: grm
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("*.grm.bin"), path("*.grm.id") , emit: grm
+    path "versions.yml"                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
