@@ -8,8 +8,7 @@ process SPLIT_CHR {
         'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
 
     input:
-    tuple val(meta), path(pgen), path(psam), path(pvar)
-    val chr
+    tuple val(meta), path(pgen), path(psam), path(pvar), val(chr)
 
     output:
     tuple val(meta), path("*.pgen"    ) , emit: pgen

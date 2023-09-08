@@ -8,7 +8,7 @@ include { FIT_MODEL            } from '../../modules/local/r/fit_model'
 
 workflow LMM {
     take:
-    full_genome_pgen   // channel: [mandatory] [ meta, pgen, psam, pvar ]
+    chr_pgen           // channel: [mandatory] [ meta, pgen, psam, pvar ]
     loco_grm           // channel: [mandatory] [ meta, grm_bin, grm_id, grm_n ]
     null_design_matrix // channel: [mandatory] [ meta, mat ]
     pheno              // value  : [mandatory] [ meta, phenotype ]
@@ -76,16 +76,29 @@ workflow LMM {
     .set { decorrelate_null_mat_in }
     DECORRELATE_NULL_MAT ( decorrelate_null_mat_in )
 
-    chol.join(
+    chol
+    .join(
         DECORRELATE_PHENO.out.pheno, failOnMismatch: true, failOnDuplicate: true
-    ).join (
+    )
+    .join (
         DECORRELATE_NULL_MAT.out.null_design_matrix, failOnMismatch: true, failOnDuplicate: true
     )
+    .map {
+        meta, chol, pheno, null_design_matrix ->
+        [meta.chr, meta, chol, pheno, null_design_matrix]
+    }
+    .join (
+        chr_pgen.map { meta, pgen, psam, pvar -> [meta.chr, pgen, psam, pvar] },
+        failOnMismatch: true, failOnDuplicate: true
+    )
+    .map{
+        chr, meta, chol, pheno, null_design_matrix, pgen, psam, pvar ->
+        [meta, chol, pheno, null_design_matrix, pgen, psam, pvar]
+    }
     .set { fit_model_in }
 
     FIT_MODEL (
         fit_model_in,
-        full_genome_pgen,
         null_model_formula,
         model_formula
     )

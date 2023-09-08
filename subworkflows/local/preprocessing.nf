@@ -1,6 +1,7 @@
 include { VCF_TO_PGEN          } from '../../modules/local/plink2/vcf_to_pgen'
 include { ESTIMATE_FREQ        } from '../../modules/local/plink2/estimate_freq'
 include { GET_CHR_NAMES        } from '../../modules/local/plink2/get_chr_names'
+include { SPLIT_CHR            } from '../../modules/local/plink2/split_chr'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
@@ -37,6 +38,25 @@ workflow PREPROCESSING {
     .map { it.trim() }
     .ifEmpty ( ["stub_chr1"] )
     .set { chr }
+
+    full_genome_pgen.combine ( chr )
+    .map {
+        meta, pgen, psam, pvar, chr ->
+        new_meta = meta.clone()
+        new_meta.chr = chr
+        [ new_meta, pgen, psam, pvar, chr ]
+    }
+    .set { split_chr_in }
+
+    SPLIT_CHR ( split_chr_in )
+
+    SPLIT_CHR.out.pgen.join(
+        SPLIT_CHR.out.pvar, failOnMismatch: true, failOnDuplicate: true
+    ).combine (
+        full_genome_pgen.map { meta, pgen, psam, pvar -> psam }
+    )
+    .map { meta, pgen, pvar, psam -> [meta, pgen, psam, pvar] }
+    .set { chr_pgen }
 
     ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
     ESTIMATE_FREQ.out.freq
@@ -76,7 +96,7 @@ workflow PREPROCESSING {
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
 
     emit:
-    full_genome_pgen                               // channel: [ meta, pgen, psam, pvar ]
+    chr_pgen                                       // channel: [ meta, pgen, psam, pvar ]
     loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, grm_id, grm_n ]
     null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, X ]
     pheno                                          // channel: [ meta, pheno ]

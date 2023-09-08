@@ -5,8 +5,7 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta ), path(chol_L), path(pheno), path(covs)
-    tuple val(meta2), path(pgen), path(psam), path(pvar)
+    tuple val(meta), path(chol_L), path(pheno), path(covs), path(pgen), path(psam), path(pvar)
     val null_model_formula
     val model_formula
 
@@ -39,10 +38,10 @@ process FIT_MODEL {
     # Sanity checks for the models
     ######################################################################################
 
-    null_model_rhs <- attr(terms(null_model_formula), which = "term.labels")
-    null_model_lhs <- attr(terms(null_model_formula), which = "variables")
-    model_rhs <- attr(terms(model_formula), which = "term.labels")
-    model_lhs <- attr(terms(model_formula), which = "variables")
+    null_model_rhs <- attr(terms(null_model), which = "term.labels")
+    null_model_lhs <- attr(terms(null_model), which = "variables")
+    model_rhs <- attr(terms(model), which = "term.labels")
+    model_lhs <- attr(terms(model), which = "variables")
 
 
     if (
@@ -59,7 +58,7 @@ process FIT_MODEL {
         )
     }
 
-    extra_terms <- stediff(model_rhs, null_model_rhs)
+    extra_terms <- setdiff(model_rhs, null_model_rhs)
     if ( !all(extra_terms %in% c("x", "d")) ) {
         stop(
             "Only 'x' and 'd' terms are allowed to be present in the model_formula",
@@ -69,9 +68,12 @@ process FIT_MODEL {
 
     to_drop <- match(null_model_rhs, model_rhs)
     model <- formula(drop.terms(terms(model), to_drop))
-    model <- update(adjusted_model, . ~ . + C - 1) # covariates and intercept already part of C
+    model <- update(model, y ~ . + C - 1) # covariates and intercept already part of C
 
     null_model <- formula(y ~ C)
+
+    message("Model:", deparse(model))
+    message("Null model:", deparse(null_model))
 
     ######################################################################################
 
@@ -83,10 +85,13 @@ process FIT_MODEL {
         setTxtProgressBar(pb, i)
 
         pgenlibr::ReadHardcalls(pgen, buf, i)
-        x <- forwardsolve(L, buf)
-        d <- forwardsolve(L, (buf == 1))
 
-        fit <- lm(model)
+        tmp <- data.frame(
+            x = forwardsolve(L, buf),
+            d = forwardsolve(L, (buf == 1))
+        )
+
+        fit <- lm(model, data = tmp)
 
         ll_fit <- logLik(fit)
         lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
@@ -112,14 +117,14 @@ process FIT_MODEL {
         writeLines(lineout, out_con)
 
         rm(
-            x, d, fit, ll_fit, lrt_chisq,
+            tmp, fit, ll_fit, lrt_chisq,
             p_lrt, var_id, var_info, chr, pos, ref, alt, lineout
         )
 
         return(0)
     }
 
-    header <- "chr\\tpos\\tid\\tref\\talt\\lrt_chisq\\tlrt_p"
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_p"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars)

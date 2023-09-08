@@ -32,9 +32,11 @@ process DECORRELATE_PHENO {
     setDTthreads(${task.cpus})
 
     L <- readRDS("${chol_L}")
-    y <- fread("${pheno}", sep = "\\t", header = TRUE)[["${pheno_col}"]]
+    pheno <- fread("${pheno}", sep = "\\t", header = TRUE)
+    y <- pheno[["${pheno_col}"]]
 
     y.mm <- forwardsolve(L, y)
+    names(y.mm) <- pheno[["#IID"]]
 
     saveRDS(y.mm, "${prefix}.pheno.rds")
 
@@ -99,9 +101,16 @@ process DECORRELATE_NULL_MAT {
     setDTthreads(${task.cpus})
 
     L <- readRDS("${chol_L}")
-    X <- fread("${null_design_matrix}", sep = "\\t", header = TRUE)
+    covars <- fread("${null_design_matrix}", sep = "\\t", header = TRUE)
+    sample_names <- covars[["#IID"]]
+    var_names <- colnames(covars)
+    covars[, `#IID` := NULL]
 
+    X <- as.matrix(covars)
     X.mm <- forwardsolve(L, X)
+
+    rownames(X.mm) <- sample_names
+    colnames(X.mm) <- var_names
 
     saveRDS(X.mm, "${prefix}.null_design_matrix.rds")
 
