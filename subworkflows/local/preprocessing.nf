@@ -5,6 +5,7 @@ include { SPLIT_CHR            } from '../../modules/local/plink2/split_chr'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
+include { PHENO_TO_RDS         } from '../../modules/local/r/pheno_to_rds'
 include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
 
 
@@ -85,6 +86,14 @@ workflow PREPROCESSING {
     .ifEmpty ( [ [id: "pheno"], pheno ] )
     .set { pheno }
 
+    PHENO_TO_RDS ( pheno )
+    PHENO_TO_RDS.out.pheno_names
+    .splitCsv ( header: false )
+    .flatten ()
+    .set { pheno_names }
+
+    PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
+
     GET_DESIGN_MATRIX ( [ [id: "covar"], covar, qcovar ], null_model_formula )
 
     // Gather versions of all tools used
@@ -95,12 +104,14 @@ workflow PREPROCESSING {
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
+    versions.mix ( PHENO_TO_RDS.out.versions         ) .set { versions }
+    versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
 
     emit:
     chr_pgen                                       // channel: [ meta, pgen, psam, pvar ]
-    loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, grm_id, grm_n ]
-    null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, X ]
-    pheno                                          // channel: [ meta, pheno ]
+    loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, grm_id ]
+    null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, covariate_mat ]
+    pheno                                          // channel: [ meta, pheno, pheno_name ]
 
     versions                                       // channel: [ versions.yml ]
 }

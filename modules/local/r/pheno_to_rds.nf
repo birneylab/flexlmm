@@ -1,6 +1,4 @@
-process GET_DESIGN_MATRIX {
-    // Both covar and qcovar are exported to GCTA qcovars because factors are converted
-    // to quantitative 0-1 dummy encoded variables
+process PHENO_TO_RDS {
     tag "$meta.id"
     label 'process_low'
 
@@ -11,12 +9,12 @@ process GET_DESIGN_MATRIX {
         'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
 
     input:
-    tuple val(meta), path(covar), path(qcovar)
-    val null_model_formula
+    tuple val(meta), path(pheno)
 
     output:
-    tuple val(meta), path("*.covariate_mat.rds") , emit: mat
-    path "versions.yml"                          , emit: versions
+    tuple val(meta), path("*.pheno.rds")       , emit: pheno
+    tuple val(meta), path("*.pheno_names.txt") , emit: pheno_names
+    path "versions.yml"                        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,16 +28,8 @@ process GET_DESIGN_MATRIX {
     library("data.table")
     setDTthreads(${task.cpus})
 
-    covar <- fread(
-        "${covar}" ,
-        header = TRUE,
-        sep = "\\t",
-        check.names = FALSE,
-        colClasses = "character"
-    )
-
-    qcovar <- fread(
-        "${qcovar}",
+    pheno <- fread(
+        "${pheno}" ,
         header = TRUE,
         sep = "\\t",
         check.names = FALSE,
@@ -47,32 +37,21 @@ process GET_DESIGN_MATRIX {
     )
 
     clean_colnames <- function(n){gsub("#", "", n)}
-    colnames(covar) <- clean_colnames(colnames(covar))
-    colnames(qcovar) <- clean_colnames(colnames(qcovar))
+    colnames(pheno) <- clean_colnames(colnames(pheno))
 
-    if ("FID" %in% colnames(covar)){
-        covar[, FID := NULL]
+    if ("FID" %in% colnames(pheno)){
+        pheno[, FID := NULL]
     }
 
-    if ("FID" %in% colnames(qcovar)){
-        qcovar[, FID := NULL]
-    }
+    Y <- pheno[, lapply(.SD, as.numeric), .SDcols = !"IID"]
+    rownames(Y) <- pheno[["IID"]]
 
-    qcovar <- cbind(
-        qcovar[, .(IID)],
-        qcovar[, lapply(.SD, as.numeric), .SDcols = !"IID"]
+    fwrite(
+        data.table(colnames(Y)),
+        "${prefix}.pheno_names.txt",
+        col.names = FALSE
     )
-
-    null_model <- formula(${null_model_formula})
-    formula    <- update(null_model, NULL ~ .)
-
-    message(paste("Design matrix formula:", deparse(formula)))
-
-    df <- merge(covar, qcovar, by = "IID")
-    C <- model.matrix(formula, data = df)
-    rownames(C) <- df[["IID"]]
-
-    saveRDS(C, "${prefix}.covariate_mat.rds")
+    saveRDS(Y, "${prefix}.pheno.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_datatable <- utils::packageVersion("data.table")
@@ -92,7 +71,8 @@ process GET_DESIGN_MATRIX {
     def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.covariate_mat.rds
+    touch ${prefix}.pheno.rds
+    echo "stub_pheno" > ${prefix}.pheno_names.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

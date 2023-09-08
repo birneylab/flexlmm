@@ -12,8 +12,8 @@ process MAKE_GRM {
     tuple val(meta2), path(freq)
 
     output:
-    tuple val(meta), path("*.grm.bin"), path("*.grm.id"), path("*.grm.N.bin") , emit: grm
-    path "versions.yml"                                                       , emit: versions
+    tuple val(meta), path("*.rel.bin"), path("*.rel.id") , emit: grm
+    path "versions.yml"                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -36,7 +36,7 @@ process MAKE_GRM {
         ${freq_cmd} \\
         --out $prefix \\
         ${args} \\
-        --make-grm-bin $args2
+        --make-rel bin $args2
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -52,9 +52,8 @@ process MAKE_GRM {
     def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
     def freq_cmd    = freq ? "--read-freq ${freq}" : ""
     """
-    touch ${prefix}.grm.bin
-    touch ${prefix}.grm.id
-    touch ${prefix}.grm.N.bin
+    touch ${prefix}.rel.bin
+    touch ${prefix}.rel.id
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
