@@ -107,6 +107,7 @@ workflow LMM {
     versions.mix ( FIT_MODEL.out.versions            ) .set { versions }
 
     emit:
+    gwas = FIT_MODEL.out.gwas // channel: [ meta, gwas ]
 
-    versions          // channel: [ versions.yml ]
+    versions                  // channel: [ versions.yml ]
 }
