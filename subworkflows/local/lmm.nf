@@ -3,6 +3,7 @@ include { GREML                } from '../../modules/local/gcta/greml'
 include { CHOLESKY             } from '../../modules/local/r/cholesky'
 include { DECORRELATE_PHENO    } from '../../modules/local/r/decorrelate'
 include { DECORRELATE_NULL_MAT } from '../../modules/local/r/decorrelate'
+include { FIT_MODEL            } from '../../modules/local/r/fit_model'
 
 
 workflow LMM {
@@ -11,6 +12,9 @@ workflow LMM {
     loco_grm           // channel: [mandatory] [ meta, grm_bin, grm_id, grm_n ]
     null_design_matrix // channel: [mandatory] [ meta, mat ]
     pheno              // value  : [mandatory] [ meta, phenotype ]
+
+    null_model_formula // value: [mandatory] null model R formula
+    model_formula      // value: [mandatory] model R formula
 
     main:
     versions = Channel.empty()
@@ -72,8 +76,19 @@ workflow LMM {
     .set { decorrelate_null_mat_in }
     DECORRELATE_NULL_MAT ( decorrelate_null_mat_in )
 
-    full_genome_pgen.view()
+    chol.join(
+        DECORRELATE_PHENO.out.pheno, failOnMismatch: true, failOnDuplicate: true
+    ).join (
+        DECORRELATE_NULL_MAT.out.null_design_matrix, failOnMismatch: true, failOnDuplicate: true
+    )
+    .set { fit_model_in }
 
+    FIT_MODEL (
+        fit_model_in,
+        full_genome_pgen,
+        null_model_formula,
+        model_formula
+    )
 
     // Gather versions of all tools used
     versions.mix ( GREML.out.versions                ) .set { versions }

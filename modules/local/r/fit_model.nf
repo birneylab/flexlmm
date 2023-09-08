@@ -2,7 +2,7 @@ process FIT_MODEL {
     tag "$meta.id"
     label 'process_low'
 
-    container 'saulpierotti-ebi/pgenlibr@sha256:35540701af85211b3d54e2601b3b795362f1631e65e8dd6658f76939d7c1bb54'
+    container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
     tuple val(meta ), path(chol_L), path(pheno), path(covs)
@@ -26,8 +26,8 @@ process FIT_MODEL {
     L <- readRDS("${chol_L}")
     y <- readRDS("${pheno}")
     C <- readRDS("${covs}")
-    pgen <- pgenlibr::NewPgen(${pgen}, pvar = ${pvar})
     pvar <- pgenlibr::NewPvar("${pvar}")
+    pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
     buf  <- pgenlibr::Buf(pgen)
 
     null_model <- formula(${null_model_formula})
@@ -113,7 +113,7 @@ process FIT_MODEL {
 
         rm(
             x, d, fit, ll_fit, lrt_chisq,
-            p_lrt, var_id, var_info, chr, pos, ref, alt,lineout
+            p_lrt, var_id, var_info, chr, pos, ref, alt, lineout
         )
 
         return(0)
@@ -153,7 +153,7 @@ process FIT_MODEL {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(Rscript -e "cat(strsplit(as.character(R.version[\\"version.string\\"]), \\" \\")[[1]][3])")
-        r-data.table: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"pgenlibr\\")))")
+        pgenlibr: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"pgenlibr\\")))")
     END_VERSIONS
     """
 }

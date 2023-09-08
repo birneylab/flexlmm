@@ -90,7 +90,9 @@ workflow FLEXLMM {
         PREPROCESSING.out.full_genome_pgen,
         PREPROCESSING.out.loco_grm,
         PREPROCESSING.out.null_design_matrix,
-        PREPROCESSING.out.pheno
+        PREPROCESSING.out.pheno,
+        null_model_formula,
+        model_formula
     )
 
     versions.mix ( PREPROCESSING.out.versions ) .set { versions }
