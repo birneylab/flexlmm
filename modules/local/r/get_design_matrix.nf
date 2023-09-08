@@ -75,7 +75,7 @@ process GET_DESIGN_MATRIX {
             "\\"${task.process}\\":",
             sprintf("    r-base: %s", ver_r),
             sprintf("    r-data.table: %s", ver_datatable),
-            "END_VERSIONS",
+            "END_VERSIONS\\n",
             sep = "\\n"
         )
     )

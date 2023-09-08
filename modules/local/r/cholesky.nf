@@ -1,3 +1,11 @@
+// Performs the cholesky decomposition V=LL^t of the phenotype variance-covariance matrix
+// V. V is calculated from the variance components estimates as:
+//
+// V = s2g K + s2e I
+//
+// Where K is the genetic relatedness matrix, s2g and s2e the variance components, and I
+// the identity matrix.
+
 process CHOLESKY {
     tag "$meta.id"
     label 'process_low'
@@ -73,13 +81,13 @@ process CHOLESKY {
 
     saveRDS(L, "${prefix}.chol_L.rds")
 
-    ver_sum_i <- function(i){r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
+    ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     system(
         paste(
             "cat <<-END_VERSIONS > versions.yml",
             "\\"${task.process}\\":",
             sprintf("    r-base: %s", ver_r),
-            "END_VERSIONS",
+            "END_VERSIONS\\n",
             sep = "\\n"
         )
     )

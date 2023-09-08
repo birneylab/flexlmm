@@ -35,6 +35,7 @@ workflow PREPROCESSING {
     .map { meta, txt -> txt }
     .splitText ()
     .map { it.trim() }
+    .ifEmpty ( ["stub_chr1"] )
     .set { chr }
 
     ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
@@ -72,10 +73,12 @@ workflow PREPROCESSING {
     versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
+    versions.mix ( PGEN_TO_BGEN.out.versions         ) .set { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
 
     emit:
-    loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, gr,_id ]
+    full_genome_pgen                               // channel: [ meta, pgen, psam, pvar ]
+    loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, grm_id, grm_n ]
     null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, X ]
     pheno                                          // channel: [ meta, pheno ]
 

@@ -87,6 +87,7 @@ workflow FLEXLMM {
     )
 
     LMM (
+        PREPROCESSING.out.full_genome_bgen,
         PREPROCESSING.out.loco_grm,
         PREPROCESSING.out.null_design_matrix,
         PREPROCESSING.out.pheno

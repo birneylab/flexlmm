@@ -18,7 +18,7 @@ process GET_CHR_NAMES {
     task.ext.when == null || task.ext.when
 
     script:
-    def args   = task.ext.args ?: ''
+    def args   = task.ext.args   ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     plink2 --zst-decompress $pvar | \\
@@ -34,10 +34,8 @@ process GET_CHR_NAMES {
     """
 
     stub:
-    def args        = task.ext.args ?: ''
+    def args        = task.ext.args   ?: ''
     def prefix      = task.ext.prefix ?: "${meta.id}"
-    def mem_mb      = task.memory.toMega()
-    def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
     """
     touch ${prefix}.txt
 

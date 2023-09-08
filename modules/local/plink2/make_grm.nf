@@ -45,13 +45,16 @@ process MAKE_GRM {
     """
 
     stub:
-    def args        = task.ext.args ?: ''
+    def args        = task.ext.args   ?: ''
+    def args2       = task.ext.args2  ?: ''
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def mem_mb      = task.memory.toMega()
     def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
     def freq_cmd    = freq ? "--read-freq ${freq}" : ""
     """
-    touch ${prefix}.rel.bin
+    touch ${prefix}.grm.bin
+    touch ${prefix}.grm.id
+    touch ${prefix}.grm.N.bin
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
