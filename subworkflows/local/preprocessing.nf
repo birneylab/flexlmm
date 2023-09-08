@@ -90,6 +90,7 @@ workflow PREPROCESSING {
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
+    versions.mix ( SPLIT_CHR.out.versions            ) .set { versions }
     versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }

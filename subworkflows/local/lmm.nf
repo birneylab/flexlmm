@@ -97,17 +97,14 @@ workflow LMM {
     }
     .set { fit_model_in }
 
-    FIT_MODEL (
-        fit_model_in,
-        null_model_formula,
-        model_formula
-    )
+    FIT_MODEL ( fit_model_in, null_model_formula, model_formula )
 
     // Gather versions of all tools used
     versions.mix ( GREML.out.versions                ) .set { versions }
     versions.mix ( CHOLESKY.out.versions             ) .set { versions }
     versions.mix ( DECORRELATE_PHENO.out.versions    ) .set { versions }
     versions.mix ( DECORRELATE_NULL_MAT.out.versions ) .set { versions }
+    versions.mix ( FIT_MODEL.out.versions            ) .set { versions }
 
     emit:
 
