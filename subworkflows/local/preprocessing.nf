@@ -73,7 +73,6 @@ workflow PREPROCESSING {
     versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
-    versions.mix ( PGEN_TO_BGEN.out.versions         ) .set { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
 
     emit:

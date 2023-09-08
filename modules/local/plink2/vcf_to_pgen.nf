@@ -29,7 +29,7 @@ process VCF_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-missing-var-ids @_#_\\\$r_\\\$a \\
+        --set-all-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         --out $prefix \\
