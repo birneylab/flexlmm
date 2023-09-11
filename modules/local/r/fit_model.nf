@@ -1,3 +1,7 @@
+// fit a mixed model by OLS from a set of pre-roteted covariates C and phenotypes y, a
+// pgen file triple with non-rotated genotypes, and a cholesky decomposition L of the
+// variance-covariance matrix. Determines a p-value from a likelyhood ratio test among
+// null_model_formula and model_formula.
 process FIT_MODEL {
     tag "$meta.id"
     label 'process_low'
@@ -5,7 +9,7 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(chol_L), path(pheno), path(covs), path(pgen), path(psam), path(pvar)
+    tuple val(meta), path(y), path(C), path(L), path(pgen), path(psam), path(pvar)
     val null_model_formula
     val model_formula
 
@@ -22,12 +26,33 @@ process FIT_MODEL {
     """
     #!/usr/bin/env Rscript
 
-    L <- readRDS("${L}")
     y <- readRDS("${y}")
     C <- readRDS("${C}")
+    L <- readRDS("${L}")
+
+    stopifnot(names(y) == rownames(C))
+    stopifnot(names(y) == rownames(L))
+    stopifnot(names(y) == colnames(L))
+    stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
+
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
     buf  <- pgenlibr::Buf(pgen)
+
+    psam <- read.table(
+        "${psam}",
+        sep = "\\t",
+        header = TRUE,
+        comment.char = "",
+        check.names = FALSE
+    )
+    clean_colnames <- function(n){gsub("#", "", n)}
+    colnames(psam) <- clean_colnames(colnames(psam))
+
+    samples <- intersect(names(y), psam[["IID"]])
+    x_slicer <- na.omit(match(samples, psam[["IID"]]))
+
+    stopifnot(names(y) == psam[["IID"]][x_slicer])
 
     null_model <- formula(${null_model_formula})
     model <- formula(${model_formula})
@@ -87,8 +112,8 @@ process FIT_MODEL {
         pgenlibr::ReadHardcalls(pgen, buf, i)
 
         tmp <- data.frame(
-            x = forwardsolve(L, buf),
-            d = forwardsolve(L, (buf == 1))
+            x = forwardsolve(L, buf[x_slicer]),
+            d = forwardsolve(L, (buf[x_slicer] == 1))
         )
 
         fit <- lm(model, data = tmp)
