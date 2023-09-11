@@ -93,8 +93,11 @@ workflow PREPROCESSING {
     .set { pheno_names }
 
     PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
-
-    GET_DESIGN_MATRIX ( [ [id: "covar"], covar, qcovar, pheno ], null_model_formula )
+    GET_DESIGN_MATRIX (
+        [ [id: "covar"], covar, qcovar],
+        PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
+        null_model_formula
+    )
 
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }

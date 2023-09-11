@@ -11,7 +11,8 @@ process GET_DESIGN_MATRIX {
         'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
 
     input:
-    tuple val(meta), path(covar), path(qcovar), path(pheno)
+    tuple val(meta), path(covar), path(qcovar)
+    path pheno
     val null_model_formula
 
     output:
@@ -32,7 +33,7 @@ process GET_DESIGN_MATRIX {
     library("data.table")
     setDTthreads(${task.cpus})
 
-    pheno <- loadRDS("${pheno}")
+    pheno <- readRDS("${pheno}")
     clean_colnames <- function(n){gsub("#", "", n)}
 
     if ( ${load_covar} ){
@@ -44,6 +45,7 @@ process GET_DESIGN_MATRIX {
         )
 
         colnames(covar) <- clean_colnames(colnames(covar))
+        if ("FID" %in% colnames(covar)) covar[, FID := NULL]
     }
 
     if ( ${load_qcovar} ){
@@ -56,10 +58,11 @@ process GET_DESIGN_MATRIX {
         )
 
         colnames(qcovar) <- clean_colnames(colnames(qcovar))
+        if ("FID" %in% colnames(qcovar)) qcovar[, FID := NULL]
 
         qcovar <- cbind(
             qcovar[, .(IID)],
-            qcovar[, lapply(.SD, as.numeric), .SDcols = !c("IID", "FID")]
+            qcovar[, lapply(.SD, as.numeric), .SDcols = !"IID"]
         )
     }
 
@@ -76,7 +79,8 @@ process GET_DESIGN_MATRIX {
     }
 
     null_model <- formula(${null_model_formula})
-    C <- model.matrix(null_model, data = df)
+    null_model_RHS <- update(null_model, NULL ~ .)
+    C <- model.matrix(null_model_RHS, data = df)
     rownames(C) <- df[["IID"]]
     saveRDS(C, "${prefix}.covariate_mat.rds")
 
