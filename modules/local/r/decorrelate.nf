@@ -4,11 +4,10 @@ process DECORRELATE {
     tag "$meta.id"
     label 'process_low'
 
-    // mulled r-data.table
-    conda "bioconda::mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68==f20c3bc5c88913df9b835378643ab86f517a3dcf-0"
+    conda "bioconda::r-base==4.2.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' :
-        'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
+        'biocontainers/r-base:4.2.1' }"
 
     input:
     tuple val(meta), path(y), path(C), path(chol_L)
@@ -42,13 +41,11 @@ process DECORRELATE {
     saveRDS(C.mm, "${prefix}.C_mm.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
-    ver_datatable <- utils::packageVersion("data.table")
     system(
         paste(
             "cat <<-END_VERSIONS > versions.yml",
             "\\"${task.process}\\":",
             sprintf("    r-base: %s", ver_r),
-            sprintf("    r-data.table: %s", ver_datatable),
             "END_VERSIONS\\n",
             sep = "\\n"
         )
@@ -65,7 +62,6 @@ process DECORRELATE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(Rscript -e "cat(strsplit(as.character(R.version[\\"version.string\\"]), \\" \\")[[1]][3])")
-        r-data.table: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"data.table\\")))")
     END_VERSIONS
     """
 }

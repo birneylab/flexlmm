@@ -10,11 +10,10 @@ process CHOLESKY {
     tag "$meta.id"
     label 'process_low'
 
-    // mulled r-data.table
-    conda "bioconda::mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68==f20c3bc5c88913df9b835378643ab86f517a3dcf-0"
+    conda "bioconda::r-base==4.2.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' :
-        'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
+        'biocontainers/r-base:4.2.1' }"
 
     input:
     tuple val(meta), path(K), path(y), path(C), path(gaston_hsq)

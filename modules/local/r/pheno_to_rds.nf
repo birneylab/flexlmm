@@ -25,40 +25,39 @@ process PHENO_TO_RDS {
     """
     #!/usr/bin/env Rscript
 
-    library("data.table")
-    setDTthreads(${task.cpus})
-
-    pheno <- fread(
+    pheno <- read.table(
         "${pheno}" ,
         header = TRUE,
         sep = "\\t",
         check.names = FALSE,
-        colClasses = "character"
+        colClasses = "character",
+        comment.char = ""
     )
 
     clean_colnames <- function(n){gsub("#", "", n)}
+    remove_fid <- function(df){subset(df, select = (colnames(df) != "FID"))}
+    remove_iid <- function(df){subset(df, select = (colnames(df) != "IID"))}
     colnames(pheno) <- clean_colnames(colnames(pheno))
+    pheno <- remove_fid(pheno)
 
-    if ("FID" %in% colnames(pheno)) pheno[, FID := NULL]
+    Y <- as.matrix(as.data.frame(lapply(remove_iid(pheno), as.numeric)))
+    rownames(Y) <- pheno[,"IID"]
 
-    Y <- as.matrix(pheno[, lapply(.SD, as.numeric), .SDcols = !"IID"])
-    rownames(Y) <- pheno[["IID"]]
-
-    fwrite(
-        data.table(colnames(Y)),
+    write.table(
+        colnames(Y),
         "${prefix}.pheno_names.txt",
-        col.names = FALSE
+        col.names = FALSE,
+        row.names = FALSE,
+        quote = FALSE
     )
     saveRDS(Y, "${prefix}.pheno.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
-    ver_datatable <- utils::packageVersion("data.table")
     system(
         paste(
             "cat <<-END_VERSIONS > versions.yml",
             "\\"${task.process}\\":",
             sprintf("    r-base: %s", ver_r),
-            sprintf("    r-data.table: %s", ver_datatable),
             "END_VERSIONS\\n",
             sep = "\\n"
         )
@@ -75,7 +74,6 @@ process PHENO_TO_RDS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(Rscript -e "cat(strsplit(as.character(R.version[\\"version.string\\"]), \\" \\")[[1]][3])")
-        r-data.table: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"data.table\\")))")
     END_VERSIONS
     """
 }

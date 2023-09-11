@@ -30,7 +30,6 @@ workflow LMM {
     DECORRELATE.out.mm_rotation
     .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
     .join ( chr_pheno_pgen,      failOnMismatch: true, failOnDuplicate: true )
-    .view()
     .set { fit_model_in }
     FIT_MODEL ( fit_model_in, null_model_formula, model_formula )
     FIT_MODEL.out.gwas.set { gwas }

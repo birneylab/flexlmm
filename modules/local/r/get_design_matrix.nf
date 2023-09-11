@@ -3,11 +3,10 @@ process GET_DESIGN_MATRIX {
     tag "$meta.id"
     label 'process_low'
 
-    // mulled r-data.table
-    conda "bioconda::mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68==f20c3bc5c88913df9b835378643ab86f517a3dcf-0"
+    conda "bioconda::r-base==4.2.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' :
-        'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
+        'biocontainers/r-base:4.2.1' }"
 
     input:
     tuple val(meta), path(covar), path(qcovar)
@@ -29,39 +28,40 @@ process GET_DESIGN_MATRIX {
     """
     #!/usr/bin/env Rscript
 
-    library("data.table")
-    setDTthreads(${task.cpus})
-
     samples <- rownames(readRDS("${pheno}"))
     clean_colnames <- function(n){gsub("#", "", n)}
+    remove_fid <- function(df){subset(df, select = (colnames(df) != "FID"))}
+    remove_iid <- function(df){subset(df, select = (colnames(df) != "IID"))}
 
     if ( ${load_covar} ){
-        covar <- fread("${covar}" ,
+        covar <- read.table("${covar}" ,
             header = TRUE,
             sep = "\\t",
             check.names = FALSE,
-            colClasses = "character"
+            colClasses = "character",
+            comment.char = ""
         )
 
         colnames(covar) <- clean_colnames(colnames(covar))
-        if ("FID" %in% colnames(covar)) covar[, FID := NULL]
+        covar <- remove_fid(covar)
     }
 
     if ( ${load_qcovar} ){
-        qcovar <- fread(
+        qcovar <- read.table(
             "${qcovar}",
             header = TRUE,
             sep = "\\t",
             check.names = FALSE,
-            colClasses = "character"
+            colClasses = "character",
+            comment.char = ""
         )
 
         colnames(qcovar) <- clean_colnames(colnames(qcovar))
-        if ("FID" %in% colnames(qcovar)) qcovar[, FID := NULL]
+        qcovar <- remove_fid(qcovar)
 
         qcovar <- cbind(
-            qcovar[, .(IID)],
-            qcovar[, lapply(.SD, as.numeric), .SDcols = !"IID"]
+            subset(qcovar, select = (colnames(qcovar) == "IID")),
+            lapply(remove_iid(qcovar), as.numeric)
         )
     }
 
@@ -74,7 +74,7 @@ process GET_DESIGN_MATRIX {
     } else {
         # this is needed to still have an intercept with the right number of samples
         # in case of no covar and no qcovar
-        df <- data.table(IID = samples)
+        df <- data.frame(IID = samples)
     }
 
     null_model <- formula(${null_model_formula})
@@ -84,13 +84,11 @@ process GET_DESIGN_MATRIX {
     saveRDS(C, "${prefix}.covariate_mat.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
-    ver_datatable <- utils::packageVersion("data.table")
     system(
         paste(
             "cat <<-END_VERSIONS > versions.yml",
             "\\"${task.process}\\":",
             sprintf("    r-base: %s", ver_r),
-            sprintf("    r-data.table: %s", ver_datatable),
             "END_VERSIONS\\n",
             sep = "\\n"
         )
@@ -106,7 +104,6 @@ process GET_DESIGN_MATRIX {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(Rscript -e "cat(strsplit(as.character(R.version[\\"version.string\\"]), \\" \\")[[1]][3])")
-        r-data.table: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"data.table\\")))")
     END_VERSIONS
     """
 }
