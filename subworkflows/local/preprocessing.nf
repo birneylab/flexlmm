@@ -41,25 +41,6 @@ workflow PREPROCESSING {
     .ifEmpty ( ["stub_chr1"] )
     .set { chr }
 
-    full_genome_pgen.combine ( chr )
-    .map {
-        meta, pgen, psam, pvar, chr ->
-        new_meta = meta.clone()
-        new_meta.chr = chr
-        [ new_meta, pgen, psam, pvar, chr ]
-    }
-    .set { split_chr_in }
-
-    SPLIT_CHR ( split_chr_in )
-
-    SPLIT_CHR.out.pgen.join(
-        SPLIT_CHR.out.pvar, failOnMismatch: true, failOnDuplicate: true
-    ).combine (
-        full_genome_pgen.map { meta, pgen, psam, pvar -> psam }
-    )
-    .map { meta, pgen, pvar, psam -> [meta, pgen, psam, pvar] }
-    .set { chr_pgen }
-
     ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
     ESTIMATE_FREQ.out.freq
     .ifEmpty ( [ [id: "freq"], [] ] )
@@ -115,10 +96,18 @@ workflow PREPROCESSING {
     MATCH_SAMPLES ( match_samples_in )
     MATCH_SAMPLES.out.model_terms.set { model_terms }
 
+    full_genome_pgen.combine ( MATCH_SAMPLES.out.sample_ids )
+    .map {
+        meta, pgen, psam, pvar, meta2, sample_ids ->
+        [ meta2, pgen, psam, pvar, sample_ids, meta2.chr ]
+    }
+    .set { split_chr_in }
+    SPLIT_CHR ( split_chr_in )
+    SPLIT_CHR.out.pgen.set { chr_pheno_pgen }
+
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
-    versions.mix ( SPLIT_CHR.out.versions            ) .set { versions }
     versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
@@ -126,10 +115,11 @@ workflow PREPROCESSING {
     versions.mix ( PHENO_TO_RDS.out.versions         ) .set { versions }
     versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
     versions.mix ( MATCH_SAMPLES.out.versions        ) .set { versions }
+    versions.mix ( SPLIT_CHR.out.versions            ) .set { versions }
 
     emit:
-    chr_pgen    // channel: [ meta, pgen, psam, pvar ]
-    model_terms // channel: [ meta, K, y, C ]
+    chr_pheno_pgen // channel: [ meta, pgen, psam, pvar ]
+    model_terms    // channel: [ meta, K, y, C ]
 
-    versions    // channel: [ versions.yml ]
+    versions       // channel: [ versions.yml ]
 }

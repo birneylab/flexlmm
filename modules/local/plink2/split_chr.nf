@@ -1,3 +1,4 @@
+// split by chromosome and reorder samples to match the phenotypes and covariates
 process SPLIT_CHR {
     tag "$meta.id"
     label 'process_low'
@@ -8,12 +9,11 @@ process SPLIT_CHR {
         'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
 
     input:
-    tuple val(meta), path(pgen), path(psam), path(pvar), val(chr)
+    tuple val(meta), path(pgen), path(psam), path(pvar), path(sample_ids), val(chr)
 
     output:
-    tuple val(meta), path("*.pgen"    ) , emit: pgen
-    tuple val(meta), path("*.pvar.zst") , emit: pvar
-    path "versions.yml"                 , emit: versions
+    tuple val(meta), path("*.pgen"), path("*.psam"), path("*.pvar.zst") , emit: pgen
+    path "versions.yml"                                                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,6 +31,8 @@ process SPLIT_CHR {
         --psam $psam \\
         --pvar $pvar \\
         --chr $chr \\
+        --keep ${sample_ids} \\
+        --indiv-sort file ${sample_ids} \\
         --out $prefix \\
         $args \\
         --make-pgen vzs $args2 \\

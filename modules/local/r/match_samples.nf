@@ -16,6 +16,7 @@ process MATCH_SAMPLES {
 
     output:
     tuple val(meta), path("*.K.rds"), path("*.y.rds"), path("*.C.rds") , emit: model_terms
+    tuple val(meta), path("*.sample.id")                              , emit: sample_ids
     path "versions.yml"                                                , emit: versions
 
     when:
@@ -55,8 +56,15 @@ process MATCH_SAMPLES {
     stopifnot(names(y) == colnames(K))
     stopifnot(sum(is.na(K)) + sum(is.na(C)) + sum(is.na(y)) == 0)
 
-    message(length(samples), "sample intersect in all sets and have no missing values")
+    message(length(samples), " sample intersect in all sets and have no missing values")
 
+    write.table(
+        samples,
+        "${prefix}.sample.id",
+        col.names = FALSE,
+        row.names = FALSE,
+        quote = FALSE
+    )
     saveRDS(K, "${prefix}.K.rds")
     saveRDS(y, "${prefix}.y.rds")
     saveRDS(C, "${prefix}.C.rds")
@@ -80,6 +88,7 @@ process MATCH_SAMPLES {
     touch ${prefix}.K.rds
     touch ${prefix}.y.rds
     touch ${prefix}.C.rds
+    touch ${prefix}.sample.id
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

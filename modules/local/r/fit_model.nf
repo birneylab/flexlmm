@@ -30,15 +30,6 @@ process FIT_MODEL {
     C <- readRDS("${C}")
     L <- readRDS("${L}")
 
-    stopifnot(names(y) == rownames(C))
-    stopifnot(names(y) == rownames(L))
-    stopifnot(names(y) == colnames(L))
-    stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
-
-    pvar <- pgenlibr::NewPvar("${pvar}")
-    pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
-    buf  <- pgenlibr::Buf(pgen)
-
     psam <- read.table(
         "${psam}",
         sep = "\\t",
@@ -49,10 +40,15 @@ process FIT_MODEL {
     clean_colnames <- function(n){gsub("#", "", n)}
     colnames(psam) <- clean_colnames(colnames(psam))
 
-    samples <- intersect(names(y), psam[["IID"]])
-    x_slicer <- na.omit(match(samples, psam[["IID"]]))
+    stopifnot(names(y) == rownames(C))
+    stopifnot(names(y) == rownames(L))
+    stopifnot(names(y) == colnames(L))
+    stopifnot(names(y) == psam[["IID"]])
+    stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
 
-    stopifnot(names(y) == psam[["IID"]][x_slicer])
+    pvar <- pgenlibr::NewPvar("${pvar}")
+    pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
+    buf  <- pgenlibr::Buf(pgen)
 
     null_model <- formula(${null_model_formula})
     model <- formula(${model_formula})
@@ -112,8 +108,8 @@ process FIT_MODEL {
         pgenlibr::ReadHardcalls(pgen, buf, i)
 
         tmp <- data.frame(
-            x = forwardsolve(L, buf[x_slicer]),
-            d = forwardsolve(L, (buf[x_slicer] == 1))
+            x = forwardsolve(L, buf),
+            d = forwardsolve(L, (buf == 1))
         )
 
         fit <- lm(model, data = tmp)

@@ -6,7 +6,7 @@ include { FIT_MODEL            } from '../../modules/local/r/fit_model'
 
 workflow LMM {
     take:
-    chr_pgen           // channel: [mandatory] [ meta, pgen, psam, pvar ]
+    chr_pheno_pgen     // channel: [mandatory] [ meta, pgen, psam, pvar ]
     model_terms        // channel: [mandatory] [ meta, K, y, C ]
     null_model_formula // value:   [mandatory] null model R formula
     model_formula      // value:   [mandatory] model R formula
@@ -17,7 +17,7 @@ workflow LMM {
     AIREML ( model_terms )
 
     model_terms
-    .join ( AIREML.out.hsq, failOnMismatch: true, failOnDuplicate: true )
+    .join ( AIREML.out.hsq,      failOnMismatch: true, failOnDuplicate: true )
     .set { cholesky_in }
     CHOLESKY ( cholesky_in )
 
@@ -27,17 +27,13 @@ workflow LMM {
     .set { decorrelate_in }
     DECORRELATE ( decorrelate_in )
 
-    decorrelate_in
-    .map{ meta, y, C, L -> [meta.chr, meta, y, C, L] }
-    .combine (
-        chr_pgen.map{ meta, pgen, psam, pvar -> [meta.chr, meta, pgen, psam, pvar] },
-        by: 0
-    )
-    .map {
-        chr, meta, y, C, L, meta2, pgen, psam, pvar -> [meta, y, C, L, pgen, psam, pvar]
-    }
+    DECORRELATE.out.mm_rotation
+    .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
+    .join ( chr_pheno_pgen,      failOnMismatch: true, failOnDuplicate: true )
+    .view()
     .set { fit_model_in }
     FIT_MODEL ( fit_model_in, null_model_formula, model_formula )
+    FIT_MODEL.out.gwas.set { gwas }
 
     // Gather versions of all tools used
     versions.mix ( AIREML.out.versions      ) .set { versions }
@@ -46,7 +42,7 @@ workflow LMM {
     versions.mix ( FIT_MODEL.out.versions   ) .set { versions }
 
     emit:
-    //gwas = FIT_MODEL.out.gwas // channel: [ meta, gwas ]
+    gwas     // channel: [ meta, gwas ]
 
-    versions                  // channel: [ versions.yml ]
+    versions // channel: [ versions.yml ]
 }

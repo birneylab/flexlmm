@@ -87,7 +87,7 @@ workflow FLEXLMM {
     )
 
     LMM (
-        PREPROCESSING.out.chr_pgen,
+        PREPROCESSING.out.chr_pheno_pgen,
         PREPROCESSING.out.model_terms,
         null_model_formula,
         model_formula
