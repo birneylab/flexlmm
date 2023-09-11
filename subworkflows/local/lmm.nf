@@ -28,6 +28,7 @@ workflow LMM {
         new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
         [new_meta, grm_bin, grm_id, pheno, pheno_name]
     }
+    .view()
     .set { aireml_in }
 
     AIREML ( aireml_in, null_design_matrix, null_model_formula )
