@@ -29,10 +29,9 @@ workflow LMM {
 
     decorrelate_in
     .map{ meta, y, C, L -> [meta.chr, meta, y, C, L] }
-    .join(
+    .combine (
         chr_pgen.map{ meta, pgen, psam, pvar -> [meta.chr, meta, pgen, psam, pvar] },
-        failOnMismatch: true,
-        failOnDuplicate: true
+        by: 0
     )
     .map {
         chr, meta, y, C, L, meta2, pgen, psam, pvar -> [meta, y, C, L, pgen, psam, pvar]
