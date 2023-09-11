@@ -29,7 +29,7 @@ workflow LMM {
         [new_meta, grm_bin, grm_id, pheno, pheno_name]
     }
     .set { aireml_in }
-    AIREML ( aireml_in, null_design_matrix, null_model_formula )
+    AIREML ( aireml_in, null_design_matrix )
 
     aireml_in
     .map { meta, grm_bin, grm_id, pheno, pheno_name -> [meta, grm_bin, grm_id] }

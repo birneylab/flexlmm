@@ -10,7 +10,6 @@ process AIREML {
     input:
     tuple val(meta ), path(grm_bin), path(grm_id), path(pheno), val(pheno_name)
     tuple val(meta2), path(null_design_matrix)
-    val null_model_formula
 
     output:
     tuple val(meta), path("*.hsq.rds") , emit: hsq
