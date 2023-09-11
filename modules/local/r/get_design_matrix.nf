@@ -1,6 +1,5 @@
+// the design matrix for the null model, including the intercept if required
 process GET_DESIGN_MATRIX {
-    // Both covar and qcovar are exported to GCTA qcovars because factors are converted
-    // to quantitative 0-1 dummy encoded variables
     tag "$meta.id"
     label 'process_low'
 

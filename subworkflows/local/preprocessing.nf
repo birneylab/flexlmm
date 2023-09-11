@@ -7,6 +7,7 @@ include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
 include { PHENO_TO_RDS         } from '../../modules/local/r/pheno_to_rds'
 include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
+include { MATCH_SAMPLES        } from '../../modules/local/r/match_samples'
 
 
 workflow PREPROCESSING {
@@ -100,6 +101,20 @@ workflow PREPROCESSING {
         null_model_formula
     )
 
+    LOCO_GRM.out.grm
+    .combine ( pheno )
+    .map {
+        meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
+        new_meta = meta.clone()
+        new_meta.pheno = pheno_name
+        new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
+        [new_meta, grm_bin, grm_id, pheno, pheno_name]
+    }
+    .combine ( GET_DESIGN_MATRIX.out.mat.map { meta, mat -> mat } )
+    .set { match_samples_in }
+    MATCH_SAMPLES ( match_samples_in )
+    MATCH_SAMPLES.out.model_terms.set { model_terms }
+
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
@@ -110,12 +125,11 @@ workflow PREPROCESSING {
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
     versions.mix ( PHENO_TO_RDS.out.versions         ) .set { versions }
     versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
+    versions.mix ( MATCH_SAMPLES.out.versions        ) .set { versions }
 
     emit:
-    chr_pgen                                       // channel: [ meta, pgen, psam, pvar ]
-    loco_grm           = LOCO_GRM.out.grm          // channel: [ meta, grm_bin, grm_id ]
-    null_design_matrix = GET_DESIGN_MATRIX.out.mat // channel: [ meta, covariate_mat ]
-    pheno                                          // channel: [ meta, pheno, pheno_name ]
+    chr_pgen    // channel: [ meta, pgen, psam, pvar ]
+    model_terms // channel: [ meta, K, y, C ]
 
-    versions                                       // channel: [ versions.yml ]
+    versions    // channel: [ versions.yml ]
 }

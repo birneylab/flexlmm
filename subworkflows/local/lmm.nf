@@ -1,55 +1,32 @@
-include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
-include { AIREML                } from '../../modules/local/r/aireml'
+include { AIREML               } from '../../modules/local/r/aireml'
 include { CHOLESKY             } from '../../modules/local/r/cholesky'
-include { DECORRELATE_PHENO    } from '../../modules/local/r/decorrelate'
-include { DECORRELATE_NULL_MAT } from '../../modules/local/r/decorrelate'
+include { DECORRELATE          } from '../../modules/local/r/decorrelate'
 include { FIT_MODEL            } from '../../modules/local/r/fit_model'
 
 
 workflow LMM {
     take:
     chr_pgen           // channel: [mandatory] [ meta, pgen, psam, pvar ]
-    loco_grm           // channel: [mandatory] [ meta, grm_bin, grm_id, grm_n ]
-    null_design_matrix // channel: [mandatory] [ meta, covariate_mat ]
-    pheno              // value  : [mandatory] [ meta, phenotype ]
-
-    null_model_formula // value: [mandatory] null model R formula
-    model_formula      // value: [mandatory] model R formula
+    model_terms        // channel: [mandatory] [ meta, K, y, C ]
+    null_model_formula // value:   [mandatory] null model R formula
+    model_formula      // value:   [mandatory] model R formula
 
     main:
     versions = Channel.empty()
 
-    loco_grm
-    .combine ( pheno )
-    .map {
-        meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
-        new_meta = meta.clone()
-        new_meta.pheno = pheno_name
-        new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
-        [new_meta, grm_bin, grm_id, pheno, pheno_name]
-    }
-    .set { aireml_in }
-    AIREML ( aireml_in, null_design_matrix )
+    AIREML ( model_terms )
 
-    aireml_in
-    .map { meta, grm_bin, grm_id, pheno, pheno_name -> [meta, grm_bin, grm_id] }
+    model_terms
     .join ( AIREML.out.hsq, failOnMismatch: true, failOnDuplicate: true )
     .set { cholesky_in }
     CHOLESKY ( cholesky_in )
 
-    //CHOLESKY.out.chol_L
-    //.combine ( pheno.map { meta, pheno -> pheno } )
-    //.map {
-    //    meta, chol, pheno ->
-    //    def pheno_col = meta.pheno
-    //    [ meta, chol, pheno, pheno_col ]
-    //}
-    //.set { decorrelate_pheno_in }
-    //DECORRELATE_PHENO ( decorrelate_pheno_in )
+    model_terms
+    .map { meta, K, y, C -> [meta, y, C] }
+    .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
+    .set { decorrelate_in }
+    DECORRELATE ( decorrelate_in )
 
-    //chol.combine ( null_design_matrix.map { meta, mat -> mat } )
-    //.set { decorrelate_null_mat_in }
-    //DECORRELATE_NULL_MAT ( decorrelate_null_mat_in )
 
     //chol
     //.join(
