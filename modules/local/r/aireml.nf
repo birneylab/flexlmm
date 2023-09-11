@@ -27,8 +27,8 @@ process AIREML {
 
     samples <- read.table("${grm_id}", header = FALSE, check.names = FALSE)
     K <- readBin("${grm_bin}", what="numeric", n=length(samples))
-    C <- loadRDS("${null_design_matrix}")
-    y <- loadRDS("${pheno}")[["${pheno_name}"]]
+    C <- readRDS("${null_design_matrix}")
+    y <- readRDS("${pheno}")[["${pheno_name}"]]
 
     stopifnot(all(samples == rownames(C)))
     stopifnot(all(samples == names(y)))
