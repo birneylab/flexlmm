@@ -34,9 +34,9 @@ def pheno = file( params.pheno )
 def null_model_formula = params.null_model_formula
 def model_formula      = params.model_formula
 
-def freq   = params.freq   ? file(params.freq  , checkIfExists: true) : ""
-def covar  = params.covar  ? file(params.covar , checkIfExists: true) : ""
-def qcovar = params.qcovar ? file(params.qcovar, checkIfExists: true) : ""
+def freq   = params.freq   ? file(params.freq  , checkIfExists: true) : []
+def covar  = params.covar  ? file(params.covar , checkIfExists: true) : []
+def qcovar = params.qcovar ? file(params.qcovar, checkIfExists: true) : []
 
 if ( params.quantile_normalise && params.standardise ) {
     error "Activating both quantile_normalise and standardise at the same time is not allowed"

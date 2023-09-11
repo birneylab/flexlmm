@@ -11,7 +11,7 @@ process GET_DESIGN_MATRIX {
         'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
 
     input:
-    tuple val(meta), path(covar), path(qcovar)
+    tuple val(meta), path(covar), path(qcovar), path(pheno)
     val null_model_formula
 
     output:
@@ -22,56 +22,62 @@ process GET_DESIGN_MATRIX {
     task.ext.when == null || task.ext.when
 
     script:
-    def args    = task.ext.args ?: ''
-    def prefix  = task.ext.prefix ?: "${meta.id}"
+    def args        = task.ext.args ?: ''
+    def prefix      = task.ext.prefix ?: "${meta.id}"
+    def load_covar  = covar  ? "TRUE" : "FALSE"
+    def load_qcovar = qcovar ? "TRUE" : "FALSE"
     """
     #!/usr/bin/env Rscript
 
     library("data.table")
     setDTthreads(${task.cpus})
 
-    covar <- fread(
-        "${covar}" ,
-        header = TRUE,
-        sep = "\\t",
-        check.names = FALSE,
-        colClasses = "character"
-    )
-
-    qcovar <- fread(
-        "${qcovar}",
-        header = TRUE,
-        sep = "\\t",
-        check.names = FALSE,
-        colClasses = "character"
-    )
-
+    pheno <- loadRDS("${pheno}")
     clean_colnames <- function(n){gsub("#", "", n)}
-    colnames(covar) <- clean_colnames(colnames(covar))
-    colnames(qcovar) <- clean_colnames(colnames(qcovar))
 
-    if ("FID" %in% colnames(covar)){
-        covar[, FID := NULL]
+    if ( ${load_covar} ){
+        covar <- fread("${covar}" ,
+            header = TRUE,
+            sep = "\\t",
+            check.names = FALSE,
+            colClasses = "character"
+        )
+
+        colnames(covar) <- clean_colnames(colnames(covar))
     }
 
-    if ("FID" %in% colnames(qcovar)){
-        qcovar[, FID := NULL]
+    if ( ${load_qcovar} ){
+        qcovar <- fread(
+            "${qcovar}",
+            header = TRUE,
+            sep = "\\t",
+            check.names = FALSE,
+            colClasses = "character"
+        )
+
+        colnames(qcovar) <- clean_colnames(colnames(qcovar))
+
+        qcovar <- cbind(
+            qcovar[, .(IID)],
+            qcovar[, lapply(.SD, as.numeric), .SDcols = !c("IID", "FID")]
+        )
     }
 
-    qcovar <- cbind(
-        qcovar[, .(IID)],
-        qcovar[, lapply(.SD, as.numeric), .SDcols = !"IID"]
-    )
+    if ( ${load_covar} & ${load_qcovar} ){
+        df <- merge(covar, qcovar, by = "IID")
+    } else if ( ${load_covar} ){
+        df <- covar
+    } else if ( ${load_qcovar} ){
+        df <- qcovar
+    } else {
+        # this is needed to still have an intercept with the right number of samples
+        # in case of no covar and no qcovar
+        df <- data.table(IID = pheno[,"IID"])
+    }
 
     null_model <- formula(${null_model_formula})
-    formula    <- update(null_model, NULL ~ .)
-
-    message(paste("Design matrix formula:", deparse(formula)))
-
-    df <- merge(covar, qcovar, by = "IID")
-    C <- model.matrix(formula, data = df)
+    C <- model.matrix(null_model, data = df)
     rownames(C) <- df[["IID"]]
-
     saveRDS(C, "${prefix}.covariate_mat.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
