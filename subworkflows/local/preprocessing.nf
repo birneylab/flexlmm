@@ -88,6 +88,7 @@ workflow PREPROCESSING {
 
     PHENO_TO_RDS ( pheno )
     PHENO_TO_RDS.out.pheno_names
+    .map { meta, pheno_names -> pheno_names }
     .splitCsv ( header: false )
     .flatten ()
     .set { pheno_names }

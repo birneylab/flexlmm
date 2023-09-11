@@ -28,13 +28,16 @@ workflow LMM {
         new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
         [new_meta, grm_bin, grm_id, pheno, pheno_name]
     }
-    .view()
     .set { aireml_in }
-
     AIREML ( aireml_in, null_design_matrix, null_model_formula )
-    CHOLESKY ( AIREML.out.hsq )
 
-    CHOLESKY.out.chol_L
+    aireml_in
+    .map { meta, grm_bin, grm_id, pheno, pheno_name -> [meta, grm_bin, grm_id] }
+    .join ( AIREML.out.hsq, failOnMismatch: true, failOnDuplicate: true )
+    .set { cholesky_in }
+    CHOLESKY ( cholesky_in )
+
+    //CHOLESKY.out.chol_L
     //.combine ( pheno.map { meta, pheno -> pheno } )
     //.map {
     //    meta, chol, pheno ->

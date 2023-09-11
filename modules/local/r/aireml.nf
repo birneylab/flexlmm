@@ -25,17 +25,23 @@ process AIREML {
     """
     #!/usr/bin/env Rscript
 
-    samples <- read.table("${grm_id}", header = FALSE, check.names = FALSE)
-    K <- readBin("${grm_bin}", what="numeric", n=length(samples))
-    C <- readRDS("${null_design_matrix}")
-    y <- readRDS("${pheno}")[["${pheno_name}"]]
+    samples <- read.table("${grm_id}", header = FALSE, check.names = FALSE)[,1]
+    K <- matrix(
+        readBin("${grm_bin}", what="numeric", n=length(samples)**2),
+        ncol = length(samples)
+    )
+    colnames(K) <- samples
+    rownames(K) <- samples
 
+    C <- readRDS("${null_design_matrix}")
+    C <- C[match(samples, rownames(C)),]
     stopifnot(all(samples == rownames(C)))
+
+    y <- readRDS("${pheno}")[,"${pheno_name}"]
+    y <- y[match(samples, names(y))]
     stopifnot(all(samples == names(y)))
 
     fit <- gaston::lmm.aireml(y, C, K, verbose = TRUE)
-
-    message(fit)
     saveRDS(fit, "${prefix}.hsq.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]

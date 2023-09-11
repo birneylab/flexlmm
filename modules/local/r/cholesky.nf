@@ -17,7 +17,7 @@ process CHOLESKY {
         'biocontainers/mulled-v2-a0002b961f72ad8f575ed127549e478f81093b68:f20c3bc5c88913df9b835378643ab86f517a3dcf-0' }"
 
     input:
-    tuple val(meta), path(grm_bin), path(grm_id), path(grm_n), path(gcta_hsq)
+    tuple val(meta), path(grm_bin), path(grm_id), path(gaston_hsq)
 
     output:
     tuple val(meta), path("*.chol_L.rds") , emit: chol_L
@@ -32,49 +32,21 @@ process CHOLESKY {
     """
     #!/usr/bin/env Rscript
 
-    ####################################################################################
-    # from https://yanglab.westlake.edu.cn/software/gcta/#MakingaGRM
-    ####################################################################################
-
-    ReadGRMBin=function(prefix, AllN=F, size=4){
-      sum_i=function(i){
-        return(sum(1:i))
-      }
-      BinFileName=paste(prefix,".grm.bin",sep="")
-      NFileName=paste(prefix,".grm.N.bin",sep="")
-      IDFileName=paste(prefix,".grm.id",sep="")
-      id = read.table(IDFileName)
-      n=dim(id)[1]
-      BinFile=file(BinFileName, "rb");
-      grm=readBin(BinFile, n=n*(n+1)/2, what=numeric(0), size=size)
-      NFile=file(NFileName, "rb");
-      if(AllN==T){
-        N=readBin(NFile, n=n*(n+1)/2, what=numeric(0), size=size)
-      }
-      else N=readBin(NFile, n=1, what=numeric(0), size=size)
-      i=sapply(1:n, sum_i)
-      return(list(diag=grm[i], off=grm[-i], id=id, N=N))
-    }
-
-    ####################################################################################
-
-    GRM <- ReadGRMBin("${grm_bin.simpleName}")
-
-    # make the matrix from the diagonal and lower triangle
-    samples <- GRM[["id"]][["V2"]]
-    n_samples <- length(samples)
-    K <- matrix(NA, ncol = n_samples, nrow = n_samples)
-    diag(K) <- GRM[["diag"]]
-    K[lower.tri(K)] <- GRM[["off"]]
-    K[upper.tri(K)] <- t(K)[upper.tri(K)]
+    samples <- read.table("${grm_id}", header = FALSE, check.names = FALSE)[,1]
+    K <- matrix(
+        readBin("${grm_bin}", what="numeric", n=length(samples)**2),
+        ncol = length(samples)
+    )
+    colnames(K) <- samples
+    rownames(K) <- samples
 
     # Load variance components
-    hsq_table <- read.table("${gcta_hsq}", nrows=3, header = TRUE)
-    s2g <- hsq_table[hsq_table["Source"] == "V(1)", "Variance"]
-    s2e <- hsq_table[hsq_table["Source"] == "V(e)", "Variance"]
+    gaston_hsq <- readRDS("${gaston_hsq}")
+    s2g <- gaston_hsq[["tau"]]
+    s2e <- gaston_hsq[["sigma2"]]
 
     # phenotype variance/covariance matrix
-    V <- s2g * K + diag(s2e, n_samples)
+    V <- s2g * K + diag(s2e, dim(K))
     L <- t(chol(V)) # R returns the upper Cholesky triangle
     colnames(L) <- samples
     rownames(L) <- samples
