@@ -39,11 +39,9 @@ process PHENO_TO_RDS {
     clean_colnames <- function(n){gsub("#", "", n)}
     colnames(pheno) <- clean_colnames(colnames(pheno))
 
-    if ("FID" %in% colnames(pheno)){
-        pheno[, FID := NULL]
-    }
+    if ("FID" %in% colnames(pheno)) pheno[, FID := NULL]
 
-    Y <- pheno[, lapply(.SD, as.numeric), .SDcols = !"IID"]
+    Y <- as.matrix(pheno[, lapply(.SD, as.numeric), .SDcols = !"IID"])
     rownames(Y) <- pheno[["IID"]]
 
     fwrite(

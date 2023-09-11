@@ -33,7 +33,7 @@ process GET_DESIGN_MATRIX {
     library("data.table")
     setDTthreads(${task.cpus})
 
-    pheno <- readRDS("${pheno}")
+    samples <- rownames(readRDS("${pheno}"))
     clean_colnames <- function(n){gsub("#", "", n)}
 
     if ( ${load_covar} ){
@@ -75,7 +75,7 @@ process GET_DESIGN_MATRIX {
     } else {
         # this is needed to still have an intercept with the right number of samples
         # in case of no covar and no qcovar
-        df <- data.table(IID = pheno[,"IID"])
+        df <- data.table(IID = samples)
     }
 
     null_model <- formula(${null_model_formula})
@@ -99,7 +99,7 @@ process GET_DESIGN_MATRIX {
     """
 
     stub:
-    def args   = task.ext.args ?: ''
+    def args   = task.ext.args   ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.covariate_mat.rds
