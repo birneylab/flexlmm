@@ -34,6 +34,7 @@ process MATCH_SAMPLES {
     )
     colnames(K) <- samples_K
     rownames(K) <- samples_K
+    stopifnot(sum(is.na(K)) == 0)
 
     C <- readRDS("${null_design_matrix}")
     y <- readRDS("${pheno}")[,"${pheno_name}"]
@@ -47,6 +48,7 @@ process MATCH_SAMPLES {
     samples <- intersect(intersect(samples_K, samples_y), samples_C)
     C <- C[match(samples, rownames(C)),]
     y <- y[match(samples, names(y))]
+    K <- K[match(samples, rownames(K)), match(samples, colnames(K))]
 
     stopifnot(names(y) == rownames(C))
     stopifnot(names(y) == rownames(K))

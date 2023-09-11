@@ -22,9 +22,9 @@ process FIT_MODEL {
     """
     #!/usr/bin/env Rscript
 
-    L <- readRDS("${chol_L}")
-    y <- readRDS("${pheno}")
-    C <- readRDS("${covs}")
+    L <- readRDS("${L}")
+    y <- readRDS("${y}")
+    C <- readRDS("${C}")
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
     buf  <- pgenlibr::Buf(pgen)
