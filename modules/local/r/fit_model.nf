@@ -23,14 +23,8 @@ process FIT_MODEL {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
     def perm_cmd = perm_seed ?
-        (
-            "set.seed(${perm_seed});" +
-            "perm_i <- sample(1:length(y), replace = FALSE);" +
-            "y <- y[perm_i];" +
-            "C <- C[perm_i,];" +
-            "L <- L[perm_i,perm_i];" +
-            "set.seed(NULL)"
-        ) : ""
+        "set.seed(${perm_seed}); gt_order <- sample(1:length(y), replace = FALSE); set.seed(NULL); is_perm <- TRUE" :
+        "gt_order <- NA; is_perm <- FALSE"
     """
     #!/usr/bin/env Rscript
 
@@ -79,6 +73,7 @@ process FIT_MODEL {
         setTxtProgressBar(pb, i)
 
         pgenlibr::ReadHardcalls(pgen, x, i)
+        if (is_perm) x <- x[gt_order]
         X <- model.matrix(fixed_effects_formula)
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
