@@ -59,7 +59,7 @@ process FIT_MODEL {
     fit_null <- lm(null_model_formula)
     ll_null  <- logLik(fit_null)
 
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_p"
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\ttlrt_p"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars, style = 3)
@@ -88,13 +88,14 @@ process FIT_MODEL {
         p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
 
         lineout <- sprintf(
-            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
+            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t5s",
             chr,
             pos,
             var_id,
             ref,
             alt,
             lrt_chisq,
+            lrt_df,
             p_lrt
         )
         writeLines(lineout, out_con)
