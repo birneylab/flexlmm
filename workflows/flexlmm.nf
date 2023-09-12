@@ -87,14 +87,15 @@ workflow FLEXLMM {
         model_formula
     )
 
-    //LMM (
-    //    PREPROCESSING.out.chr_pheno_pgen,
-    //    PREPROCESSING.out.model_terms,
-    //    null_model_formula,
-    //    model_formula
-    //)
+    LMM (
+        PREPROCESSING.out.chr_pheno_pgen,
+        PREPROCESSING.out.model_terms,
+        PREPROCESSING.out.fixed_effects_formula,
+        PREPROCESSING.out.model_formula,
+        PREPROCESSING.out.null_model_formula
+    )
 
-    //versions.mix ( PREPROCESSING.out.versions ) .set { versions }
+    versions.mix ( PREPROCESSING.out.versions ) .set { versions }
     //versions.mix ( LMM.out.versions           ) .set { versions }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

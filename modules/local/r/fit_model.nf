@@ -7,8 +7,9 @@ process FIT_MODEL {
 
     input:
     tuple val(meta), path(y), path(C), path(L), path(pgen), path(psam), path(pvar)
-    val null_model_formula
-    val model_formula
+    path fixed_effects_formula
+    path model_formula
+    path null_model_formula
 
     output:
     tuple val(meta), path("*.gwas.tsv.gz") , emit: gwas
@@ -27,6 +28,10 @@ process FIT_MODEL {
     y <- readRDS("${y}")
     C <- readRDS("${C}")
     L <- readRDS("${L}")
+
+    fixed_effects_formula <- readRDS("${fixed_effects_formula}")
+    model_formula         <- readRDS("${model_formula}")
+    null_model_formula    <- readRDS("${null_model_formula}")
 
     psam <- read.table(
         "${psam}",
@@ -47,75 +52,25 @@ process FIT_MODEL {
 
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
-    buf  <- pgenlibr::Buf(pgen)
-
-    null_model <- formula(${null_model_formula})
-    model <- formula(${model_formula})
+    x    <- pgenlibr::Buf(pgen)
 
     out_con <- gzfile("${prefix}.gwas.tsv.gz", "a")
 
-    ######################################################################################
-    # Sanity checks for the models
-    ######################################################################################
+    fit_null <- lm(null_model_formula)
+    ll_null  <- logLik(fit_null)
+    lrt_df   <-
 
-    null_model_rhs <- attr(terms(null_model), which = "term.labels")
-    null_model_lhs <- attr(terms(null_model), which = "variables")
-    model_rhs <- attr(terms(model), which = "term.labels")
-    model_lhs <- attr(terms(model), which = "variables")
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_p"
+    writeLines(header, out_con)
+    nvars <- pgenlibr::GetVariantCt(pgen)
+    pb <- txtProgressBar(1, nvars, style = 3)
 
-
-    if (
-        !all(null_model_rhs %in% model_rhs) |
-        !(length(model_rhs) > length(null_model_rhs))
-    ) {
-        stop("The null_model_formula must be nested in the model_formula")
-    }
-
-    if (model_lhs == "y" & null_model_lhs == "y") {
-        stop(
-            "The response variable of the model_formula",
-            "and null_model_formula can only be 'y'"
-        )
-    }
-
-    extra_terms <- setdiff(model_rhs, null_model_rhs)
-    if ( !all(extra_terms %in% c("x", "d")) ) {
-        stop(
-            "Only 'x' and 'd' terms are allowed to be present in the model_formula",
-            "and absent from the null_model_formula"
-        )
-    }
-
-    to_drop <- match(null_model_rhs, model_rhs)
-    model <- formula(drop.terms(terms(model), to_drop))
-    model <- update(model, y ~ . + C - 1) # covariates and intercept already part of C
-
-    null_model <- formula(y ~ C)
-
-    message("Model:", deparse(model))
-    message("Null model:", deparse(null_model))
-
-    ######################################################################################
-
-    fit_null <- lm(null_model)
-    ll_null <- logLik(fit_null)
-    lrt_df <- length(extra_terms)
-
-    process_variant <- function (i){
+    for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
 
-        pgenlibr::ReadHardcalls(pgen, buf, i)
-
-        tmp <- data.frame(
-            x = forwardsolve(L, buf),
-            d = forwardsolve(L, (buf == 1))
-        )
-
-        fit <- lm(model, data = tmp)
-
-        ll_fit <- logLik(fit)
-        lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
-        p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
+        pgenlibr::ReadHardcalls(pgen, x, i)
+        X <- model.matrix(fixed_effects_formula)
+        X <- forwardsolve(L, X)
 
         var_id <- pgenlibr::GetVariantId(pvar, i)
         var_info <- strsplit(var_id, '_')[[1]]
@@ -123,6 +78,12 @@ process FIT_MODEL {
         pos <- var_info[[2]]
         ref <- var_info[[3]]
         alt <- var_info[[4]]
+
+        fit <- lm(model_formula)
+        ll_fit <- logLik(fit)
+        lrt_df <- ncol(X)
+        lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
+        p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
 
         lineout <- sprintf(
             "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
@@ -137,23 +98,14 @@ process FIT_MODEL {
         writeLines(lineout, out_con)
 
         rm(
-            tmp, fit, ll_fit, lrt_chisq,
-            p_lrt, var_id, var_info, chr, pos, ref, alt, lineout
+            fit, ll_fit, lrt_chisq, p_lrt, var_id,
+            var_info, chr, pos, ref, alt, lineout, X
         )
-
-        return(0)
     }
-
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_p"
-    writeLines(header, out_con)
-    nvars <- pgenlibr::GetVariantCt(pgen)
-    pb <- txtProgressBar(1, nvars)
-    ret <- sapply(1:nvars, process_variant)
-
-    stopifnot(all(ret == 0))
 
     pgenlibr::ClosePgen(pgen)
     close(out_con)
+    close(pb)
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_pgenlibr <- utils::packageVersion("pgenlibr")

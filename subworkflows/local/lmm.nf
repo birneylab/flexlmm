@@ -6,10 +6,12 @@ include { FIT_MODEL            } from '../../modules/local/r/fit_model'
 
 workflow LMM {
     take:
-    chr_pheno_pgen     // channel: [mandatory] [ meta, pgen, psam, pvar ]
-    model_terms        // channel: [mandatory] [ meta, K, y, C ]
-    null_model_formula // value:   [mandatory] null model R formula
-    model_formula      // value:   [mandatory] model R formula
+    chr_pheno_pgen        // channel: [mandatory] [ meta, pgen, psam, pvar ]
+    model_terms           // channel: [mandatory] [ meta, K, y, C ]
+
+    fixed_effects_formula // channel: [mandatory] formula_rds
+    model_formula         // channel: [mandatory] formula_rds
+    null_model_formula         // channel: [mandatory] formula_rds
 
     main:
     versions = Channel.empty()
@@ -31,7 +33,7 @@ workflow LMM {
     .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
     .join ( chr_pheno_pgen,      failOnMismatch: true, failOnDuplicate: true )
     .set { fit_model_in }
-    FIT_MODEL ( fit_model_in, null_model_formula, model_formula )
+    FIT_MODEL ( fit_model_in, fixed_effects_formula, model_formula, null_model_formula )
     FIT_MODEL.out.gwas.set { gwas }
 
     // Gather versions of all tools used

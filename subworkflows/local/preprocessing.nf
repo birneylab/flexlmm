@@ -13,14 +13,14 @@ include { MATCH_SAMPLES        } from '../../modules/local/r/match_samples'
 
 workflow PREPROCESSING {
     take:
-    vcf                // value: [mandatory] vcf_file
-    pheno              // value: [mandatory] phenotypes
-    covar              // value: [optional ] covariates
-    qcovar             // value: [optional ] covariates
-    freq               // value: [optional ] vcf_file
+    vcf                    // value: [mandatory] vcf_file
+    pheno                  // value: [mandatory] phenotypes
+    covar                  // value: [optional ] covariates
+    qcovar                 // value: [optional ] covariates
+    freq                   // value: [optional ] vcf_file
 
-    null_model_formula // value: [mandatory] null model R formula
-    model_formula      // value: [mandatory] null model R formula
+    null_model_formula_str // value: [mandatory] null model R formula
+    model_formula_str      // value: [mandatory] null model R formula
 
     main:
     versions = Channel.empty()
@@ -77,53 +77,63 @@ workflow PREPROCESSING {
     .flatten ()
     .set { pheno_names }
 
-    VALIDATE_FORMULAS ( null_model_formula, model_formula )
+    VALIDATE_FORMULAS ( null_model_formula_str, model_formula_str )
+    VALIDATE_FORMULAS.out.null_model   .set { null_model_formula    }
+    VALIDATE_FORMULAS.out.model        .set { model_formula         }
+    VALIDATE_FORMULAS.out.fixed_effects.set { fixed_effects_formula }
+    VALIDATE_FORMULAS.out.covariates   .set { covariate_formula     }
 
-    //PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
-    //GET_DESIGN_MATRIX (
-    //    [ [id: "covar"], covar, qcovar],
-    //    PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
-    //    VALIDATE_FORMULAS.out.null_model
-    //)
+    PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
+    GET_DESIGN_MATRIX (
+        [ [id: "covar"], covar, qcovar],
+        PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
+        covariate_formula
+    )
 
-    //LOCO_GRM.out.grm
-    //.combine ( pheno )
-    //.map {
-    //    meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
-    //    new_meta = meta.clone()
-    //    new_meta.pheno = pheno_name
-    //    new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
-    //    [new_meta, grm_bin, grm_id, pheno, pheno_name]
-    //}
-    //.combine ( GET_DESIGN_MATRIX.out.mat.map { meta, mat -> mat } )
-    //.set { match_samples_in }
-    //MATCH_SAMPLES ( match_samples_in )
-    //MATCH_SAMPLES.out.model_terms.set { model_terms }
+    LOCO_GRM.out.grm
+    .combine ( pheno )
+    .map {
+        meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
+        new_meta = meta.clone()
+        new_meta.pheno = pheno_name
+        new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
+        [new_meta, grm_bin, grm_id, pheno, pheno_name]
+    }
+    .combine ( GET_DESIGN_MATRIX.out.mat.map { meta, mat -> mat } )
+    .set { match_samples_in }
+    MATCH_SAMPLES ( match_samples_in )
+    MATCH_SAMPLES.out.model_terms.set { model_terms }
 
-    //full_genome_pgen.combine ( MATCH_SAMPLES.out.sample_ids )
-    //.map {
-    //    meta, pgen, psam, pvar, meta2, sample_ids ->
-    //    [ meta2, pgen, psam, pvar, sample_ids, meta2.chr ]
-    //}
-    //.set { split_chr_in }
-    //SPLIT_CHR ( split_chr_in )
-    //SPLIT_CHR.out.pgen.set { chr_pheno_pgen }
+    full_genome_pgen.combine ( MATCH_SAMPLES.out.sample_ids )
+    .map {
+        meta, pgen, psam, pvar, meta2, sample_ids ->
+        [ meta2, pgen, psam, pvar, sample_ids, meta2.chr ]
+    }
+    .set { split_chr_in }
+    SPLIT_CHR ( split_chr_in )
+    SPLIT_CHR.out.pgen.set { chr_pheno_pgen }
 
-    //// Gather versions of all tools used
-    //versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
-    //versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
-    //versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
-    //versions.mix ( FULL_GRM.out.versions             ) .set { versions }
-    //versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
-    //versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
-    //versions.mix ( PHENO_TO_RDS.out.versions         ) .set { versions }
-    //versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
-    //versions.mix ( MATCH_SAMPLES.out.versions        ) .set { versions }
-    //versions.mix ( SPLIT_CHR.out.versions            ) .set { versions }
+    // Gather versions of all tools used
+    versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
+    versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
+    versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
+    versions.mix ( FULL_GRM.out.versions             ) .set { versions }
+    versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
+    versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
+    versions.mix ( PHENO_TO_RDS.out.versions         ) .set { versions }
+    versions.mix ( VALIDATE_FORMULAS.out.versions    ) .set { versions }
+    versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
+    versions.mix ( MATCH_SAMPLES.out.versions        ) .set { versions }
+    versions.mix ( SPLIT_CHR.out.versions            ) .set { versions }
 
-    //emit:
-    //chr_pheno_pgen // channel: [ meta, pgen, psam, pvar ]
-    //model_terms    // channel: [ meta, K, y, C ]
+    emit:
+    chr_pheno_pgen        // channel: [ meta, pgen, psam, pvar ]
+    model_terms           // channel: [ meta, K, y, C ]
 
-    //versions       // channel: [ versions.yml ]
+    null_model_formula    // channel: formula_rds
+    model_formula         // channel: formula_rds
+    fixed_effects_formula // channel: formula_rds
+    covariate_formula     // channel: formula_rds
+
+    versions              // channel: [ versions.yml ]
 }

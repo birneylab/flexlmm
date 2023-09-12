@@ -11,7 +11,7 @@ process GET_DESIGN_MATRIX {
     input:
     tuple val(meta), path(covar), path(qcovar)
     path pheno
-    val null_model_formula
+    path covariate_formula
 
     output:
     tuple val(meta), path("*.covariate_mat.rds") , emit: mat
@@ -28,6 +28,7 @@ process GET_DESIGN_MATRIX {
     """
     #!/usr/bin/env Rscript
 
+    covariate_formula <- readRDS("${covariate_formula}")
     samples <- rownames(readRDS("${pheno}"))
     clean_colnames <- function(n){gsub("#", "", n)}
     remove_fid <- function(df){subset(df, select = (colnames(df) != "FID"))}
@@ -77,9 +78,7 @@ process GET_DESIGN_MATRIX {
         df <- data.frame(IID = samples)
     }
 
-    null_model <- formula(${null_model_formula})
-    null_model_RHS <- update(null_model, NULL ~ .)
-    C <- model.matrix(null_model_RHS, data = df)
+    C <- model.matrix(covariate_formula, data = df)
     rownames(C) <- df[["IID"]]
     saveRDS(C, "${prefix}.covariate_mat.rds")
 

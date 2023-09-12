@@ -11,10 +11,10 @@ process VALIDATE_FORMULAS {
     val model_formula
 
     output:
-    path "*.null.model.rds" , emit: null_model
+    path "*.null_model.rds" , emit: null_model
     path "*.model.rds"      , emit: model
-    path "*.C_model.rds"    , emit: covariate_model
-    path "*.X_model.rds"    , emit: fixed_effects_model
+    path "*.C_model.rds"    , emit: covariates
+    path "*.X_model.rds"    , emit: fixed_effects
 
     path "versions.yml"     , emit: versions
 
@@ -40,15 +40,15 @@ process VALIDATE_FORMULAS {
 
     if (
         !all(null_model_rhs %in% model_rhs) |
-        !(length(model_rhs) > length(null_model_rhs)) |
+        !(length(model_rhs) >= length(null_model_rhs)) |
         # null_model_intercept can be set only if model_intercept is also set, otherwise
         # the models are not nested.
-        !(model_intercept > null_model_intercept)
+        !(model_intercept >= null_model_intercept)
     ) {
         stop("The null_model_formula must be nested in the model_formula")
     }
 
-    if !(model_lhs == "y" & null_model_lhs == "y") {
+    if ( !(model_lhs == "y" & null_model_lhs == "y") ) {
         stop(
             "The response variable of the model_formula",
             "and null_model_formula can only be 'y'"
