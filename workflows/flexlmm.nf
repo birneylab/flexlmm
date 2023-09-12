@@ -83,18 +83,19 @@ workflow FLEXLMM {
         covar,
         qcovar,
         freq,
-        null_model_formula
-    )
-
-    LMM (
-        PREPROCESSING.out.chr_pheno_pgen,
-        PREPROCESSING.out.model_terms,
         null_model_formula,
         model_formula
     )
 
-    versions.mix ( PREPROCESSING.out.versions ) .set { versions }
-    versions.mix ( LMM.out.versions           ) .set { versions }
+    //LMM (
+    //    PREPROCESSING.out.chr_pheno_pgen,
+    //    PREPROCESSING.out.model_terms,
+    //    null_model_formula,
+    //    model_formula
+    //)
+
+    //versions.mix ( PREPROCESSING.out.versions ) .set { versions }
+    //versions.mix ( LMM.out.versions           ) .set { versions }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')

@@ -1,7 +1,4 @@
-// fit a mixed model by OLS from a set of pre-roteted covariates C and phenotypes y, a
-// pgen file triple with non-rotated genotypes, and a cholesky decomposition L of the
-// variance-covariance matrix. Determines a p-value from a likelyhood ratio test among
-// null_model_formula and model_formula.
+// checks that the models are nested and that the correct terms are used where required
 process FIT_MODEL {
     tag "$meta.id"
     label 'process_low'
@@ -15,6 +12,7 @@ process FIT_MODEL {
 
     output:
     tuple val(meta), path("*.gwas.tsv.gz") , emit: gwas
+
     path "versions.yml"                    , emit: versions
 
     when:
