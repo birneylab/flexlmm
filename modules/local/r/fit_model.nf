@@ -73,12 +73,13 @@ process FIT_MODEL {
         setTxtProgressBar(pb, i)
 
         pgenlibr::ReadHardcalls(pgen, x, i)
-        if (is_perm) x <- x[gt_order]
         X <- model.matrix(fixed_effects_formula)
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
         X <- subset(X, select = -`(Intercept)`)
         X <- forwardsolve(L, X)
+
+        if (is_perm) X <- X[gt_order,]
 
         var_id <- pgenlibr::GetVariantId(pvar, i)
         var_info <- strsplit(var_id, '_')[[1]]
