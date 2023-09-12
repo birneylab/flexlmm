@@ -1,7 +1,8 @@
-include { AIREML               } from '../../modules/local/r/aireml'
-include { CHOLESKY             } from '../../modules/local/r/cholesky'
-include { DECORRELATE          } from '../../modules/local/r/decorrelate'
-include { FIT_MODEL            } from '../../modules/local/r/fit_model'
+include { AIREML                      } from '../../modules/local/r/aireml'
+include { CHOLESKY                    } from '../../modules/local/r/cholesky'
+include { DECORRELATE                 } from '../../modules/local/r/decorrelate'
+include { FIT_MODEL                   } from '../../modules/local/r/fit_model'
+include { FIT_MODEL as FIT_MODEL_PERM } from '../../modules/local/r/fit_model'
 
 
 workflow LMM {
@@ -11,7 +12,9 @@ workflow LMM {
 
     fixed_effects_formula // channel: [mandatory] formula_rds
     model_formula         // channel: [mandatory] formula_rds
-    null_model_formula         // channel: [mandatory] formula_rds
+    null_model_formula    // channel: [mandatory] formula_rds
+
+    permutation_seeds     // channel: [optional ] permutation seeds
 
     main:
     versions = Channel.empty()
@@ -32,15 +35,36 @@ workflow LMM {
     DECORRELATE.out.mm_rotation
     .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
     .join ( chr_pheno_pgen,      failOnMismatch: true, failOnDuplicate: true )
+    .map {
+        meta, y, C, L, pgen, psam, pvar ->
+        [meta, y, C, L, pgen, psam, pvar, []]
+    }
     .set { fit_model_in }
     FIT_MODEL ( fit_model_in, fixed_effects_formula, model_formula, null_model_formula )
     FIT_MODEL.out.gwas.set { gwas }
 
+    fit_model_in
+    .combine ( permutation_seeds )
+    .map {
+        meta, y, C, L, pgen, psam, pvar, fake_seed, seed ->
+        def new_meta = meta.clone()
+        new_meta.id = "${meta.id}_perm${seed}"
+        new_meta.seed = seed
+        new_meta.is_perm = true
+        [new_meta, y, C, L, pgen, psam, pvar, seed]
+    }
+    .set { fit_model_perm_in }
+    FIT_MODEL_PERM (
+        fit_model_perm_in, fixed_effects_formula, model_formula, null_model_formula
+    )
+    FIT_MODEL_PERM.out.gwas.set { gwas_perm }
+
     // Gather versions of all tools used
-    versions.mix ( AIREML.out.versions      ) .set { versions }
-    versions.mix ( CHOLESKY.out.versions    ) .set { versions }
-    versions.mix ( DECORRELATE.out.versions ) .set { versions }
-    versions.mix ( FIT_MODEL.out.versions   ) .set { versions }
+    versions.mix ( AIREML.out.versions         ) .set { versions }
+    versions.mix ( CHOLESKY.out.versions       ) .set { versions }
+    versions.mix ( DECORRELATE.out.versions    ) .set { versions }
+    versions.mix ( FIT_MODEL.out.versions      ) .set { versions }
+    versions.mix ( FIT_MODEL_PERM.out.versions ) .set { versions }
 
     emit:
     gwas     // channel: [ meta, gwas ]

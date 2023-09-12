@@ -6,7 +6,7 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(y), path(C), path(L), path(pgen), path(psam), path(pvar)
+    tuple val(meta), path(y), path(C), path(L), path(pgen), path(psam), path(pvar), val(perm_seed)
     path fixed_effects_formula
     path model_formula
     path null_model_formula
@@ -22,6 +22,15 @@ process FIT_MODEL {
     script:
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
+    def perm_cmd = perm_seed ?
+        (
+            "set.seed(${perm_seed});" +
+            "perm_i <- sample(1:length(y), replace = FALSE);" +
+            "y <- y[perm_i];" +
+            "C <- C[perm_i,];" +
+            "L <- L[perm_i,perm_i];" +
+            "set.seed(NULL)"
+        ) : ""
     """
     #!/usr/bin/env Rscript
 
@@ -49,6 +58,8 @@ process FIT_MODEL {
     stopifnot(all(names(y) == colnames(L)))
     stopifnot(all(names(y) == psam[["IID"]]))
     stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
+
+    ${perm_cmd}
 
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
@@ -99,11 +110,6 @@ process FIT_MODEL {
             p_lrt
         )
         writeLines(lineout, out_con)
-
-        rm(
-            fit, ll_fit, lrt_chisq, p_lrt, var_id,
-            var_info, chr, pos, ref, alt, lineout, X
-        )
     }
 
     pgenlibr::ClosePgen(pgen)

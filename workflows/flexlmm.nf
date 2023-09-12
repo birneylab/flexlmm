@@ -38,6 +38,8 @@ def freq   = params.freq   ? file(params.freq  , checkIfExists: true) : []
 def covar  = params.covar  ? file(params.covar , checkIfExists: true) : []
 def qcovar = params.qcovar ? file(params.qcovar, checkIfExists: true) : []
 
+def permutation_seeds = params.permutations ? 1..params.permutations : []
+
 if ( params.quantile_normalise && params.standardise ) {
     error "Activating both quantile_normalise and standardise at the same time is not allowed"
 }
@@ -92,7 +94,8 @@ workflow FLEXLMM {
         PREPROCESSING.out.model_terms,
         PREPROCESSING.out.fixed_effects_formula,
         PREPROCESSING.out.model_formula,
-        PREPROCESSING.out.null_model_formula
+        PREPROCESSING.out.null_model_formula,
+        permutation_seeds
     )
 
     versions.mix ( PREPROCESSING.out.versions ) .set { versions }

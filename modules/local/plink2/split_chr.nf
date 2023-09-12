@@ -21,7 +21,7 @@ process SPLIT_CHR {
     script:
     def args   = task.ext.args   ?: ''
     def args2  = task.ext.args2  ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}.${chr}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def mem_mb = task.memory.toMega()
     """
     plink2 \\
@@ -45,7 +45,7 @@ process SPLIT_CHR {
 
     stub:
     def args   = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}.${chr}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def mem_mb = task.memory.toMega()
     """
     touch ${prefix}.pgen
