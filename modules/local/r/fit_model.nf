@@ -69,6 +69,9 @@ process FIT_MODEL {
 
         pgenlibr::ReadHardcalls(pgen, x, i)
         X <- model.matrix(fixed_effects_formula)
+        # drop the intercept since it is already in C, cannot drop before model.matrix so
+        # that contrast are calculated correctly
+        X <- subset(X, select = -`(Intercept)`)
         X <- forwardsolve(L, X)
 
         var_id <- pgenlibr::GetVariantId(pvar, i)

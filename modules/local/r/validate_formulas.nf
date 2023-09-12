@@ -40,10 +40,7 @@ process VALIDATE_FORMULAS {
 
     if (
         !all(null_model_rhs %in% model_rhs) |
-        !(length(model_rhs) >= length(null_model_rhs)) |
-        # null_model_intercept can be set only if model_intercept is also set, otherwise
-        # the models are not nested.
-        !(model_intercept >= null_model_intercept)
+        !(length(model_rhs) >= length(null_model_rhs))
     ) {
         stop("The null_model_formula must be nested in the model_formula")
     }
@@ -55,20 +52,21 @@ process VALIDATE_FORMULAS {
         )
     }
 
+    if ( !(null_model_intercept == 1 & model_intercept == 1) ) {
+        stop("Fitting a model without intercept is not allowed")
+    }
+
     extra_terms  <- setdiff(model_rhs, null_model_rhs)
     common_terms <- intersect(model_rhs, null_model_rhs)
 
-    # 0 if both intercepts are set, 1 if only model_intercept is set (reverse not
-    # possible)
-    extra_intercept <- model_intercept - null_model_intercept
-    extra_terms  <- c(extra_intercept, paste0("(", extra_terms , ")"))
-    common_terms <- c(null_model_intercept, paste0("(", common_terms, ")"))
+    extra_terms  <- paste0("(", extra_terms , ")")
+    common_terms <- paste0("(", common_terms, ")")
 
     fixed_effects <- reformulate(extra_terms)
     covariates    <- reformulate(common_terms)
 
     # C is used later to refer to the null design matrix, X to refer to the extra
-    # fixed_effects effects matrix. Intercept not set since already in C or X if wanted
+    # fixed_effects effects matrix. Intercept not set since already in C
     model      <- formula("y ~ 0 + X + C")
     null_model <- formula("y ~ 0 + C")
 
