@@ -29,13 +29,17 @@ process DECORRELATE {
     y <- readRDS("${y}")
     C <- readRDS("${C}")
 
-    stopifnot(names(y) == rownames(C))
-    stopifnot(names(y) == rownames(L))
-    stopifnot(names(y) == colnames(L))
+    stopifnot(all(!is.null(names(y))))
+    stopifnot(all(names(y) == rownames(C)))
+    stopifnot(all(names(y) == rownames(L)))
+    stopifnot(all(names(y) == colnames(L)))
     stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
 
     y.mm <- forwardsolve(L, y)
     C.mm <- forwardsolve(L, C)
+
+    names(y.mm) <- names(y)
+    rownames(C.mm) <- rownames(C)
 
     saveRDS(y.mm, "${prefix}.y_mm.rds")
     saveRDS(C.mm, "${prefix}.C_mm.rds")

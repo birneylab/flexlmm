@@ -40,10 +40,11 @@ process FIT_MODEL {
     clean_colnames <- function(n){gsub("#", "", n)}
     colnames(psam) <- clean_colnames(colnames(psam))
 
-    stopifnot(names(y) == rownames(C))
-    stopifnot(names(y) == rownames(L))
-    stopifnot(names(y) == colnames(L))
-    stopifnot(names(y) == psam[["IID"]])
+    stopifnot(all(!is.null(names(y))))
+    stopifnot(all(names(y) == rownames(C)))
+    stopifnot(all(names(y) == rownames(L)))
+    stopifnot(all(names(y) == colnames(L)))
+    stopifnot(all(names(y) == psam[["IID"]]))
     stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
 
     pvar <- pgenlibr::NewPvar("${pvar}")

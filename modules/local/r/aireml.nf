@@ -25,9 +25,10 @@ process AIREML {
     y <- readRDS("${y}")
     C <- readRDS("${C}")
 
-    stopifnot(names(y) == rownames(C))
-    stopifnot(names(y) == rownames(K))
-    stopifnot(names(y) == colnames(K))
+    stopifnot(all(!is.null(names(y))))
+    stopifnot(all(names(y) == rownames(C)))
+    stopifnot(all(names(y) == rownames(K)))
+    stopifnot(all(names(y) == colnames(K)))
     stopifnot(sum(is.na(K)) + sum(is.na(C)) + sum(is.na(y)) == 0)
 
     fit <- gaston::lmm.aireml(y, C, K, verbose = TRUE)
