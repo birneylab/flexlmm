@@ -88,7 +88,7 @@ process FIT_MODEL {
         p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
 
         lineout <- sprintf(
-            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t5s",
+            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
             chr,
             pos,
             var_id,
