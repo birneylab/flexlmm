@@ -59,7 +59,7 @@ process FIT_MODEL {
     fit_null <- lm(null_model_formula)
     ll_null  <- logLik(fit_null)
 
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\ttlrt_p"
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars, style = 3)
