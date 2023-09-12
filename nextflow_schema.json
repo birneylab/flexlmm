@@ -89,6 +89,11 @@
                     "type": "string",
                     "fa_icon": "fas fa-check",
                     "description": ""
+                },
+                "permutations": {
+                    "type": "integer",
+                    "fa_icon": "fas fa-check",
+                    "description": ""
                 }
             }
         },

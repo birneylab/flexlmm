@@ -67,7 +67,8 @@ workflow LMM {
     versions.mix ( FIT_MODEL_PERM.out.versions ) .set { versions }
 
     emit:
-    gwas     // channel: [ meta, gwas ]
+    gwas      // channel: [ meta, gwas ]
+    gwas_perm // channel: [ meta, gwas_perm ]
 
     versions // channel: [ versions.yml ]
 }
