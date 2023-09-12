@@ -58,7 +58,6 @@ process FIT_MODEL {
 
     fit_null <- lm(null_model_formula)
     ll_null  <- logLik(fit_null)
-    lrt_df   <-
 
     header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_p"
     writeLines(header, out_con)
