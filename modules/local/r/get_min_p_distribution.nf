@@ -29,7 +29,11 @@ process GET_MIN_P_DISTRIBUTION {
     p_vec  <- numeric(0)
     n_snps_vec <- numeric(0)
     perm_vec <- numeric(0)
+
+    pb <- txtProgressBar(1, ${nperms}, style = 3)
+
     for ( i in 1:${nperms} ) {
+        setTxtProgressBar(pb, i)
         all_files <- list.files(pattern = sprintf("perm%s.gwas.tsv.gz", i))
         min_p <- 2
         n_snps <- 0
@@ -47,6 +51,7 @@ process GET_MIN_P_DISTRIBUTION {
                 n_snps <- n_snps + 1
                 line <- readLines(con, n = 1)
             }
+            close(con)
         }
         p_vec <- c(p_vec, min_p)
         n_snps_vec <- c(n_snps_vec, n_snps)
