@@ -1,5 +1,5 @@
 include { GET_MIN_P_DISTRIBUTION } from '../../modules/local/r/get_min_p_distribution'
-include { MANHATTAN              } from '../../modules/local/r/make_plots'
+include { MANHATTAN; QQ          } from '../../modules/local/r/make_plots'
 
 
 workflow POSTPROCESSING {
@@ -30,6 +30,10 @@ workflow POSTPROCESSING {
         [new_meta, gwas]
     }
     .groupTuple ()
+    .set { grouped_gwas }
+    QQ ( grouped_gwas )
+
+    grouped_gwas
     .join ( GET_MIN_P_DISTRIBUTION.out.min_p_dist, failOnMismatch: true, failOnDuplicate: true )
     .set { manhattan_in }
     MANHATTAN ( manhattan_in, p_thr )
