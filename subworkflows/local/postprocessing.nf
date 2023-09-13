@@ -21,6 +21,17 @@ workflow POSTPROCESSING {
     .set { grouped_perms }
     GET_MIN_P_DISTRIBUTION ( grouped_perms, nperms )
 
+    gwas
+    .map {
+        meta, gwas ->
+        new_meta = [id: meta.pheno, pheno: meta.pheno]
+        [new_meta, gwas]
+    }
+    .groupTuple ()
+    .set { grouped_gwas }
+
+    versions.mix ( GET_MIN_P_DISTRIBUTION.out.versions ) .set { versions }
+
     emit:
 
     versions // channel: [ versions.yml ]

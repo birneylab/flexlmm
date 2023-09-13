@@ -110,8 +110,9 @@ workflow FLEXLMM {
         nperms
     )
 
-    versions.mix ( PREPROCESSING.out.versions ) .set { versions }
-    versions.mix ( LMM.out.versions           ) .set { versions }
+    versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
+    versions.mix ( LMM.out.versions            ) .set { versions }
+    versions.mix ( POSTPROCESSING.out.versions ) .set { versions }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')
