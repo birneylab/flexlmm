@@ -1,7 +1,7 @@
 include { AIREML                      } from '../../modules/local/r/aireml'
 include { CHOLESKY                    } from '../../modules/local/r/cholesky'
 include { DECORRELATE                 } from '../../modules/local/r/decorrelate'
-include { FIT_MODEL                   } from '../../modules/local/r/fit_model'
+include { FIT_MODEL as FIT_MODEL_ORIG } from '../../modules/local/r/fit_model'
 include { FIT_MODEL as FIT_MODEL_PERM } from '../../modules/local/r/fit_model'
 
 
@@ -44,8 +44,8 @@ workflow LMM {
         [meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, []]
     }
     .set { fit_model_in }
-    FIT_MODEL ( fit_model_in, fixed_effects_formula, model_formula, null_model_formula )
-    FIT_MODEL.out.gwas.set { gwas }
+    FIT_MODEL_ORIG ( fit_model_in, fixed_effects_formula, model_formula, null_model_formula )
+    FIT_MODEL_ORIG.out.gwas.set { gwas }
 
     fit_model_in
     .combine ( permutation_seeds )
@@ -67,7 +67,7 @@ workflow LMM {
     versions.mix ( AIREML.out.versions         ) .set { versions }
     versions.mix ( CHOLESKY.out.versions       ) .set { versions }
     versions.mix ( DECORRELATE.out.versions    ) .set { versions }
-    versions.mix ( FIT_MODEL.out.versions      ) .set { versions }
+    versions.mix ( FIT_MODEL_ORIG.out.versions ) .set { versions }
     versions.mix ( FIT_MODEL_PERM.out.versions ) .set { versions }
 
     emit:

@@ -56,8 +56,9 @@ if ( params.quantile_normalise && params.standardise ) {
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 
-include { PREPROCESSING } from '../subworkflows/local/preprocessing'
-include { LMM           } from '../subworkflows/local/lmm'
+include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
+include { LMM            } from '../subworkflows/local/lmm'
+include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,6 +101,11 @@ workflow FLEXLMM {
         PREPROCESSING.out.model_formula,
         PREPROCESSING.out.null_model_formula,
         permutation_seeds
+    )
+
+    POSTPROCESSING (
+        LMM.out.gwas,
+        LMM.out.gwas_perm
     )
 
     versions.mix ( PREPROCESSING.out.versions ) .set { versions }
