@@ -50,6 +50,7 @@ process SPLIT_CHR {
     """
     touch ${prefix}.pgen
     touch ${prefix}.pvar.zst
+    touch ${prefix}.psam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
