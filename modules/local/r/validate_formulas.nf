@@ -66,7 +66,7 @@ process VALIDATE_FORMULAS {
     covariates    <- reformulate(common_terms)
 
     # C is used later to refer to the null design matrix, X to refer to the extra
-    # fixed_effects effects matrix. Intercept not set since already in C
+    # fixed_effects effects matrix. Intercept not set since already in C.
     model      <- formula("y ~ 0 + X + C")
     null_model <- formula("y ~ 0 + C")
 

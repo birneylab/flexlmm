@@ -92,6 +92,7 @@ workflow FLEXLMM {
     LMM (
         PREPROCESSING.out.chr_pheno_pgen,
         PREPROCESSING.out.model_terms,
+        PREPROCESSING.out.gxe_frame,
         PREPROCESSING.out.fixed_effects_formula,
         PREPROCESSING.out.model_formula,
         PREPROCESSING.out.null_model_formula,

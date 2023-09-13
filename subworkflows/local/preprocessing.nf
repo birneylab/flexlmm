@@ -87,7 +87,8 @@ workflow PREPROCESSING {
     GET_DESIGN_MATRIX (
         [ [id: "covar"], covar, qcovar],
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
-        covariate_formula
+        covariate_formula,
+        fixed_effects_formula
     )
 
     LOCO_GRM.out.grm
@@ -99,10 +100,12 @@ workflow PREPROCESSING {
         new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
         [new_meta, grm_bin, grm_id, pheno, pheno_name]
     }
-    .combine ( GET_DESIGN_MATRIX.out.mat.map { meta, mat -> mat } )
+    .combine ( GET_DESIGN_MATRIX.out.C        .map { meta, C   -> C   } )
+    .combine ( GET_DESIGN_MATRIX.out.gxe_frame.map { meta, gxe -> gxe } )
     .set { match_samples_in }
     MATCH_SAMPLES ( match_samples_in )
     MATCH_SAMPLES.out.model_terms.set { model_terms }
+    MATCH_SAMPLES.out.gxe_frame  .set { gxe_frame   }
 
     full_genome_pgen.combine ( MATCH_SAMPLES.out.sample_ids )
     .map {
@@ -129,6 +132,7 @@ workflow PREPROCESSING {
     emit:
     chr_pheno_pgen        // channel: [ meta, pgen, psam, pvar ]
     model_terms           // channel: [ meta, K, y, C ]
+    gxe_frame             // channel: [ meta, gxe_frame ]
 
     null_model_formula    // channel: formula_rds
     model_formula         // channel: formula_rds

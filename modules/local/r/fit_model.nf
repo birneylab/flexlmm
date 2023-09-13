@@ -6,7 +6,7 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(y), path(C), path(L), path(pgen), path(psam), path(pvar), val(perm_seed)
+    tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(pgen), path(psam), path(pvar), val(perm_seed)
     path fixed_effects_formula
     path model_formula
     path null_model_formula
@@ -31,6 +31,7 @@ process FIT_MODEL {
     y <- readRDS("${y}")
     C <- readRDS("${C}")
     L <- readRDS("${L}")
+    gxe_frame <- readRDS("${gxe_frame}")
 
     fixed_effects_formula <- readRDS("${fixed_effects_formula}")
     model_formula         <- readRDS("${model_formula}")
@@ -50,8 +51,9 @@ process FIT_MODEL {
     stopifnot(all(names(y) == rownames(C)))
     stopifnot(all(names(y) == rownames(L)))
     stopifnot(all(names(y) == colnames(L)))
+    stopifnot(all(names(y) == rownames(gxe_frame)))
     stopifnot(all(names(y) == psam[["IID"]]))
-    stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) == 0)
+    stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) + sum(is.na(gxe_frame)) == 0)
 
     ${perm_cmd}
 
@@ -73,7 +75,7 @@ process FIT_MODEL {
         setTxtProgressBar(pb, i)
 
         pgenlibr::ReadHardcalls(pgen, x, i)
-        X <- model.matrix(fixed_effects_formula)
+        X <- model.matrix(fixed_effects_formula, data=gxe_frame)
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
         X <- subset(X, select = -`(Intercept)`)

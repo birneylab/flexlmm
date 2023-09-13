@@ -12,9 +12,11 @@ process GET_DESIGN_MATRIX {
     tuple val(meta), path(covar), path(qcovar)
     path pheno
     path covariate_formula
+    path fixed_effects_formula
 
     output:
-    tuple val(meta), path("*.covariate_mat.rds") , emit: mat
+    tuple val(meta), path("*.covariate_mat.rds") , emit: C
+    tuple val(meta), path("*.gxe_frame.rds")     , emit: gxe_frame
     path "versions.yml"                          , emit: versions
 
     when:
@@ -29,6 +31,7 @@ process GET_DESIGN_MATRIX {
     #!/usr/bin/env Rscript
 
     covariate_formula <- readRDS("${covariate_formula}")
+    fixed_effects_formula <- readRDS("${fixed_effects_formula}")
     samples <- rownames(readRDS("${pheno}"))
     clean_colnames <- function(n){gsub("#", "", n)}
     remove_fid <- function(df){subset(df, select = (colnames(df) != "FID"))}
@@ -78,6 +81,16 @@ process GET_DESIGN_MATRIX {
         df <- data.frame(IID = samples)
     }
 
+    fixed_vars <- all.vars(fixed_effects_formula)
+    gxe_vars <- fixed_vars[fixed_vars != "x"]
+    if ( length(gxe_vars) > 0 ){
+        gxe_frame <- subset(df, select = gxe_vars)
+        rownames(gxe_frame) <- df[["IID"]]
+    } else {
+        gxe_frame <- data.frame(row.names = samples)
+    }
+    saveRDS(gxe_frame, "${prefix}.gxe_frame.rds")
+
     C <- model.matrix(covariate_formula, data = df)
     rownames(C) <- df[["IID"]]
     saveRDS(C, "${prefix}.covariate_mat.rds")
@@ -99,6 +112,7 @@ process GET_DESIGN_MATRIX {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.covariate_mat.rds
+    touch ${prefix}.gxe_frame.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
