@@ -41,6 +41,7 @@ def qcovar = params.qcovar ? file(params.qcovar, checkIfExists: true) : []
 def permutation_seeds = params.permutations ? 1..params.permutations : []
 def nperms            = params.permutations ?: 0
 def permute_by        = params.permute_by   ?: []
+def p_thr             = params.p_thr
 
 if ( params.quantile_normalise && params.standardise ) {
     error "Activating both quantile_normalise and standardise at the same time is not allowed"
@@ -107,7 +108,8 @@ workflow FLEXLMM {
     POSTPROCESSING (
         LMM.out.gwas,
         LMM.out.gwas_perm,
-        nperms
+        nperms,
+        p_thr
     )
 
     versions.mix ( PREPROCESSING.out.versions  ) .set { versions }

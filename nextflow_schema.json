@@ -99,6 +99,11 @@
                     "type": "string",
                     "fa_icon": "fas fa-check",
                     "description": ""
+                },
+                "p_thr": {
+                    "type": "number",
+                    "fa_icon": "fas fa-check",
+                    "description": ""
                 }
             }
         },
