@@ -6,7 +6,7 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(pgen), path(psam), path(pvar), val(perm_seed)
+    tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(perm_group), path(pgen), path(psam), path(pvar), val(perm_seed)
     path fixed_effects_formula
     path model_formula
     path null_model_formula
@@ -20,11 +20,10 @@ process FIT_MODEL {
     task.ext.when == null || task.ext.when
 
     script:
-    def args    = task.ext.args ?: ''
-    def prefix  = task.ext.prefix ?: "${meta.id}"
-    def perm_cmd = perm_seed ?
-        "set.seed(${perm_seed}); gt_order <- sample(1:length(y), replace = FALSE); set.seed(NULL); is_perm <- TRUE" :
-        "gt_order <- NA; is_perm <- FALSE"
+    def args       = task.ext.args ?: ''
+    def prefix     = task.ext.prefix ?: "${meta.id}"
+    def do_permute = perm_seed ? "TRUE" : "FALSE"
+    def perm_seed  = perm_seed ?: "NULL"
     """
     #!/usr/bin/env Rscript
 
@@ -32,6 +31,7 @@ process FIT_MODEL {
     C <- readRDS("${C}")
     L <- readRDS("${L}")
     gxe_frame <- readRDS("${gxe_frame}")
+    perm_group <- readRDS("${perm_group}")
 
     fixed_effects_formula <- readRDS("${fixed_effects_formula}")
     model_formula         <- readRDS("${model_formula}")
@@ -53,19 +53,30 @@ process FIT_MODEL {
     stopifnot(all(names(y) == colnames(L)))
     stopifnot(all(names(y) == rownames(gxe_frame)))
     stopifnot(all(names(y) == psam[["IID"]]))
-    stopifnot(sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) + sum(is.na(gxe_frame)) == 0)
+    stopifnot(all(names(y) == names(perm_group)))
+    stopifnot(
+        sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) + sum(is.na(gxe_frame)) + sum(is.na(perm_group)) == 0
+    )
 
-    ${perm_cmd}
+    if ( ${do_permute} ) {
+        set.seed(${perm_seed})
+        gt_order <- 1:length(y)
+        for ( curr_group in unique(perm_group) ) {
+            gt_order[perm_group == curr_group] <- sample(
+                gt_order[perm_group == curr_group], replace = FALSE
+            )
+        }
+        set.seed(NULL)
+    }
 
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
     x    <- pgenlibr::Buf(pgen)
 
-    out_con <- gzfile("${prefix}.gwas.tsv.gz", "a")
-
     fit_null <- lm(null_model_formula)
     ll_null  <- logLik(fit_null)
 
+    out_con <- gzfile("${prefix}.gwas.tsv.gz", "w")
     header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
@@ -81,7 +92,7 @@ process FIT_MODEL {
         X <- subset(X, select = -`(Intercept)`)
         X <- forwardsolve(L, X)
 
-        if (is_perm) X <- X[gt_order,]
+        if ( ${do_permute} ) X <- X[gt_order,]
 
         var_id <- pgenlibr::GetVariantId(pvar, i)
         var_info <- strsplit(var_id, '_')[[1]]
@@ -92,7 +103,7 @@ process FIT_MODEL {
 
         fit <- lm(model_formula)
         ll_fit <- logLik(fit)
-        lrt_df <- ncol(X)
+        lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
         lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
         p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
 

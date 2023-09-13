@@ -13,20 +13,23 @@ process GET_DESIGN_MATRIX {
     path pheno
     path covariate_formula
     path fixed_effects_formula
+    val  permute_by
 
     output:
     tuple val(meta), path("*.covariate_mat.rds") , emit: C
     tuple val(meta), path("*.gxe_frame.rds")     , emit: gxe_frame
+    tuple val(meta), path("*.perm_group.rds")    , emit: perm_group
     path "versions.yml"                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args        = task.ext.args ?: ''
-    def prefix      = task.ext.prefix ?: "${meta.id}"
-    def load_covar  = covar  ? "TRUE" : "FALSE"
-    def load_qcovar = qcovar ? "TRUE" : "FALSE"
+    def args           = task.ext.args ?: ''
+    def prefix         = task.ext.prefix ?: "${meta.id}"
+    def load_covar     = covar      ? "TRUE" : "FALSE"
+    def load_qcovar    = qcovar     ? "TRUE" : "FALSE"
+    def permute_by_set = permute_by ? "TRUE" : "FALSE"
     """
     #!/usr/bin/env Rscript
 
@@ -91,6 +94,19 @@ process GET_DESIGN_MATRIX {
     }
     saveRDS(gxe_frame, "${prefix}.gxe_frame.rds")
 
+    if ( ${permute_by_set} ){
+        permute_by <- '${permute_by}'
+        if ( !(${load_covar}) ) stop("'permute_by' is set but no covariate file was provided")
+        if ( !(permute_by %in% colnames(covar)) ) {
+            stop("The value of 'permute_by' must be a column of the covariate file.")
+        }
+        perm_group <- df[,permute_by]
+    } else {
+        perm_group <- rep(1, nrow(df))
+    }
+    names(perm_group) <- df[["IID"]]
+    saveRDS(perm_group, "${prefix}.perm_group.rds")
+
     C <- model.matrix(covariate_formula, data = df)
     rownames(C) <- df[["IID"]]
     saveRDS(C, "${prefix}.covariate_mat.rds")
@@ -113,6 +129,7 @@ process GET_DESIGN_MATRIX {
     """
     touch ${prefix}.covariate_mat.rds
     touch ${prefix}.gxe_frame.rds
+    touch ${prefix}.perm_group.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

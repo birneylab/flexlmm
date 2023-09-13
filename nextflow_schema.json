@@ -94,6 +94,11 @@
                     "type": "integer",
                     "fa_icon": "fas fa-check",
                     "description": ""
+                },
+                "permute_by": {
+                    "type": "string",
+                    "fa_icon": "fas fa-check",
+                    "description": ""
                 }
             }
         },

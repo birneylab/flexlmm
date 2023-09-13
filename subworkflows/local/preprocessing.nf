@@ -18,6 +18,7 @@ workflow PREPROCESSING {
     covar                  // value: [optional ] covariates
     qcovar                 // value: [optional ] covariates
     freq                   // value: [optional ] vcf_file
+    permute_by             // value: [optional ] permute_by factor
 
     null_model_formula_str // value: [mandatory] null model R formula
     model_formula_str      // value: [mandatory] null model R formula
@@ -88,7 +89,8 @@ workflow PREPROCESSING {
         [ [id: "covar"], covar, qcovar],
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
         covariate_formula,
-        fixed_effects_formula
+        fixed_effects_formula,
+        permute_by
     )
 
     LOCO_GRM.out.grm
@@ -100,12 +102,14 @@ workflow PREPROCESSING {
         new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
         [new_meta, grm_bin, grm_id, pheno, pheno_name]
     }
-    .combine ( GET_DESIGN_MATRIX.out.C        .map { meta, C   -> C   } )
-    .combine ( GET_DESIGN_MATRIX.out.gxe_frame.map { meta, gxe -> gxe } )
+    .combine ( GET_DESIGN_MATRIX.out.C         .map { meta, C    -> C    } )
+    .combine ( GET_DESIGN_MATRIX.out.gxe_frame .map { meta, gxe  -> gxe  } )
+    .combine ( GET_DESIGN_MATRIX.out.perm_group.map { meta, perm -> perm } )
     .set { match_samples_in }
     MATCH_SAMPLES ( match_samples_in )
     MATCH_SAMPLES.out.model_terms.set { model_terms }
     MATCH_SAMPLES.out.gxe_frame  .set { gxe_frame   }
+    MATCH_SAMPLES.out.perm_group .set { perm_group  }
 
     full_genome_pgen.combine ( MATCH_SAMPLES.out.sample_ids )
     .map {
@@ -133,6 +137,7 @@ workflow PREPROCESSING {
     chr_pheno_pgen        // channel: [ meta, pgen, psam, pvar ]
     model_terms           // channel: [ meta, K, y, C ]
     gxe_frame             // channel: [ meta, gxe_frame ]
+    perm_group            // channel: [ meta, perm_group ]
 
     null_model_formula    // channel: formula_rds
     model_formula         // channel: formula_rds

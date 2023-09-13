@@ -10,6 +10,7 @@ workflow LMM {
     chr_pheno_pgen        // channel: [mandatory] [ meta, pgen, psam, pvar ]
     model_terms           // channel: [mandatory] [ meta, K, y, C ]
     gxe_frame             // channel: [mandatory] [ meta, gxe_frame ]
+    perm_group            // channel: [mandatory] [ meta, perm_group ]
 
     fixed_effects_formula // channel: [mandatory] formula_rds
     model_formula         // channel: [mandatory] formula_rds
@@ -36,10 +37,11 @@ workflow LMM {
     DECORRELATE.out.mm_rotation
     .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
     .join ( gxe_frame,           failOnMismatch: true, failOnDuplicate: true )
+    .join ( perm_group,          failOnMismatch: true, failOnDuplicate: true )
     .join ( chr_pheno_pgen,      failOnMismatch: true, failOnDuplicate: true )
     .map {
-        meta, y, C, L, gxe_frame, pgen, psam, pvar ->
-        [meta, y, C, L, gxe_frame, pgen, psam, pvar, []]
+        meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar ->
+        [meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, []]
     }
     .set { fit_model_in }
     FIT_MODEL ( fit_model_in, fixed_effects_formula, model_formula, null_model_formula )
@@ -48,12 +50,12 @@ workflow LMM {
     fit_model_in
     .combine ( permutation_seeds )
     .map {
-        meta, y, C, L, gxe_frame, pgen, psam, pvar, fake_seed, seed ->
+        meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, fake_seed, seed ->
         def new_meta = meta.clone()
         new_meta.id = "${meta.id}_perm${seed}"
         new_meta.seed = seed
         new_meta.is_perm = true
-        [new_meta, y, C, L, gxe_frame, pgen, psam, pvar, seed]
+        [new_meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, seed]
     }
     .set { fit_model_perm_in }
     FIT_MODEL_PERM (

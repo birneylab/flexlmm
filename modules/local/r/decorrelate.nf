@@ -40,6 +40,7 @@ process DECORRELATE {
 
     names(y.mm) <- names(y)
     rownames(C.mm) <- rownames(C)
+    colnames(C.mm) <- colnames(C)
 
     saveRDS(y.mm, "${prefix}.y_mm.rds")
     saveRDS(C.mm, "${prefix}.C_mm.rds")
