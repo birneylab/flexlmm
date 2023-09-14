@@ -143,9 +143,10 @@ process QQ {
     gwas_files <- list.files(pattern = "*.gwas.tsv.gz")
     df <- lapply(gwas_files, read_tsv) %>%
         bind_rows() %>%
+        arrange(lrt_p) %>%
         reframe(
             sample = -log10(lrt_p),
-            theoretical = -log10(rank(lrt_p) / n())
+            theoretical = -log10(qunif(ppoints(lrt_p)))
         )
 
     p <- ggplot(df, aes(x = theoretical, y = sample)) +
