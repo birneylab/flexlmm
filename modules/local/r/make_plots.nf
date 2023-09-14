@@ -52,11 +52,7 @@ process MANHATTAN {
         geom_hline(yintercept = -log10(bonferroni_thr), color = "blue") +
         theme_minimal_hgrid(18) +
         scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
-        scale_x_continuous(
-            label = axis_set[["chr"]],
-            breaks = axis_set[["center"]],
-            expand = expansion(mult = c(0.05, 3))
-        ) +
+        scale_x_continuous(label = axis_set[["chr"]], breaks = axis_set[["center"]]) +
         scale_color_manual(
             values = rep(c("black", "gray"), unique(length(axis_set[["chr"]])))
         ) +
@@ -68,7 +64,7 @@ process MANHATTAN {
             x = Inf,
             label = "Bonferroni ${p_thr}",
             size = 6,
-            vjust = -1,
+            vjust = ifelse(-log10(bonferroni_thr) >= -log10(perm_thr), -0.2, 1.2),
             hjust = 2.3
         ) +
         annotate(
@@ -77,7 +73,7 @@ process MANHATTAN {
             x = Inf,
             label = "Permutations ${p_thr}",
             size = 6,
-            vjust = -1,
+            vjust = ifelse(-log10(perm_thr) > -log10(bonferroni_thr), -0.2, 1.2),
             hjust = 1
         ) +
         ggtitle("${prefix}")
