@@ -47,7 +47,7 @@ process MANHATTAN {
         summarize(center = mean(pos_cum))
 
     p <- ggplot(df, aes(x = pos_cum, y = -log10(lrt_p), color = as.factor(chr))) +
-        geom_point(size = 0.2, alpha = 0.75) +
+        geom_point(size = 0.8, alpha = 0.75) +
         geom_hline(yintercept = -log10(perm_thr), color = "red") +
         geom_hline(yintercept = -log10(bonferroni_thr), color = "blue") +
         theme_minimal_hgrid(18) +
