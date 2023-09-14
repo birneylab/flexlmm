@@ -141,18 +141,19 @@ process QQ {
     library("cowplot")
 
     gwas_files <- list.files(pattern = "*.gwas.tsv.gz")
-    df <- lapply(gwas_files, read_tsv) %>% bind_rows()
+    df <- lapply(gwas_files, read_tsv) %>%
+        bind_rows() %>%
+        reframe(
+            sample = -log10(lrt_p),
+            theoretical = -log10(rank(df$lrt_p) / n())
+        )
 
-    qfunc <- stats::qunif
-
-    p <- ggplot(df, aes(sample = lrt_p)) +
-        stat_qq(distribution = qfunc, size = 1) +
-        stat_qq_line(distribution = qfunc) +
+    p <- ggplot(qq_df, aes(x = theoretical, y = sample)) +
+        geom_point() +
+        geom_abline(slope = 1, intercept = 0, color = "red") +
         theme_cowplot(18) +
-        labs(y = "Sample", x = "Theoretical") +
-        ggtitle("${prefix}")
-
-    ggsave("${prefix}.${suffix}", p)
+        labs(y = "Sample", x = "Theoretical")
+        ggsave("${prefix}.${suffix}", p)
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_tidyverse <- utils::packageVersion("tidyverse")
