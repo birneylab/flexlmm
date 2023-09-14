@@ -10,8 +10,8 @@ process MANHATTAN {
     val p_thr
 
     output:
-    tuple val(meta), path("*.pdf") , emit: plot
-    path "versions.yml"            , emit: versions
+    tuple val(meta), path("${prefix}.${suffix}") , emit: plot
+    path "versions.yml"                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -19,7 +19,7 @@ process MANHATTAN {
     script:
     def args = task.ext.args   ?: ""
     prefix   = task.ext.prefix ?: "${meta.id}"
-    suffix   = task.ext.suffix ?: "pdf"
+    suffix   = task.ext.suffix ?: "png"
     """
     #!/usr/bin/env Rscript
 
@@ -47,7 +47,7 @@ process MANHATTAN {
         summarize(center = mean(pos_cum))
 
     p <- ggplot(df, aes(x = pos_cum, y = -log10(lrt_p), color = as.factor(chr))) +
-        geom_point(size = 1, alpha = 0.75) +
+        geom_point(size = 0.2, alpha = 0.75) +
         geom_hline(yintercept = -log10(perm_thr), color = "red") +
         geom_hline(yintercept = -log10(bonferroni_thr), color = "blue") +
         theme_minimal_hgrid(18) +
@@ -78,7 +78,7 @@ process MANHATTAN {
         ) +
         ggtitle("${prefix}")
 
-    ggsave("${prefix}.${suffix}", p)
+    ggsave("${prefix}.${suffix}", width = 30, height = 6, bg = "white")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_tidyverse <- utils::packageVersion("tidyverse")
@@ -124,8 +124,8 @@ process QQ {
     tuple val(meta), path(gwas)
 
     output:
-    tuple val(meta), path("*.pdf") , emit: plot
-    path "versions.yml"            , emit: versions
+    tuple val(meta), path("${prefix}.${suffix}") , emit: plot
+    path "versions.yml"                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -133,7 +133,7 @@ process QQ {
     script:
     def args = task.ext.args   ?: ""
     prefix   = task.ext.prefix ?: "${meta.id}"
-    suffix   = task.ext.suffix ?: "pdf"
+    suffix   = task.ext.suffix ?: "png"
     """
     #!/usr/bin/env Rscript
 
@@ -150,11 +150,12 @@ process QQ {
         )
 
     p <- ggplot(df, aes(x = theoretical, y = sample)) +
-        geom_point() +
+        geom_point(size = 1) +
         geom_abline(slope = 1, intercept = 0, color = "red") +
         theme_cowplot(18) +
         labs(y = "Sample", x = "Theoretical")
-        ggsave("${prefix}.${suffix}", p)
+
+    ggsave("${prefix}.${suffix}", p, bg = "white")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_tidyverse <- utils::packageVersion("tidyverse")
