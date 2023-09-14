@@ -145,10 +145,10 @@ process QQ {
         bind_rows() %>%
         reframe(
             sample = -log10(lrt_p),
-            theoretical = -log10(rank(df$lrt_p) / n())
+            theoretical = -log10(rank(lrt_p) / n())
         )
 
-    p <- ggplot(qq_df, aes(x = theoretical, y = sample)) +
+    p <- ggplot(df, aes(x = theoretical, y = sample)) +
         geom_point() +
         geom_abline(slope = 1, intercept = 0, color = "red") +
         theme_cowplot(18) +
