@@ -75,6 +75,8 @@ workflow PREPROCESSING {
         .set { freq }
         FULL_GRM ( full_genome_grm_in, freq )
         LOCO_GRM ( loco_grm_in       , freq )
+
+        versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
     } else {
         FULL_GRM ( full_genome_grm_in, [[id:null], []] )
         LOCO_GRM ( loco_grm_in       , [[id:null], []] )
@@ -141,7 +143,6 @@ workflow PREPROCESSING {
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
-    versions.mix ( ESTIMATE_FREQ.out.versions        ) .set { versions }
     versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
