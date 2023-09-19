@@ -55,11 +55,6 @@ workflow PREPROCESSING {
         Channel.of ( ["stub_chr"] ).set { chr }
     }
 
-    ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
-    ESTIMATE_FREQ.out.freq
-    .ifEmpty ( [ [id: "freq"], [] ] )
-    .set { freq }
-
     full_genome_pgen
     .map { meta, pgen, pvar, psam -> [meta, pgen, pvar, psam, []] }
     .set { full_genome_grm_in }
@@ -74,8 +69,16 @@ workflow PREPROCESSING {
     }
     .set { loco_grm_in }
 
-    FULL_GRM ( full_genome_grm_in, freq )
-    LOCO_GRM ( loco_grm_in       , freq )
+    if ( freq ) {
+        ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
+        ESTIMATE_FREQ.out.freq
+        .set { freq }
+        FULL_GRM ( full_genome_grm_in, freq )
+        LOCO_GRM ( loco_grm_in       , freq )
+    } else {
+        FULL_GRM ( full_genome_grm_in, [[id:null], []] )
+        LOCO_GRM ( loco_grm_in       , [[id:null], []] )
+    }
 
     TRANSFORM_PHENOTYPES ( full_genome_pgen.combine ( [ pheno ] ) )
     TRANSFORM_PHENOTYPES.out.pheno
