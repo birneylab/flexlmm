@@ -11,6 +11,10 @@ include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
 include { MATCH_SAMPLES        } from '../../modules/local/r/match_samples'
 
 
+def select_chr   = params.select_chr   ? ( params.select_chr as String   ).split(",") : null
+def select_pheno = params.select_pheno ? ( params.select_pheno as String ).split(",") : null
+
+
 workflow PREPROCESSING {
     take:
     vcf                    // value: [mandatory] vcf_file
@@ -21,7 +25,7 @@ workflow PREPROCESSING {
     permute_by             // value: [optional ] permute_by factor
 
     null_model_formula_str // value: [mandatory] null model R formula
-    model_formula_str      // value: [mandatory] null model R formula
+    model_formula_str      // value: [mandatory] model R formula
 
     main:
     versions = Channel.empty()
@@ -41,8 +45,15 @@ workflow PREPROCESSING {
     .map { meta, txt -> txt }
     .splitText ()
     .map { it.trim() }
-    .ifEmpty ( ["stub_chr1"] )
     .set { chr }
+
+    if ( select_chr ) {
+        chr.filter { select_chr.contains ( it ) }.set { chr }
+    }
+
+    if ( workflow.stubRun ){
+        Channel.of ( ["stub_chr"] ).set { chr }
+    }
 
     ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
     ESTIMATE_FREQ.out.freq
@@ -77,6 +88,10 @@ workflow PREPROCESSING {
     .splitCsv ( header: false )
     .flatten ()
     .set { pheno_names }
+
+    if ( select_pheno ) {
+        pheno_names.filter { select_pheno.contains ( it ) }.set { pheno_names }
+    }
 
     VALIDATE_FORMULAS ( null_model_formula_str, model_formula_str )
     VALIDATE_FORMULAS.out.null_model   .set { null_model_formula    }

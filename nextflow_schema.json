@@ -32,6 +32,12 @@
                     "type": "string",
                     "fa_icon": "fas fa-file"
                 },
+                "select_chr": {
+                    "fa_icon": "fas fa-file"
+                },
+                "select_pheno": {
+                    "fa_icon": "fas fa-file"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

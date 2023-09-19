@@ -85,6 +85,8 @@ process GET_DESIGN_MATRIX {
     }
 
     fixed_vars <- all.vars(fixed_effects_formula)
+    # this includes any covariate used (even if not in a gxe term) but it is fine, it
+    # will just not be used downstream
     gxe_vars <- fixed_vars[fixed_vars != "x"]
     if ( length(gxe_vars) > 0 ){
         gxe_frame <- subset(df, select = gxe_vars)
