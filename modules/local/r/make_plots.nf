@@ -189,3 +189,79 @@ process QQ {
     END_VERSIONS
     """
 }
+
+
+process RELATEDNESS {
+    tag "$meta.id"
+    label 'process_low'
+
+    conda "bioconda::bioconductor-complexheatmap==2.16.0"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/bioconductor-complexheatmap:2.16.0--r43hdfd78af_0' :
+        'biocontainers/bioconductor-complexheatmap:2.16.0--r43hdfd78af_0' }"
+
+    input:
+    tuple val(meta), path(K), path(samples)
+
+    output:
+    tuple val(meta), path("${prefix}.png") , emit: plot
+    path "versions.yml"                    , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args   ?: ""
+    prefix   = task.ext.prefix ?: "${meta.id}"
+    """
+    #!/usr/bin/env Rscript
+
+    library("ComplexHeatmap")
+    library("circlize")
+
+    samples <- read.table("${samples}")[[1]]
+    K_vec <- readBin("${K}", what = "double", n = (length(samples))**2)
+    K <- matrix(K_vec, nrow = length(samples))
+    K.clust <- hclust(as.dist(max(K) - K))
+
+    png("${prefix}.png", width = 9.4, height = 7)
+    Heatmap(
+        K,
+        cluster_rows = K.clust,
+        cluster_columns = K.clust,
+        col = colorRamp2(c(min(K), mean(K), max(K)), c("blue", "white", "red")),
+        show_row_dend = FALSE,
+        show_column_dend = FALSE,
+        heatmap_legend_param = list(title = "Relatedness"),
+        use_raster = FALSE
+    )
+    dev.off()
+
+    ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
+    ver_complexheatmap <- utils::packageVersion("ComplexHeatmap")
+
+    system(
+        paste(
+            "cat <<-END_VERSIONS > versions.yml",
+            "\\"${task.process}\\":",
+            sprintf("    r-base: %s", ver_r),
+            sprintf("    r-ComplexHeatmap: %s", ver_complexheatmap),
+            "END_VERSIONS",
+            sep = "\\n"
+        )
+    )
+    """
+
+    stub:
+    def args = task.ext.args ?: ''
+    prefix   = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}.png
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        r-base: \$(Rscript -e "cat(strsplit(as.character(R.version[\\"version.string\\"]), \\" \\")[[1]][3])")
+        r-ComplexHeatmap: \$(Rscript -e "cat(as.character(utils::packageVersion(\\"ComplexHeatmap\\")))")
+    END_VERSIONS
+    """
+}

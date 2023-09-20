@@ -104,7 +104,12 @@ process FIT_MODEL {
         alt <- var_info[[4]]
 
         fit <- lm(model_formula)
-        varnames <- gsub("^[X,C]", "", names(coef(fit)))
+        varnames <- names(coef(fit))
+        # in case of single column the colname is not reported
+        varnames[varnames == "X"] <- colnames(X)
+        varnames[varnames == "C"] <- colnames(C)
+        # remove leading X and C
+        varnames <- gsub("^[X,C]", "", varnames)
         beta <- paste(varnames, coef(fit), collapse = ",", sep = "~")
         ll_fit <- logLik(fit)
         lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
