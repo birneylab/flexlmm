@@ -228,7 +228,7 @@ process RELATEDNESS {
         vals <- c(-1, 0, 1)
     }
 
-    png("${prefix}.png", width = 9.4, height = 7)
+    png("${prefix}.png", width = 9.4, height = 7, unit = "in", res = 300)
     Heatmap(
         K,
         cluster_rows = K.clust,
