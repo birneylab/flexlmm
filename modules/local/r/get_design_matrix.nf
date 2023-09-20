@@ -51,6 +51,11 @@ process GET_DESIGN_MATRIX {
 
         colnames(covar) <- clean_colnames(colnames(covar))
         covar <- remove_fid(covar)
+
+        covar <- cbind(
+            subset(covar, select = (colnames(covar) == "IID")),
+            lapply(remove_iid(covar), as.factor)
+        )
     }
 
     if ( ${load_qcovar} ){

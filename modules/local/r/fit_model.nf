@@ -67,7 +67,6 @@ process FIT_MODEL {
 
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
-    x    <- pgenlibr::Buf(pgen)
 
     fit_null <- .lm.fit(x = C, y = y)
     ll_null  <- stats:::logLik.lm(fit_null)
@@ -78,21 +77,28 @@ process FIT_MODEL {
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars, style = 3)
 
+    data <- model.frame(
+        fixed_effects_formula,
+        data = cbind(x = 0, gxe_frame)
+    )
+    t <- terms(fixed_effects_formula)
+    data[["x"]] <- pgenlibr::Buf(pgen)
+
     for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
 
-        pgenlibr::ReadHardcalls(pgen, x, i)
-        X <- model.matrix(fixed_effects_formula, data=gxe_frame)
+        pgenlibr::ReadHardcalls(pgen, data[["x"]], i)
+        X <- .External2(stats:::C_modelmatrix, t, data)
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
         X <- subset(X, select = -`(Intercept)`)
         X_names <- colnames(X)
-        X <- forwardsolve(L, X)
+        X_mm <- forwardsolve(L, X)
 
-        if ( ${do_permute} ) X <- as.matrix(X[gt_order,])
+        if ( ${do_permute} ) X_mm <- X_mm[gt_order, , drop = FALSE]
 
-        colnames(X) <- X_names
-        design_matrix <- cbind(X, C)
+        colnames(X_mm) <- X_names
+        design_matrix <- cbind(X_mm, C)
 
         var_id <- pgenlibr::GetVariantId(pvar, i)
         var_info <- strsplit(var_id, '_')[[1]]
