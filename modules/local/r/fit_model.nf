@@ -77,7 +77,7 @@ process FIT_MODEL {
     ll_null  <- logLik(fit_null)
 
     out_con <- gzfile("${prefix}.gwas.tsv.gz", "w")
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p"
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p\\tbeta"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars, style = 3)
@@ -90,7 +90,9 @@ process FIT_MODEL {
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
         X <- subset(X, select = -`(Intercept)`)
+        X_names <- colnames(X)
         X <- forwardsolve(L, X)
+        colnames(X) <- X_names
 
         if ( ${do_permute} ) X <- X[gt_order,]
 
@@ -102,13 +104,15 @@ process FIT_MODEL {
         alt <- var_info[[4]]
 
         fit <- lm(model_formula)
+        varnames <- gsub("^[X,C]", "", names(coef(fit)))
+        beta <- paste(varnames, coef(fit), collapse = ",", sep = "~")
         ll_fit <- logLik(fit)
         lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
         lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
         p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
 
         lineout <- sprintf(
-            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
+            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
             chr,
             pos,
             var_id,
@@ -116,7 +120,8 @@ process FIT_MODEL {
             alt,
             lrt_chisq,
             lrt_df,
-            p_lrt
+            p_lrt,
+            beta
         )
         writeLines(lineout, out_con)
     }
