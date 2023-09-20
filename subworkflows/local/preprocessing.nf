@@ -99,8 +99,6 @@ workflow PREPROCESSING {
     }
 
     VALIDATE_FORMULAS ( null_model_formula_str, model_formula_str )
-    VALIDATE_FORMULAS.out.null_model   .set { null_model_formula    }
-    VALIDATE_FORMULAS.out.model        .set { model_formula         }
     VALIDATE_FORMULAS.out.fixed_effects.set { fixed_effects_formula }
     VALIDATE_FORMULAS.out.covariates   .set { covariate_formula     }
 
@@ -158,8 +156,6 @@ workflow PREPROCESSING {
     gxe_frame             // channel: [ meta, gxe_frame ]
     perm_group            // channel: [ meta, perm_group ]
 
-    null_model_formula    // channel: formula_rds
-    model_formula         // channel: formula_rds
     fixed_effects_formula // channel: formula_rds
     covariate_formula     // channel: formula_rds
 

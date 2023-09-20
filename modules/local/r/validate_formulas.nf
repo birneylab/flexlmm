@@ -11,8 +11,6 @@ process VALIDATE_FORMULAS {
     val model_formula
 
     output:
-    path "*.null_model.rds" , emit: null_model
-    path "*.model.rds"      , emit: model
     path "*.C_model.rds"    , emit: covariates
     path "*.X_model.rds"    , emit: fixed_effects
 
@@ -65,18 +63,9 @@ process VALIDATE_FORMULAS {
     fixed_effects <- reformulate(extra_terms)
     covariates    <- reformulate(common_terms)
 
-    # C is used later to refer to the null design matrix, X to refer to the extra
-    # fixed_effects effects matrix. Intercept not set since already in C.
-    model      <- formula("y ~ 0 + X + C")
-    null_model <- formula("y ~ 0 + C")
-
-    message("Model:", deparse(model))
-    message("Null model:", deparse(null_model))
     message("Fixed effects:", deparse(fixed_effects))
     message("Covariates:", deparse(covariates))
 
-    saveRDS(null_model, "${prefix}.null_model.rds")
-    saveRDS(model, "${prefix}.model.rds")
     saveRDS(covariates, "${prefix}.C_model.rds")
     saveRDS(fixed_effects, "${prefix}.X_model.rds")
 

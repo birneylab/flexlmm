@@ -13,8 +13,6 @@ workflow LMM {
     perm_group            // channel: [mandatory] [ meta, perm_group ]
 
     fixed_effects_formula // channel: [mandatory] formula_rds
-    model_formula         // channel: [mandatory] formula_rds
-    null_model_formula    // channel: [mandatory] formula_rds
 
     permutation_seeds     // channel: [optional ] permutation seeds
 
@@ -44,7 +42,7 @@ workflow LMM {
         [meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, []]
     }
     .set { fit_model_in }
-    FIT_MODEL_ORIG ( fit_model_in, fixed_effects_formula, model_formula, null_model_formula )
+    FIT_MODEL_ORIG ( fit_model_in, fixed_effects_formula )
     FIT_MODEL_ORIG.out.gwas.set { gwas }
 
     fit_model_in
@@ -58,9 +56,7 @@ workflow LMM {
         [new_meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, seed]
     }
     .set { fit_model_perm_in }
-    FIT_MODEL_PERM (
-        fit_model_perm_in, fixed_effects_formula, model_formula, null_model_formula
-    )
+    FIT_MODEL_PERM (fit_model_perm_in, fixed_effects_formula)
     FIT_MODEL_PERM.out.gwas.set { gwas_perm }
 
     // Gather versions of all tools used

@@ -8,8 +8,6 @@ process FIT_MODEL {
     input:
     tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(perm_group), path(pgen), path(psam), path(pvar), val(perm_seed)
     path fixed_effects_formula
-    path model_formula
-    path null_model_formula
 
     output:
     tuple val(meta), path("*.gwas.tsv.gz") , emit: gwas
@@ -34,8 +32,6 @@ process FIT_MODEL {
     perm_group <- readRDS("${perm_group}")
 
     fixed_effects_formula <- readRDS("${fixed_effects_formula}")
-    model_formula         <- readRDS("${model_formula}")
-    null_model_formula    <- readRDS("${null_model_formula}")
 
     psam <- read.table(
         "${psam}",
@@ -73,8 +69,8 @@ process FIT_MODEL {
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
     x    <- pgenlibr::Buf(pgen)
 
-    fit_null <- lm(null_model_formula)
-    ll_null  <- logLik(fit_null)
+    fit_null <- .lm.fit(x = C, y = y)
+    ll_null  <- stats:::logLik.lm(fit_null)
 
     out_con <- gzfile("${prefix}.gwas.tsv.gz", "w")
     header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p\\tbeta"
@@ -94,7 +90,9 @@ process FIT_MODEL {
         X <- forwardsolve(L, X)
 
         if ( ${do_permute} ) X <- as.matrix(X[gt_order,])
+
         colnames(X) <- X_names
+        design_matrix <- cbind(X, C)
 
         var_id <- pgenlibr::GetVariantId(pvar, i)
         var_info <- strsplit(var_id, '_')[[1]]
@@ -103,15 +101,14 @@ process FIT_MODEL {
         ref <- var_info[[3]]
         alt <- var_info[[4]]
 
-        fit <- lm(model_formula)
-        varnames <- names(coef(fit))
-        # in case of single column the colname is not reported
-        varnames[varnames == "X"] <- colnames(X)
-        varnames[varnames == "C"] <- colnames(C)
-        # remove leading X and C
-        varnames <- gsub("^[X,C]", "", varnames)
-        beta <- paste(varnames, coef(fit), collapse = ",", sep = "~")
-        ll_fit <- logLik(fit)
+        fit <- .lm.fit(x = design_matrix, y = y)
+        beta <- paste(
+            colnames(design_matrix),
+            fit[["coefficients"]],
+            collapse = ",",
+            sep = "~"
+        )
+        ll_fit <- stats:::logLik.lm(fit)
         lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
         lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
         p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
