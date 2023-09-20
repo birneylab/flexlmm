@@ -71,7 +71,8 @@ process FIT_MODEL {
     fit_null <- .lm.fit(x = C, y = y)
     ll_null  <- stats:::logLik.lm(fit_null)
 
-    out_con <- gzfile("${prefix}.gwas.tsv.gz", "w")
+    outname <- "${prefix}.gwas.tsv.gz"
+    out_con <- gzfile(outname, "w")
     header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p\\tbeta"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
@@ -137,6 +138,11 @@ process FIT_MODEL {
     pgenlibr::ClosePgen(pgen)
     close(out_con)
     close(pb)
+
+    # to make sure that the output has been written properly
+    gwas <- read.table(outname, header = TRUE, sep = "\t")
+    stopifnot(nrow(gwas) == nvars)
+    stopifnot(ncol(gwas) == 9)
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_pgenlibr <- utils::packageVersion("pgenlibr")
