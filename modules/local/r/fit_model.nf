@@ -92,9 +92,9 @@ process FIT_MODEL {
         X <- subset(X, select = -`(Intercept)`)
         X_names <- colnames(X)
         X <- forwardsolve(L, X)
-        colnames(X) <- X_names
 
-        if ( ${do_permute} ) X <- X[gt_order,]
+        if ( ${do_permute} ) X <- as.matrix(X[gt_order,])
+        colnames(X) <- X_names
 
         var_id <- pgenlibr::GetVariantId(pvar, i)
         var_info <- strsplit(var_id, '_')[[1]]
