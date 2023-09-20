@@ -138,6 +138,8 @@ workflow PREPROCESSING {
     SPLIT_CHR ( split_chr_in )
     SPLIT_CHR.out.pgen.set { chr_pheno_pgen }
 
+    FULL_GRM.out.grm.mix ( LOCO_GRM.out.grm ).set { all_grms }
+
     // Gather versions of all tools used
     versions.mix ( VCF_TO_PGEN.out.versions          ) .set { versions }
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
@@ -155,9 +157,11 @@ workflow PREPROCESSING {
     model_terms           // channel: [ meta, K, y, C ]
     gxe_frame             // channel: [ meta, gxe_frame ]
     perm_group            // channel: [ meta, perm_group ]
+    all_grms              // channel: [ meta, grm, grm_id ]
 
     fixed_effects_formula // channel: formula_rds
     covariate_formula     // channel: formula_rds
+
 
     versions              // channel: [ versions.yml ]
 }

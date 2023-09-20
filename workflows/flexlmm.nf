@@ -106,6 +106,7 @@ workflow FLEXLMM {
     POSTPROCESSING (
         LMM.out.gwas,
         LMM.out.gwas_perm,
+        PREPROCESSING.out.all_grms,
         nperms,
         p_thr
     )

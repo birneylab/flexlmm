@@ -1,17 +1,20 @@
-include { GET_MIN_P_DISTRIBUTION } from '../../modules/local/r/get_min_p_distribution'
-include { MANHATTAN; QQ          } from '../../modules/local/r/make_plots'
+include { GET_MIN_P_DISTRIBUTION     } from '../../modules/local/r/get_min_p_distribution'
+include { MANHATTAN; QQ; RELATEDNESS } from '../../modules/local/r/make_plots'
 
 
 workflow POSTPROCESSING {
     take:
     gwas        // channel: [mandatory] [ meta, gwas ]
     gwas_perm   // channel: [mandatory] [ meta, gwas_perm ]
+    all_grms    // channel: [mandatory] [ meta, grm, grm_id ]
 
     nperms      // value  : [mandatory] [number of permutations]
     p_thr       // value  : [mandatory] [nominal p value threshold]
 
     main:
     versions = Channel.empty()
+
+    RELATEDNESS ( all_grms )
 
     gwas_perm
     .map {

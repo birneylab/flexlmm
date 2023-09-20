@@ -201,7 +201,7 @@ process RELATEDNESS {
         'biocontainers/bioconductor-complexheatmap:2.16.0--r43hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(K), path(samples)
+    tuple val(meta), path(grm), path(grm_id)
 
     output:
     tuple val(meta), path("${prefix}.png") , emit: plot
@@ -219,17 +219,21 @@ process RELATEDNESS {
     library("ComplexHeatmap")
     library("circlize")
 
-    samples <- read.table("${samples}")[[1]]
-    K_vec <- readBin("${K}", what = "double", n = (length(samples))**2)
+    samples <- read.table("${grm_id}")[[1]]
+    K_vec <- readBin("${grm}", what = "double", n = (length(samples))**2)
     K <- matrix(K_vec, nrow = length(samples))
     K.clust <- hclust(as.dist(max(K) - K))
+    vals <- c(min(K), mean(K), max(K))
+    if (unique(vals != 3)) {
+        vals <- c(-1, 0, 1)
+    }
 
     png("${prefix}.png", width = 9.4, height = 7)
     Heatmap(
         K,
         cluster_rows = K.clust,
         cluster_columns = K.clust,
-        col = colorRamp2(c(min(K), mean(K), max(K)), c("blue", "white", "red")),
+        col = colorRamp2(vals, c("blue", "white", "red")),
         show_row_dend = FALSE,
         show_column_dend = FALSE,
         heatmap_legend_param = list(title = "Relatedness"),
