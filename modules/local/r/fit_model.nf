@@ -85,6 +85,11 @@ process FIT_MODEL {
     t <- terms(fixed_effects_formula)
     data[["x"]] <- pgenlibr::Buf(pgen)
 
+    # for forwardsolve
+    k <- ncol(L)
+    upper.tri <- FALSE
+    transpose <- FALSE
+
     for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
 
@@ -94,7 +99,8 @@ process FIT_MODEL {
         # that contrast are calculated correctly
         X <- subset(X, select = -`(Intercept)`)
         X_names <- colnames(X)
-        X_mm <- forwardsolve(L, X)
+        # forwardsolve(L, X) without the wrapper
+        X_mm <- .Internal(backsolve(L, X, k, upper.tri, transpose))
 
         if ( ${do_permute} ) X_mm <- X_mm[gt_order, , drop = FALSE]
 
