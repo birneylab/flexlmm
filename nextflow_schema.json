@@ -11,11 +11,17 @@
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
+                "outdir",
                 "vcf",
-                "pheno",
-                "outdir"
+                "pheno"
             ],
             "properties": {
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+                    "fa_icon": "fas fa-folder-open"
+                },
                 "vcf": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
@@ -52,11 +58,17 @@
                     "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf`` is used.",
                     "format": "file-path"
                 },
-                "outdir": {
+                "select_chr": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-question",
+                    "description": "Restrict analysis to a set of chromosomes",
+                    "help_text": "Comma-separated string of chromosome names in `vcf`. If not specified all chromosomes are used. If a chromosome is specified still the rest of the genome is used to evaluate the LOCO relatedness matrix."
+                },
+                "select_pheno": {
+                    "type": "string",
+                    "fa_icon": "fas fa-question",
+                    "description": "Restrict analysis to a set of phenotypes",
+                    "help_text": "Comma-separated string of column names in `pheno` to be used as phenotypes. If not specified all the columns of `pheno` are used."
                 },
                 "email": {
                     "type": "string",
@@ -289,17 +301,13 @@
         }
     ],
     "properties": {
-        "select_chr": {
-            "type": "string"
-        },
-        "select_pheno": {
-            "type": "string"
-        },
         "quantile_normalise": {
-            "type": "string"
+            "type": "string",
+            "fa_icon": "fas fa-check"
         },
         "standardise": {
-            "type": "string"
+            "type": "string",
+            "fa_icon": "fas fa-check"
         },
         "null_model_formula": {
             "type": "string"
