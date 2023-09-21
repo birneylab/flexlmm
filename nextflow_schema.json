@@ -92,29 +92,45 @@
             "fa_icon": "fas fa-signal",
             "properties": {
                 "quantile_normalise": {
-                    "type": "string",
-                    "fa_icon": "fas fa-check"
-                },
-                "p_thr": {
-                    "type": "number",
-                    "default": 0.05
+                    "type": "boolean",
+                    "fa_icon": "fas fa-check",
+                    "description": "Should the phenotypes be quantile normalised?",
+                    "help_text": "Forces phenotypes to a N(0, 1) distribution."
                 },
                 "standardise": {
-                    "type": "string",
-                    "fa_icon": "fas fa-check"
+                    "type": "boolean",
+                    "fa_icon": "fas fa-check",
+                    "description": "Should the phenotypes be mean-centered and variance-scaled?"
                 },
                 "null_model_formula": {
-                    "type": "string"
+                    "type": "string",
+                    "fa_icon": "fas fa-arrow-right",
+                    "description": "R-style formula for the outer model that you want to use as a baseline.",
+                    "help_text": "A string like 'y ~ cov1'. Here 'y' can be used to refer to the phenotype, and 'x' can be used to refer to the genotype. Column names in `covar` and `qcovar` can also be used. See https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula for more information on R formulas."
                 },
                 "model_formula": {
-                    "type": "string"
+                    "type": "string",
+                    "fa_icon": "fas fa-arrow-right",
+                    "description": "R-style formula for the nested model that includes the variable of interest",
+                    "help_text": "Similar to `null_model_formula`. Must contain all the terms in `null_model_formula` plus at least an extra one. You can also include GxE terms (es. 'y ~ x + x:cov1 + cov1'), and dominance terms ('y ~ x + (x == 1) + cov1'). Arithmetic operations such as '(x == 1)' must be enclosed in parentheses."
                 },
                 "permutations": {
                     "type": "integer",
-                    "default": 1
+                    "default": 1,
+                    "fa_icon": "fas fa-list-ol",
+                    "description": "Number of permutations to be performed"
                 },
                 "permute_by": {
-                    "type": "string"
+                    "type": "string",
+                    "fa_icon": "fas fa-mouse-pointer",
+                    "description": "Perform permutation within pre-defined groups",
+                    "help_text": "Must be a column name in `covar`. If specified, samples are exchaged in permutations only within the levels of the specified factor."
+                },
+                "p_thr": {
+                    "type": "number",
+                    "default": 0.05,
+                    "fa_icon": "fas fa-arrow-right",
+                    "description": "Nominal significance threshold"
                 }
             }
         },
