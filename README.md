@@ -1,4 +1,4 @@
-# ![birneylab/flexlmm](docs/images/birneylab-flexlmm_name_light.svg#gh-light-mode-only) ![birneylab/flexlmm](docs/images/birneylab-flexlmm_name_dark.svg#gh-dark-mode-only)
+# ![birneylab/flexlmm#gh-light-mode-only](docs/images/birneylab-flexlmm_name_light.svg#gh-light-mode-only) ![birneylab/flexlmm#gh-light-mode-only](docs/images/birneylab-flexlmm_name_dark.svg#gh-dark-mode-only)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
