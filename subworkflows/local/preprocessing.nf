@@ -101,6 +101,7 @@ workflow PREPROCESSING {
     VALIDATE_FORMULAS ( null_model_formula_str, model_formula_str )
     VALIDATE_FORMULAS.out.fixed_effects.set { fixed_effects_formula }
     VALIDATE_FORMULAS.out.covariates   .set { covariate_formula     }
+    VALIDATE_FORMULAS.out.intercepts   .set { intercepts            }
 
     PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
     GET_DESIGN_MATRIX (
@@ -161,6 +162,7 @@ workflow PREPROCESSING {
 
     fixed_effects_formula // channel: formula_rds
     covariate_formula     // channel: formula_rds
+    intercepts            // channel: intercepts_rds
 
 
     versions              // channel: [ versions.yml ]

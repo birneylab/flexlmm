@@ -13,6 +13,7 @@ process VALIDATE_FORMULAS {
     output:
     path "*.C_model.rds"    , emit: covariates
     path "*.X_model.rds"    , emit: fixed_effects
+    path "*.intercepts.rds" , emit: intercepts
 
     path "versions.yml"     , emit: versions
 
@@ -35,6 +36,7 @@ process VALIDATE_FORMULAS {
     model_lhs <- all.vars(model[[2]])
     model_rhs <- attr(terms(model), which = "term.labels")
     model_intercept <- attr(terms(model), which = "intercept")
+    intercepts <- c(model = model_intercept, null_model = null_model_intercept)
 
     if (
         !all(null_model_rhs %in% model_rhs) |
@@ -50,8 +52,8 @@ process VALIDATE_FORMULAS {
         )
     }
 
-    if ( !(null_model_intercept == 1 & model_intercept == 1) ) {
-        stop("Fitting a model without intercept is not allowed")
+    if ( (null_model_intercept == 1 & model_intercept == 0) ) {
+        stop("The null_model_formula must be nested in the model_formula")
     }
 
     extra_terms  <- setdiff(model_rhs, null_model_rhs)
@@ -68,6 +70,7 @@ process VALIDATE_FORMULAS {
 
     saveRDS(covariates, "${prefix}.C_model.rds")
     saveRDS(fixed_effects, "${prefix}.X_model.rds")
+    saveRDS(intercepts, "${prefix}.intercepts.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     system(
@@ -89,6 +92,7 @@ process VALIDATE_FORMULAS {
     touch ${prefix}.model.rds
     touch ${prefix}.C_model.rds
     touch ${prefix}.X_model.rds
+    touch ${prefix}.intercepts.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

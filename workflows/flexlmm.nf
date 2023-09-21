@@ -100,6 +100,7 @@ workflow FLEXLMM {
         PREPROCESSING.out.gxe_frame,
         PREPROCESSING.out.perm_group,
         PREPROCESSING.out.fixed_effects_formula,
+        PREPROCESSING.out.intercepts,
         permutation_seeds
     )
 

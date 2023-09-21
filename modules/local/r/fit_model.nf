@@ -8,6 +8,7 @@ process FIT_MODEL {
     input:
     tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(perm_group), path(pgen), path(psam), path(pvar), val(perm_seed)
     path fixed_effects_formula
+    path intercepts
 
     output:
     tuple val(meta), path("*.gwas.tsv.gz") , emit: gwas
@@ -32,6 +33,17 @@ process FIT_MODEL {
     perm_group <- readRDS("${perm_group}")
 
     fixed_effects_formula <- readRDS("${fixed_effects_formula}")
+    intercepts <- readRDS("${intercepts}")
+
+    if ( intercepts[["model"]] == 1 & intercepts[["null_model"]] == 1 ) {
+        drop_intercept <- TRUE
+    } else if ( intercepts[["model"]] == 1 & intercepts[["null_model"]] == 0 ) {
+        drop_intercept <- FALSE
+    } else if ( intercepts[["model"]] == 0 & intercepts[["null_model"]] == 0 ) {
+        drop_intercept <- FALSE
+    } else {
+        stop("Intercept is in null_model but not in model, models are not nested")
+    }
 
     psam <- read.table(
         "${psam}",
@@ -107,7 +119,9 @@ process FIT_MODEL {
 
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
-        X <- subset(X, select = -`(Intercept)`)
+        if ( drop_intercept ) X <- subset(X, select = -`(Intercept)`)
+
+        # names are lost in forwardsolve
         X_names <- colnames(X)
 
         # forwardsolve(L, X) without the wrapper
