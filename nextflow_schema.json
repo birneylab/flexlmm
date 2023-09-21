@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/birneylab/stitchimpute/master/nextflow_schema.json",
-    "title": "birneylab/stitchimpute pipeline parameters",
-    "description": "A pipeline for imputing genotypes using STITCH, evaluating imputation performance against a ground truth, optimising imputation parameters, and refining the SNP set used",
+    "$id": "https://raw.githubusercontent.com/birneylab/flexlmm/master/nextflow_schema.json",
+    "title": "birneylab/flexlmm pipeline parameters",
+    "description": "Flexible linear mixed model framework for Genome Wide Association Studies",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -10,33 +10,47 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["vcf", "pheno", "outdir"],
+            "required": [
+                "vcf",
+                "pheno",
+                "outdir"
+            ],
             "properties": {
                 "vcf": {
                     "type": "string",
-                    "fa_icon": "fas fa-file"
+                    "fa_icon": "fas fa-file",
+                    "description": "VCF file containing the sample genotypes. Can be bgzip compressed.",
+                    "pattern": ".*.[vcf,vcf.gz]",
+                    "format": "file-path"
                 },
                 "pheno": {
                     "type": "string",
-                    "fa_icon": "fas fa-file"
+                    "description": "Phenotype file in PLINK2 format",
+                    "format": "file-path",
+                    "mimetype": "text/tsv",
+                    "fa_icon": "fas fa-file",
+                    "help_text": "The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. \n\nIID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).\n\nFor example:\n\n#IID  qt1    bmi    site\n1110  2.3    22.22  site2\n2202  34.12  18.23  site1\n..."
                 },
                 "covar": {
                     "type": "string",
-                    "fa_icon": "fas fa-file"
+                    "description": "Categorical covariates. Same format as `pheno`.",
+                    "format": "file-path",
+                    "mimetype": "text/tsv",
+                    "fa_icon": "fas fa-file",
+                    "help_text": "Columns cannot be named 'x' or 'y'."
                 },
                 "qcovar": {
                     "type": "string",
-                    "fa_icon": "fas fa-file"
+                    "fa_icon": "fas fa-file",
+                    "description": "Quantitative covariates. Same format as `pheno`.",
+                    "format": "file-path",
+                    "mimetype": "text/tsv"
                 },
                 "freq": {
                     "type": "string",
-                    "fa_icon": "fas fa-file"
-                },
-                "select_chr": {
-                    "fa_icon": "fas fa-file"
-                },
-                "select_pheno": {
-                    "fa_icon": "fas fa-file"
+                    "fa_icon": "fas fa-file",
+                    "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf`` is used.",
+                    "format": "file-path"
                 },
                 "outdir": {
                     "type": "string",
@@ -54,62 +68,7 @@
                 "multiqc_title": {
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature",
-                    "hidden": true
-                }
-            }
-        },
-        "phenotype_options": {
-            "title": "Phenotype options",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "fa_icon": "fas fa-blind",
-            "properties": {
-                "quantile_normalise": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check",
-                    "description": "Should the phenotypes be quantile-normalised?"
-                },
-                "standardise": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-check",
-                    "description": "Should the phenotypes be standardised?"
-                }
-            }
-        },
-        "statistical_models": {
-            "title": "Statistical models",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "required": ["null_model_formula", "model_formula"],
-            "fa_icon": "fas fa-blind",
-            "properties": {
-                "null_model_formula": {
-                    "type": "string",
-                    "fa_icon": "fas fa-check",
-                    "description": ""
-                },
-                "model_formula": {
-                    "type": "string",
-                    "fa_icon": "fas fa-check",
-                    "description": ""
-                },
-                "permutations": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-check",
-                    "description": ""
-                },
-                "permute_by": {
-                    "type": "string",
-                    "fa_icon": "fas fa-check",
-                    "description": ""
-                },
-                "p_thr": {
-                    "type": "number",
-                    "fa_icon": "fas fa-check",
-                    "description": ""
+                    "fa_icon": "fas fa-file-signature"
                 }
             }
         },
@@ -221,7 +180,14 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -313,9 +279,6 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/phenotype_options"
-        },
-        {
             "$ref": "#/definitions/institutional_config_options"
         },
         {
@@ -324,5 +287,36 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "select_chr": {
+            "type": "string"
+        },
+        "select_pheno": {
+            "type": "string"
+        },
+        "quantile_normalise": {
+            "type": "string"
+        },
+        "standardise": {
+            "type": "string"
+        },
+        "null_model_formula": {
+            "type": "string"
+        },
+        "model_formula": {
+            "type": "string"
+        },
+        "permutations": {
+            "type": "integer",
+            "default": 1
+        },
+        "permute_by": {
+            "type": "string"
+        },
+        "p_thr": {
+            "type": "number",
+            "default": 0.05
+        }
+    }
 }
