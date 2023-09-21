@@ -84,6 +84,40 @@
                 }
             }
         },
+        "statistical_parameters": {
+            "title": "Statistical parameters",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-signal",
+            "properties": {
+                "quantile_normalise": {
+                    "type": "string",
+                    "fa_icon": "fas fa-check"
+                },
+                "p_thr": {
+                    "type": "number",
+                    "default": 0.05
+                },
+                "standardise": {
+                    "type": "string",
+                    "fa_icon": "fas fa-check"
+                },
+                "null_model_formula": {
+                    "type": "string"
+                },
+                "model_formula": {
+                    "type": "string"
+                },
+                "permutations": {
+                    "type": "integer",
+                    "default": 1
+                },
+                "permute_by": {
+                    "type": "string"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -291,6 +325,9 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
+            "$ref": "#/definitions/statistical_parameters"
+        },
+        {
             "$ref": "#/definitions/institutional_config_options"
         },
         {
@@ -299,32 +336,5 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ],
-    "properties": {
-        "quantile_normalise": {
-            "type": "string",
-            "fa_icon": "fas fa-check"
-        },
-        "standardise": {
-            "type": "string",
-            "fa_icon": "fas fa-check"
-        },
-        "null_model_formula": {
-            "type": "string"
-        },
-        "model_formula": {
-            "type": "string"
-        },
-        "permutations": {
-            "type": "integer",
-            "default": 1
-        },
-        "permute_by": {
-            "type": "string"
-        },
-        "p_thr": {
-            "type": "number",
-            "default": 0.05
-        }
-    }
+    ]
 }
