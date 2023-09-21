@@ -55,7 +55,7 @@
                 "freq": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
-                    "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf`` is used.",
+                    "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf` is used.",
                     "format": "file-path"
                 },
                 "select_chr": {
