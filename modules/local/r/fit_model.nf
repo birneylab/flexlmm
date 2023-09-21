@@ -78,29 +78,40 @@ process FIT_MODEL {
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars, style = 3)
 
-    data <- model.frame(
-        fixed_effects_formula,
-        data = cbind(x = 0, gxe_frame)
-    )
     t <- terms(fixed_effects_formula)
-    data[["x"]] <- pgenlibr::Buf(pgen)
-
-    # for forwardsolve
-    k <- ncol(L)
-    upper.tri <- FALSE
-    transpose <- FALSE
+    var_promise <- attr(t, "variables")
+    var_names <- attr(t, "term.labels")
+    var_frame <- cbind(x = 0, gxe_frame)
+    var_frame[["x"]] <- pgenlibr::Buf(pgen)
 
     for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
 
-        pgenlibr::ReadHardcalls(pgen, data[["x"]], i)
-        X <- .External2(stats:::C_modelmatrix, t, data)
+        pgenlibr::ReadHardcalls(pgen, var_frame[["x"]], i)
+
+        # df with all the math operations like (x == 1) evaluated
+        curr_frame <- .External2(
+            stats:::C_modelframe,
+            t,
+            rownames(var_frame),
+            eval(var_promise, var_frame, NULL),
+            var_names,
+            NULL,
+            NULL,
+            NULL,
+            na.fail
+        )
+
+        # computes contrasts and interactions
+        X <- .External2(stats:::C_modelmatrix, t, curr_frame)
+
         # drop the intercept since it is already in C, cannot drop before model.matrix so
         # that contrast are calculated correctly
         X <- subset(X, select = -`(Intercept)`)
         X_names <- colnames(X)
+
         # forwardsolve(L, X) without the wrapper
-        X_mm <- .Internal(backsolve(L, X, k, upper.tri, transpose))
+        X_mm <- .Internal(backsolve(L, X, ncol(L), FALSE, FALSE))
 
         if ( ${do_permute} ) X_mm <- X_mm[gt_order, , drop = FALSE]
 
@@ -124,7 +135,9 @@ process FIT_MODEL {
         ll_fit <- stats:::logLik.lm(fit)
         lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
         lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
-        p_lrt <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
+        p_lrt <- (
+            if (lrt_df > 0) pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE) else NA
+        )
 
         lineout <- sprintf(
             "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
