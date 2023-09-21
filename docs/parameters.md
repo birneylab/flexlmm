@@ -1,6 +1,6 @@
-# birneylab/stitchimpute pipeline parameters
+# birneylab/flexlmm pipeline parameters
 
-A pipeline for imputing genotypes using STITCH, evaluating imputation performance against a ground truth, optimising imputation parameters, and refining the SNP set used
+Flexible linear mixed model framework for Genome Wide Association Studies
 
 ## Input/output options
 
@@ -8,54 +8,30 @@ Define where the pipeline should find input data and save output data.
 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| `input` | Path to comma-separated file containing information about the samples in the experiment. <details><summary>Help</summary><small>You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://github.com/birneylab/stitchimpute/usage#samplesheet-input).</small></details>| `string` |  | True |  |
-| `mode` | Which branch of the pipeline to run | `string` | imputation |  |  |
 | `outdir` | The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure. | `string` |  | True |  |
-| `skip_chr` | Chromosomes to skip <details><summary>Help</summary><small>Chromosomes from the reference provided that should not be imputed. Multiple chromosomes can be separated by commas. Es. "1,2,3".</small></details>| `string` |  |  |  |
-| `grid_search_params` | CSV files containing the values of the K and nGen parameters to be used for the grid search workflow <details><summary>Help</summary><small>Must have column names `K` and `nGen`. Each line corresponds to a combination of parameters to be tested.</small></details>| `string` |  |  |  |
-| `snp_filtering_criteria` | CSV file containing the threshold for inclusion of SNPs in the iterative refinement process <details><summary>Help</summary><small>TBD</small></details>| `string` |  |  |  |
+| `vcf` | VCF file containing the sample genotypes. Can be bgzip compressed. | `string` |  | True |  |
+| `pheno` | Phenotype file in PLINK2 format <details><summary>Help</summary><small>The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. <br><br>IID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).<br><br>For example:<br><br>#IID  qt1    bmi    site<br>1110  2.3    22.22  site2<br>2202  34.12  18.23  site1<br>...</small></details>| `string` |  | True |  |
+| `covar` | Categorical covariates. Same format as `pheno`. <details><summary>Help</summary><small>Columns cannot be named 'x' or 'y'.</small></details>| `string` |  |  |  |
+| `qcovar` | Quantitative covariates. Same format as `pheno`. | `string` |  |  |  |
+| `freq` | Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf`` is used. | `string` |  |  |  |
+| `select_chr` | Restrict analysis to a set of chromosomes <details><summary>Help</summary><small>Comma-separated string of chromosome names in `vcf`. If not specified all chromosomes are used. If a chromosome is specified still the rest of the genome is used to evaluate the LOCO relatedness matrix.</small></details>| `string` |  |  |  |
+| `select_pheno` | Restrict analysis to a set of phenotypes <details><summary>Help</summary><small>Comma-separated string of column names in `pheno` to be used as phenotypes. If not specified all the columns of `pheno` are used.</small></details>| `string` |  |  |  |
 | `email` | Email address for completion summary. <details><summary>Help</summary><small>Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.</small></details>| `string` |  |  |  |
 | `multiqc_title` | MultiQC report title. Printed as page header, used for filename if not otherwise specified. | `string` |  |  |  |
 
-## Stitch options
+## Statistical parameters
 
 
 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| `stitch_posfile` | Positions to run the imputation over <details><summary>Help</summary><small>Where to find file with positions to run. File is tab seperated with no header, one row per SNP, with col 1 = chromosome, col 2 = physical position (sorted from smallest to largest), col 3 = reference base, col 4 = alternate base. Bases are capitalized. Example first row: 1<tab>1000<tab>A<tab>G<tab></small></details>| `string` |  | True |  |
-| `stitch_K` | Number of ancestral haplotypes <details><summary>Help</summary><small>See STITCH documentation for more details. Required for imputation mode.</small></details>| `integer` |  |  |  |
-| `stitch_nGen` | Number of generations since founding of the population <details><summary>Help</summary><small>See STITCH documentation for more details. Required for imputation mode.</small></details>| `integer` |  |  |  |
-
-## Reference genome options
-
-Reference genome related files and options required for the workflow.
-
-| Parameter | Description | Type | Default | Required | Hidden |
-|-----------|-----------|-----------|-----------|-----------|-----------|
-| `genome` | Name of iGenomes reference. <details><summary>Help</summary><small>If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. <br><br>See the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details.</small></details>| `string` |  |  |  |
-| `fasta` | Path to FASTA genome file. <details><summary>Help</summary><small>This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.</small></details>| `string` |  |  |  |
-| `igenomes_base` | Directory / URL base for iGenomes references. | `string` | s3://ngi-igenomes/igenomes |  | True |
-| `igenomes_ignore` | Do not load the iGenomes reference config. <details><summary>Help</summary><small>Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`.</small></details>| `boolean` |  |  | True |
-
-## Ground truth
-
-
-
-| Parameter | Description | Type | Default | Required | Hidden |
-|-----------|-----------|-----------|-----------|-----------|-----------|
-| `ground_truth_vcf` | VCF file with ground truth calls <details><summary>Help</summary><small>Accepted format are vcf, vcf.gz, and bcf. Sample names must be identical to the sample names in the SM tag of the cram indicated in the samplesheet. Used to calculate per-sample correlation with the imputation results. The file is re-formatted appropriately and given in input to STITCH with the --genfile flag.</small></details>| `string` |  |  |  |
-| `downsample_coverage` | To what average depth should the ground truth cram files be downsampled to? <details><summary>Help</summary><small>To what average depth should the ground truth cram files be downsampled to? If not specidied no downsampling is done. Must be a numeric value.</small></details>| `number` |  |  |  |
-| `correlation_imputed_dosage_type` | Type of dosage to use in calculating the correlation <details><summary>Help</summary><small>Should the correlation with the ground truth be calculated on the posterior haplotype dosage ("soft"), or on the dosage corresponding to the posterior genotype that has maximal posterior probability ("hard")? The hard dosage is an integer [0, 1, 2], the soft dosage is a real number in [0, 2].</small></details>| `string` | soft |  | True |
-| `random_seed` | Random seed used for downsampling | `integer` |  |  |  |
-
-## Other options
-
-
-
-| Parameter | Description | Type | Default | Required | Hidden |
-|-----------|-----------|-----------|-----------|-----------|-----------|
-| `filter_var` | Variable to use for filtering the SNPs <details><summary>Help</summary><small>Can be "info_score" or "pearson_r". By default, if this is not set "pearson_r" is used if ground_truth_vcf is set, "info_score" otherwise. If ground_truth_vcf is not defined this is ignored and "info_score" is used in any case.</small></details>| `string` |  |  | True |
+| `quantile_normalise` | Should the phenotypes be quantile normalised? <details><summary>Help</summary><small>Forces phenotypes to a N(0, 1) distribution.</small></details>| `boolean` |  |  |  |
+| `standardise` | Should the phenotypes be mean-centered and variance-scaled? | `boolean` |  |  |  |
+| `null_model_formula` | R-style formula for the outer model that you want to use as a baseline. <details><summary>Help</summary><small>A string like 'y ~ cov1'. Here 'y' can be used to refer to the phenotype, and 'x' can be used to refer to the genotype. Column names in `covar` and `qcovar` can also be used. See https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula for more information on R formulas.</small></details>| `string` |  |  |  |
+| `model_formula` | R-style formula for the nested model that includes the variable of interest <details><summary>Help</summary><small>Similar to `null_model_formula`. Must contain all the terms in `null_model_formula` plus at least an extra one. You can also include GxE terms (es. 'y ~ x + x:cov1 + cov1'), and dominance terms ('y ~ x + (x == 1) + cov1'). Arithmetic operations such as '(x == 1)' must be enclosed in parentheses.</small></details>| `string` |  |  |  |
+| `permutations` | Number of permutations to be performed | `integer` | 1 |  |  |
+| `permute_by` | Perform permutation within pre-defined groups <details><summary>Help</summary><small>Must be a column name in `covar`. If specified, samples are exchaged in permutations only within the levels of the specified factor.</small></details>| `string` |  |  |  |
+| `p_thr` | Nominal significance threshold | `number` | 0.05 |  |  |
 
 ## Institutional config options
 
