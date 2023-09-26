@@ -17,7 +17,7 @@ Both models are specified by the user with the R formula interface.
 ![birneylab/stitchimpute_metro_map](docs/images/birneylab-stitchimpute_metro_map.png)
 
 1. Convert vcf genotypes to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
-1. Compute the relatedness matrix ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
+1. Compute the relatedness matrix for the whole genome and each LOCO subset ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Verify that the statistical model specified is nested in the null model ([`R language`](https://www.r-project.org/))
 1. Estimate variance components using the null model fixed effects and the relatedness matrix ([`gaston`](https://cran.r-project.org/web/packages/gaston/index.html))
 1. Run joint imputation with STITCH on high and low coverage cram files ([`STITCH`](https://doi.org/10.1038/ng.3594))
