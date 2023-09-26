@@ -41,7 +41,7 @@ Both models are specified by the user with the R formula interface.
 - Can include quantitative and/or categorical covariates
 - Permutations can be done within subgroups specified by a categorical covariate
 
-## To be implemented
+## To be implemented
 
 - Quantitative phenotypes (case-control studies)
 
