@@ -68,7 +68,7 @@ null_model_formula: y ~ cov1
 Here, `cov1` is the name of one of the columns of the file specified via `--covar` or `--qcovar`.
 The p-value here will indicate if any of the terms `x`, `(x==1)`, and `x:cov1` have an effect significantly different from 0, when an intercept and `cov1` are accounted for.
 
-The following formulas instead are _NOT_ valid:
+The following formulas instead are **NOT** valid:
 
 ```
 model_formula: y ~ x + (x==1) + x:cov1
@@ -124,37 +124,14 @@ nextflow run birneylab/stitchimpute \
 
 ## Pipeline output
 
-<!--
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/stitchimpute/results) tab on the nf-core website pipeline page.
--->
-
 For more details about the output files and reports, please refer to the
 [output documentation](docs/output.md).
 
 ## Credits
 
-<!--
-nf-core/stitchimpute was originally written by Saul Pierotti.
--->
-
-> birneylab/stitchimpute was originally written by Saul Pierotti.
-
-<!--
-> We thank the following people for their extensive assistance in the development of this pipeline:
-
-## Contributions and Support
-
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
-
-For further information or help, don't hesitate to get in touch on the [Slack `#stitchimpute` channel](https://nfcore.slack.com/channels/stitchimpute) (you can join with [this invite](https://nf-co.re/join/slack)).
--->
+> birneylab/flexlmm was originally written by Saul Pierotti.
 
 ## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  nf-core/stitchimpute for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
