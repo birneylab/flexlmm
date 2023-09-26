@@ -8,9 +8,25 @@
 ## Introduction
 
 **birneylab/flexlmm** is a bioinformatics pipeline that runs linear mixed models for Genome-Wide Association Studies.
-It is not particularly fast or different from other tools, but it is very flexible in the definition of the statistical model to be used.
+It is not particularly fast or different from other tools, but it is very flexible in the definition of the statistical model to be used and it uses permutations to correct for multiple testing and non-normal phenotypes.
 P-values are evaluated with a likelyhood ratio test among a 'null model' and a 'real model'.
-Both models
+Both models are specified by the user with the R formula interface.
+
+## Technical details
+
+This pipeline fits a Leave-One-Chromosome-Out (LOCO) mixed model using the 'null model' terms as fixed effects and the realised relatedness matrix as correlation matrix to estimate the variance components.
+The variance components are then used to estimate the variance-covariance matrix of the phenotypes.
+The square root of the variance-covariance matrix is determined via [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition), and this decomposition is used to rotate the response vector and the design matrix for each 'real model' before running [Ordinary Least Squares (OLS)](https://en.wikipedia.org/wiki/Ordinary_least_squares).
+Minus the fact that the fixed effect SNPs are not included in the variance components estimation (for performance reasons), fitting OLS to the rotated response and design matrix is mathematically equivalent to fitting Generalised Least Squares (i.e. fitting a mixed model) to the original response and design matrix.
+This is a fairly standard approach used for example [here](https://github.com/grimmlab/permGWAS).
+
+Permutations are run on the genotype vectors jointly, so that each genotype is permuted in the same way and linkage disequilibrium is maintained. Since phenotypes and covariates are not permuted, also their relationship is not altered.
+Genotype permutations are performed AFTER the Cholesky rotation, so that the relatedness structure is regressed out from the correct samples and only the residuals from that are permuted.
+This corresponds to a null hypothesis where the exchangeable quantities are the genotype identities when relatedness is accounted already for.
+See [here](https://doi.org/10.1186/s13059-021-02354-7) for an example of this approach being used in practice.
+
+Significance thresholds for a given nominal significance level are reported using [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction) and Westfall–Young permutations (see [here](https://doi.org/10.1093/bioinformatics/btac455)).
+If $m$ permutations are permuted, the significance threshold is set as the $t$ quantile of the empirical distribution given by the minimum p-values for each permutation (in total a set of $m$ p-values), where $t$ is the nominal significance desired.
 
 **Disclaimer**: this pipeline uses the nf-core template but it is not part of nf-core itself.
 
