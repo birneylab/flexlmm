@@ -51,7 +51,7 @@ The central concept of this pipeline is that of testing weather the model that w
 A p-value for this is obtained via a likelyhood ratio test.
 A condition for this test is that the null model must be nested in the real model. That is, the model must include all the terms present in the null model plus at least one extra term.
 
-The formulas in this pipeline are interpreted as [R formulas](<(https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula)>)
+The formulas in this pipeline are interpreted as [R formulas](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula).
 In the formulas used by this pipeline, it is allowed to refer to the genotype of a given SNP with the term `x`, and to the phenotype with the term `y`.
 An intercept is automatically included but can be remove by adding the term `0` or `-1` to the models.
 Derived quantities such as a dominance term (`x==1` for genotypes encoded as 0,1,2) can be used but must be enclosed in parenthesis.
