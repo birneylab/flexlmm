@@ -10,12 +10,45 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
+- [Convert genotypes](#convert-genotypes) - Convert genotypes to the pgen format
+- [Prepare inputs](#prepare-inputs) - Format and match the data for downstream processing
 - [Relatedness](#relatedness) - Computes full-genome and LOCO relatedness matrices
 - [Variance components](#variance-components) - Estimate genetic and residuals variances
 - [GWAS](#gwas) - Compute _p_-values and other SNP-wise statistics
 - [Permutations](#permutations) - Compute the distribution of the minimum _p_-values for each permutation
 - [Plots](#plots) - Plots of association results, _p_-value distributions, and relatedness matrices
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+
+### Convert genotypes
+
+Converts the vcf genotypes in pgen format.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genotypes/`
+  - `*.pgen`: binary plink2 file
+  - `*.psam`: sample ids
+  - `*.pvar.zst`: variant information compressed with zstandard
+
+</details>
+
+### Prepare inputs
+
+Matches samples between the various files, and expands categorical covariates and interaction terms. All matrices are in RDS format and can be loaded into R with the `loadRDS` function.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `model_matrices/{phenotype_name}/{chromosome_name}`
+ - `*.K.rds`: LOCO relatedness matrix for the current chromosome and phenotype
+ - `*.C.rds`: matrix of fixed-effects for the null
+ - `*.y.rds`: phenotype vector
+ - `*.gxe_frame.matched.rds`: `data.frame` object with all the covariates needed converted to the correct types.
+ - `*.perm_group.matched.rds`: vector of groups memberships to be respected in the permutations
+ - `*.sample.id`: text file with ordered sample names, one per line
+
+</details>
 
 ### Relatedness
 
