@@ -124,8 +124,6 @@ nextflow run birneylab/stitchimpute \
    -profile <docker/singularity/.../institute> \
    --vcf input.vcf.gz \
    --pheno input.pheno \
-   --model_formula 'y ~ x' \
-   --null_model_formula 'y ~ 1' \
    --outdir <OUTDIR>
 ```
 
@@ -135,6 +133,9 @@ nextflow run birneylab/stitchimpute \
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 > For more details and further functionality, please refer to the [usage documentation](docs/usage.md) and the [parameter documentation](docs/parameters.md).
+
+> **WARNING**:
+> It is highly recommended to use the docker or singularity profile. Some processes do not have a working conda configuration.
 
 ## Pipeline output
 
