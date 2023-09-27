@@ -87,7 +87,7 @@ Except for the fact that the fixed effect SNPs are not included in the variance 
 This is a fairly standard approach used for example [here](https://github.com/grimmlab/permGWAS).
 
 Permutations are run on the genotype vectors jointly, so that each genotype is permuted in the same way and linkage disequilibrium is maintained. Since phenotypes and covariates are not permuted, also their relationship is not altered.
-Genotype permutations are performed AFTER the Cholesky rotation, so that the relatedness structure is regressed out from the correct samples and only the residuals from that are permuted.
+Genotype permutations are performed AFTER the Cholesky rotation, so that the relatedness structure is regressed out from the correct samples and only the residuals from this operation are permuted.
 This corresponds to a null hypothesis where the exchangeable quantities are the genotype identities when relatedness is accounted already for.
 See [here](https://doi.org/10.1186/s13059-021-02354-7) for an example of this approach being used in practice.
 
