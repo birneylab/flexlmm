@@ -11,8 +11,9 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [Relatedness](#relatedness) - Computes full-genome and LOCO relatedness matrices
-- [Variance components](#variance) - Estimate genetic and residuals variances
-- [Fit model](#fit) - Compute _p_-values and other SNP-wise statistics
+- [Variance components](#variance-components) - Estimate genetic and residuals variances
+- [GWAS](#gwas) - Compute _p_-values and other SNP-wise statistics
+- [Permutations](#permutations) - Compute the distribution of the minimum _p_-values for each permutation
 - [Plots](#plots) - Plots of association results, _p_-value distributions, and relatedness matrices
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
@@ -44,14 +45,14 @@ Estimates of the genetic and enviromental variances for each LOCO relatedness ma
 
 </details>
 
-### Fit model
+### GWAS
 
 GWAS result as compressed tab-separated file with header line, one file for each chromosome and phenotype.
-Columns are:
 
 <details markdown="1">
 <summary>Format description</summary>
 
+The columns are:
 - `chr`: chromosome name
 - `pos`: position of the variant
 - `ref`: reference allele
@@ -71,23 +72,14 @@ Columns are:
 
 </details>
 
-### Performance
+### Permutations
 
-Imputation performance per SNP according to different metrics. The summary file has the following columns:
-
-```
-chr,pos,ref,alt,info_score,pearson_r
-```
-
-The `pearson_r` column is present only if `ground_truth_vcf` is set.
+For each permutation, the minimum _p_-value is collected in a data frame together with the number of tests performed for that permutationand the permutation ID (which is also the random seed used). One file per phenotype will be present.
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `{group}/performance_summaries`
-  - `joint_stitch_output.performance.csv.gz`: CSV file containing the imputation performance results
-- `imputation_quality_plots`
-  - `*.pdf`: Plots produced in R with ggplot2 and cowplot showing the cumulative density of the different performance metrics, group by iteration/parameter combination in the respective workflows
+- `permutations/*.min_p_dist.rds`: An RDS file that can be loaded in R with the `loadRDS` function. It contains a `data.frame` object with columns `permutation,min_p,n_snps`
 
 </details>
 
