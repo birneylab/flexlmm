@@ -31,7 +31,7 @@
                     "format": "file-path",
                     "mimetype": "text/tsv",
                     "fa_icon": "fas fa-file",
-                    "help_text": "The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. \n\nIID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).\n\nSee an [example file](assets/test_data/tsv/pheno.tsv)"
+                    "help_text": "The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. \n\nIID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).\n\nSee an [example file](../assets/test_data/tsv/pheno.tsv)"
                 },
                 "covar": {
                     "type": "string",
@@ -39,32 +39,34 @@
                     "format": "file-path",
                     "mimetype": "text/tsv",
                     "fa_icon": "fas fa-file",
-                    "help_text": "Columns cannot be named 'x' or 'y'."
+                    "help_text": "Columns cannot be named 'x', 'y', 'ID', '#ID', 'FID', or '#FID', or have the same name of columns in `qcovar` .\n\nSee an [example file](../assets/test_data/tsv/covar.tsv)"
                 },
                 "qcovar": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
                     "description": "Quantitative covariates. Same format as `pheno`.",
                     "format": "file-path",
-                    "mimetype": "text/tsv"
+                    "mimetype": "text/tsv",
+                    "help_text": "Columns cannot be named 'x', 'y', 'ID', '#ID', 'FID', or '#FID', or have the same name of columns in `covar` .\n\nSee an [example file](../assets/test_data/tsv/qcovar.tsv)"
                 },
                 "freq": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
                     "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf` is used.",
-                    "format": "file-path"
+                    "format": "file-path",
+                    "help_text": ""
                 },
                 "select_chr": {
                     "type": "string",
                     "fa_icon": "fas fa-question",
                     "description": "Restrict analysis to a set of chromosomes",
-                    "help_text": "Comma-separated string of chromosome names in `vcf`. If not specified all chromosomes are used. If a chromosome is specified still the rest of the genome is used to evaluate the LOCO relatedness matrix."
+                    "help_text": "Comma-separated string of chromosome names in `vcf`. If not specified all chromosomes are used. If a chromosome is specified still the rest of the genome is used to evaluate the LOCO relatedness matrix.\n\nExample: '1,2,3'"
                 },
                 "select_pheno": {
                     "type": "string",
                     "fa_icon": "fas fa-question",
                     "description": "Restrict analysis to a set of phenotypes",
-                    "help_text": "Comma-separated string of column names in `pheno` to be used as phenotypes. If not specified all the columns of `pheno` are used."
+                    "help_text": "Comma-separated string of column names in `pheno` to be used as phenotypes. If not specified all the columns of `pheno` are used.\n\nExample: 'pheno1,pheno2'"
                 },
                 "email": {
                     "type": "string",
@@ -72,11 +74,6 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-                },
-                "multiqc_title": {
-                    "type": "string",
-                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature"
                 }
             }
         },
