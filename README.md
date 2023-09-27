@@ -1,11 +1,11 @@
-# ![birneylab/flexlmm](docs/images/birneylab-flexlmm_name_light.svg#gh-light-mode-only) ![birneylab/flexlmm](docs/images/birneylab-flexlmm_name_dark.svg#gh-dark-mode-only)
+# ![birneylab/flexlmm](docs/images/birneylab-flexlmm_name_dark.png#gh-light-mode-only) ![birneylab/flexlmm](docs/images/birneylab-flexlmm_name_dark.png#gh-dark-mode-only)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
-## Introduction
+## Introductiot
 
 **birneylab/flexlmm** is a bioinformatics pipeline that runs linear mixed models for Genome-Wide Association Studies.
 It is not particularly fast or different from other tools, but it is very flexible in the definition of the statistical model to be used and it uses permutations to correct for multiple testing and non-normal phenotypes.
