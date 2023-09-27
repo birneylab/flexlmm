@@ -54,10 +54,9 @@ Columns are:
 - `ref`: reference allele
 - `alt`: alternate allele
 - `lrt_chisq`: $\chi^2$ value of the Likelihood-ratio test
-- `lrt_df`: degrees of freedom of the Likelihood-ratio test (number of extra parameters in the real model compared to the null model)
-- `lrt_p`: _p_-value computed from `lrt_chisq` and `lrt_df`
-- `beta`: fixed effect sizes for all the terms (including intercept and covariates)
-  - This column contains several values. For each parameter, it contains the string `variable_name~beta_value`. This is separated by commas from other variable_name-beta_value pairs. Example of the content of the `beta` column for one line: `var1~0.3,var2~0.6,(Intercept)~2,x~1.2,x==1TRUE~0.9`
+- `lrt_df`: degrees of freedom of the Likelihood-ratio test (number of extra parameters in the real model)
+- `lrt_p`
+- `beta`
 
 <details markdown="1">
 <summary>Output files</summary>
