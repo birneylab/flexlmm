@@ -12,11 +12,19 @@
 
 - [plink2](https://www.cog-genomics.org/plink/2.0/)
 
+> Chang CC, Chow CC, Tellier LCAM, Vattikuti S, Purcell SM, Lee JJ (2015) Second-generation PLINK: rising to the challenge of larger and richer datasets. GigaScience, 4.
+
 - [R language](https://www.r-project.org/)
+
+> R Core Team. (YEAR). R: A Language and Environment for Statistical Computing.
 
 - [Gaston](https://cran.r-project.org/web/packages/gaston/index.html)
 
+> Dandine et al. 46th European Mathematical Genetics Meeting (EMGM) 2018, Cagliari, Italy, April 18-20, 2018: Abstracts. (2018, June 26). S. Karger AG. doi: 10.1159/000488519
+
 - [ggplot2](https://ggplot2.tidyverse.org/)
+
+> Hadley Wickham (2016). ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York.
 
 - [ComplexHeatmap](https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html)
 
