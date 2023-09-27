@@ -124,6 +124,8 @@ nextflow run birneylab/stitchimpute \
    -profile <docker/singularity/.../institute> \
    --vcf input.vcf.gz \
    --pheno input.pheno \
+   --model_formula 'y ~ x' \
+   --null_model_formula 'y ~ 1' \
    --outdir <OUTDIR>
 ```
 

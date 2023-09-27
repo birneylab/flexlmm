@@ -53,8 +53,7 @@
                     "type": "string",
                     "fa_icon": "fas fa-file",
                     "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf` is used.",
-                    "format": "file-path",
-                    "help_text": ""
+                    "format": "file-path"
                 },
                 "select_chr": {
                     "type": "string",
@@ -109,7 +108,7 @@
                 },
                 "permutations": {
                     "type": "integer",
-                    "default": 1,
+                    "default": 10,
                     "fa_icon": "fas fa-list-ol",
                     "description": "Number of permutations to be performed"
                 },
@@ -125,7 +124,8 @@
                     "fa_icon": "fas fa-arrow-right",
                     "description": "Nominal significance threshold"
                 }
-            }
+            },
+            "required": ["null_model_formula", "model_formula"]
         },
         "institutional_config_options": {
             "title": "Institutional config options",
