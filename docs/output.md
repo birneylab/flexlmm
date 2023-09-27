@@ -42,7 +42,7 @@ Matches samples between the various files, and expands categorical covariates an
 
 - `model_matrices/{phenotype_name}/{chromosome_name}/`
   - `*.K.rds`: LOCO relatedness matrix for the current chromosome and phenotype
-  - `*.C.rds`: matrix of fixed-effects for the null
+  - `*.C.rds`: matrix of fixed-effects for the null model
   - `*.y.rds`: phenotype vector
   - `*.gxe_frame.matched.rds`: `data.frame` object with all the covariates needed converted to the correct types.
   - `*.perm_group.matched.rds`: vector of groups memberships to be respected in the permutations
