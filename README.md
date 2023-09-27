@@ -22,7 +22,7 @@ Both models are specified by the user with the [R formula interface](https://www
 1. Estimate variance components using the null model fixed effects and the relatedness matrix ([`gaston`](https://cran.r-project.org/web/packages/gaston/index.html))
 1. Compute the Cholesky decomposition of the phenotype variance-covariance matrix ([`R language`](https://www.r-project.org/))
 1. Remove the covariance structure from the phenotypes and fixed effect covariates ([`R language`](https://www.r-project.org/))
-1. Fit the null and complete models for each SNP, and compute a p-value using a likelyhood ratio test ([`R language`](https://www.r-project.org/))
+1. Fit the null and complete models for each SNP, and compute a _p_-value using a likelyhood ratio test ([`R language`](https://www.r-project.org/))
 1. Fit the model and compute p-values for each permutation of the genotypes ([`R language`](https://www.r-project.org/))
 1. Compute the significance threshold using the Westfall–Young minP approach ([`R language`](https://www.r-project.org/))
 1. Make the final plots ([`ggplot2`](https://ggplot2.tidyverse.org/)):
