@@ -1,4 +1,4 @@
-# birneylab/stitchimpute: Citations
+# birneylaDaskb/flexlmm: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
@@ -10,21 +10,17 @@
 
 ## Pipeline tools
 
-- [STITCH](https://github.com/rwdavies/STITCH)
+- [plink2](https://www.cog-genomics.org/plink/2.0/)
 
-  > Davies, R., Flint, J., Myers, S. et al. Rapid genotype imputation from sequence without reference panels. Nat Genet 48, 965–969 (2016). https://doi.org/10.1038/ng.3594
+- [R language](https://www.r-project.org/)
 
-- [Scikit-allel](https://scikit-allel.readthedocs.io/en/stable/)
+- [Gaston](https://cran.r-project.org/web/packages/gaston/index.html)
 
-- [Anndata](https://anndata.readthedocs.io/en/latest/)
+- [ggplot2](https://ggplot2.tidyverse.org/)
 
-- [Zarr](https://zarr.dev/)
+- [ComplexHeatmap](https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html)
 
-- [Dask](https://www.dask.org/)
-
-- [Samtools and Bcftools](http://www.htslib.org/)
-
-  > Danecek P, Bonfield JK, Liddle J, Marshall J, Ohan V, Pollard MO, Whitwham A, Keane T, McCarthy SA, Davies RM, Li H, Twelve years of SAMtools and BCFtools, GigaScience (2021) 10(2) giab008 [33590861]
+> Gu, Z., Eils, R., & Schlesner, M. (2016). Complex heatmaps reveal patterns and correlations in multidimensional genomic data. Bioinformatics, 32(18), 2847–2849. doi: 10.1093/bioinformatics/btw313
 
 ## Software packaging/containerisation tools
 
