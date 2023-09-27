@@ -1,8 +1,4 @@
-# birneylab/stitchimpute: Output
-
-<!--
-# nf-core/stitchimpute: Output
--->
+# birneylab/flexlmm: Output
 
 ## Introduction
 
@@ -10,32 +6,30 @@ This document describes the output produced by the pipeline.
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
-According to the pipeline workflow selected, the output folder with have different subfolders, which I indicate as `{group}` in the following explanation.
-`{group}` will be nothing in the imputation workflow.
-In the grid search workflow, it will be a string "K*{K}\_nGen*{nGen}" with the corresponding value of K and nGen for a given combination of parameters.
-In the SNP set refinement workflow, it will be a string "iteration\_{n}" with the corresponding iteration number.
-
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [Ground truth](#groundtruth) - Conversion of the ground truth to the anndata format and downsampling of high-coverage cram files
-- [Stitch](#stitch) - Raw output from the STITCH imputation per chromosome
-- [Joint output](#joint) - Full-genome imputation output
-- [Performance](#performance) - Imputation performance per SNP according to different metrics
+- [Relatedness](#grm) - Computes full-genome and LOCO relatedness matrices
+- [Variance components](#reml) - Estimate genetic and residuals variances
+- [Fit model](#fit) - Compute _p_-values and other SNP-wise statistics
+- [Plots](#plots) - Plots of association results, _p_-value distributions, and relatedness matrices
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
-### Ground truth
+### Relatedness
 
-Conversion of the ground truth to the anndata format and downsampling of high-coverage cram files
+Computation of the genetic relatedness matrices for the full genome and with each chromosome left out (LOCO).
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `ground_truth/`
-  - `anndata/*.anndata.zarr`: Information from `ground_truth_vcf` in anndata zarr format for easier manipulation
-  - `downsampled_reads/*.cram`: Downsampled version of the cram files used in the pipeline
-  - `downsampled_reads/*.cram.crai`: Index files for the downsampled cram files
+- `relatedness_matrix/`
+  - `loco/{left_out_chromosome_name}`: relatedness matrix evaluated on the full genome except for the named chromosome
+    - `*.rel.bin`: [binary plink format](https://www.cog-genomics.org/plink/2.0/distance)
+    - `*.rel.id`: sample IDs
+  - `full_genome/*.cram`: relatedness matrix evaluated on the full genome
+    - `*.rel.bin`: [binary plink format](https://www.cog-genomics.org/plink/2.0/distance)
+    - `*.rel.id`: sample IDs
 
 </details>
 
