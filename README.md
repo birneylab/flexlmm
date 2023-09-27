@@ -94,6 +94,19 @@ See [here](https://doi.org/10.1186/s13059-021-02354-7) for an example of this ap
 Significance thresholds for a given nominal significance level are reported using [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction) and Westfall–Young permutations (see [here](https://doi.org/10.1093/bioinformatics/btac455)).
 If $m$ permutations are performed, the significance threshold is set as the $t$ quantile of the empirical distribution given by the minimum p-values for each permutation (in total a set of $m$ p-values), where $t$ is the nominal significance desired.
 
+## Integration with [birneylab/stitchimpute](https://github.com/birneylab/stitchimpute)
+
+In order to use a vcf file obtained from the **birneylab/stitchimpute** pipeline, activate the `stitch` profile with the flag `-profile stitch`.
+This correctly loads the dosage information and fills missing genotypes.
+
+## Birneylab-specific information
+
+For ease of use, the ideal settings for stitch for medaka samples have been specified in a profile called `medaka`.
+This can be activated with the flag `-profile medaka`.
+Always use this profile when working with medaka samples.
+If the genotypes that you are using have been obtained with the *birneylab/stitchimpute* pipeline, you should also use the `stitch` profile.
+In this case the flag to be used is `-profile medaka,stitch`
+
 ## Usage
 
 > **Note**
