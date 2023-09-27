@@ -67,7 +67,7 @@ null_model_formula: y ~ cov1
 ```
 
 Here, `cov1` is the name of one of the columns of the file specified via `--covar` or `--qcovar`.
-The p-value here will indicate if any of the terms `x`, `(x==1)`, and `x:cov1` have an effect significantly different from 0, when an intercept and `cov1` are accounted for.
+The _p_-value that you will obtain in this case will indicate if any of the terms `x`, `(x==1)`, and `x:cov1` have an effect significantly different from 0, when an intercept and `cov1` are accounted for.
 
 The following formulas instead are **NOT** valid:
 
