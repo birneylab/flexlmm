@@ -5,7 +5,7 @@
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
-## Introductiot
+## Introduction
 
 **birneylab/flexlmm** is a bioinformatics pipeline that runs linear mixed models for Genome-Wide Association Studies.
 It is not particularly fast or different from other tools, but it is very flexible in the definition of the statistical model to be used and it uses permutations to correct for multiple testing and non-normal phenotypes.
