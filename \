@@ -54,12 +54,12 @@ A condition for this test is that the null model must be nested in the real mode
 
 In this pipeline both models are supplied by the user in the form of [R formulas](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula) using the parameters `null_model_formula` and `model_formula`.
 In the formulas is possible to refer to the genotype of a given SNP with the term `x`, and to the phenotype with the term `y`.
-An intercept is automatically included but can be removed by adding the term `0` or `-1` to the models.
-Derived quantities such as a dominance term (i.e. `x==1` for genotypes encoded as 0,1,2) can be used but must be enclosed in parenthesis.
+An intercept is automatically included but can be remove by adding the term `0` or `-1` to the models.
+Derived quantities such as a dominance term (`x==1` for genotypes encoded as 0,1,2) can be used but must be enclosed in parenthesis.
 Names of the columns in the covariate and quantitative covariate file can also be used.
 Consult the [parameter documentation](docs/parameters.md) to see how these files should be formatted.
 
-A valid real model and null model formula pair is for example:
+A valid model and null model formula pair is for example:
 
 ```
 model_formula: y ~ x + (x==1) + x:cov1 + cov1
