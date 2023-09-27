@@ -11,8 +11,8 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [Relatedness](#relatedness) - Computes full-genome and LOCO relatedness matrices
-- [Variance components](#variance components) - Estimate genetic and residuals variances
-- [Fit model](#fit model) - Compute _p_-values and other SNP-wise statistics
+- [Variance components](#variance) - Estimate genetic and residuals variances
+- [Fit model](#fit) - Compute _p_-values and other SNP-wise statistics
 - [Plots](#plots) - Plots of association results, _p_-value distributions, and relatedness matrices
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
@@ -49,6 +49,9 @@ Estimates of the genetic and enviromental variances for each LOCO relatedness ma
 GWAS result as compressed tab-separated file with header line, one file for each chromosome and phenotype.
 Columns are:
 
+<details markdown="1">
+<summary>Format description</summary>
+
 - `chr`: chromosome name
 - `pos`: position of the variant
 - `ref`: reference allele
@@ -58,6 +61,8 @@ Columns are:
 - `lrt_p`: _p_-value computed from `lrt_chisq` and `lrt_df`
 - `beta`: fixed effect sizes for all the terms (including intercept and covariates)
   - This column contains several values. For each parameter, it contains the string `variable_name~beta_value`. This is separated by commas from other variable_name-beta_value pairs. Example of the content of the `beta` column for one line: `var1~0.3,var2~0.6,(Intercept)~2,x~1.2,x==1TRUE~0.9`
+
+</details>
 
 <details markdown="1">
 <summary>Output files</summary>
