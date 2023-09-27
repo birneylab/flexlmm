@@ -14,7 +14,7 @@ Both models are specified by the user with the [R formula interface](https://www
 
 **Disclaimer**: this pipeline uses the nf-core template but it is not part of nf-core itself.
 
-![birneylab/stitchimpute_metro_map](docs/images/birneylab-stitchimpute_metro_map.png)
+![birneylab/stitchimpute_metro_map](docs/images/birneylab_flexlmm_drawing.png)
 
 1. Convert vcf genotypes to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Compute the relatedness matrix for the whole genome and each LOCO subset ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
