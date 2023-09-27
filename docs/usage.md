@@ -5,7 +5,11 @@
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run birneylab/stitchimpute --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run birneylab/flexlmm \
+  --vcf ./input.vcf \
+  --pheno ./input.pheno \
+  --outdir ./results \
+  -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -28,15 +32,15 @@ Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <
 The above pipeline run specified with a params file in yaml format:
 
 ```bash
-nextflow run birneylab/stitchimpute -profile docker -params-file params.yaml
+nextflow run birneylab/flexlmm -profile docker -params-file params.yaml
 ```
 
 with `params.yaml` containing:
 
 ```yaml
-input: './samplesheet.csv'
+vcf: './input.vcf'
 outdir: './results/'
-genome: 'GRCh37'
+pheno: './input.pheno'
 <...>
 ```
 
