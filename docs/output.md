@@ -69,7 +69,7 @@ Computation of the genetic relatedness matrices for the full genome and with eac
 
 ### Variance components
 
-Estimates of the genetic and enviromental variances for each LOCO relatedness matrix and each phenotype. Can also be used to estimate heritability. RDS objects that can be loaded into R using the `loadRDS` function. They contain the whole object retured by the call to `gaston::lmm.aireml`.
+Estimates of the genetic and enviromental variances for each LOCO relatedness matrix and each phenotype. Can also be used to estimate heritability. RDS objects that can be loaded into R using the `loadRDS` function. They contain the whole object retured by the call to [`gaston::lmm.aireml`](https://cran.r-project.org/web/packages/gaston/index.html).
 
 <details markdown="1">
 <summary>Output files</summary>
