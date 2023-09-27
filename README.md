@@ -136,7 +136,7 @@ nextflow run birneylab/stitchimpute \
 
 > For more details and further functionality, please refer to the [usage documentation](docs/usage.md) and the [parameter documentation](docs/parameters.md).
 
-> **WARNING**:
+> **Warning**:
 > It is highly recommended to use the docker or singularity profile. Some processes do not have a working conda configuration.
 
 ## Pipeline output
