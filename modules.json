@@ -1,15 +1,9 @@
 {
-  "name": "birneylab/stitchimpute",
-  "homePage": "https://github.com/birneylab/stitchimpute",
+  "name": "birneylab/flexlmm",
+  "homePage": "https://github.com/birneylab/flexlmm",
   "repos": {
     "https://github.com/nf-core/modules.git": {
       "modules": {
-        "nf-core": {
-          "bcftools/index": {
-            "branch": "master",
-            "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-            "installed_by": ["modules"]
-          },
           "custom/dumpsoftwareversions": {
             "branch": "master",
             "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",
