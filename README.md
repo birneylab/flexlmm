@@ -83,7 +83,7 @@ This is because the null model contains the term `cov1` which is not present in 
 This pipeline fits a Leave-One-Chromosome-Out (LOCO) mixed model using the 'null model' terms as fixed effects and the realised relatedness matrix as correlation matrix to estimate the variance components.
 The variance components are then used to estimate the variance-covariance matrix of the phenotypes.
 The square root of the variance-covariance matrix is determined via [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition), and this decomposition is used to rotate the response vector and the design matrix for each 'real model' before running [Ordinary Least Squares (OLS)](https://en.wikipedia.org/wiki/Ordinary_least_squares).
-Minus the fact that the fixed effect SNPs are not included in the variance components estimation (for performance reasons), fitting OLS to the rotated response and design matrix is mathematically equivalent to fitting Generalised Least Squares (i.e. fitting a mixed model) to the original response and design matrix.
+Except for the fact that the fixed effect SNPs are not included in the variance components estimation (for performance reasons), fitting OLS to the rotated response and design matrix is mathematically equivalent to fitting Generalised Least Squares (i.e. fitting a mixed model) to the original response and design matrix.
 This is a fairly standard approach used for example [here](https://github.com/grimmlab/permGWAS).
 
 Permutations are run on the genotype vectors jointly, so that each genotype is permuted in the same way and linkage disequilibrium is maintained. Since phenotypes and covariates are not permuted, also their relationship is not altered.
