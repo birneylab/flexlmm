@@ -83,6 +83,23 @@ For each permutation, the minimum _p_-value is collected in a data frame togethe
 
 </details>
 
+### Plots
+
+Manhattan plots of the GWAS results, QQ plots, and heatmaps of the relatedness matrices.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `plots/`
+  - `manhattan/*.png`: Manhattan plots, one per phenotype
+  - `qq/*.png`: quantile-quantile (qq) plots, one per phenotype
+  - `relatednss_matrix`
+    - `loco/{left_out_chromosome_name}/*.png`: LOCO relatedness matrix heatmaps, one per chromosome and phenotype
+    - `full_genome/*.png`: full-genome relatedness matrix heatmaps, one per phenotype
+
+</details>
+
+
 ### Pipeline information
 
 <details markdown="1">
@@ -96,12 +113,3 @@ For each permutation, the minimum _p_-value is collected in a data frame togethe
 </details>
 
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
-
-## Note on anndata, scikit-allel, and zarr
-
-[Zarr](https://zarr.dev/) is a format for the storage of large multidimensional arrays.
-Combined with [Dask](https://www.dask.org/), zarr allows to operate on larger-than-memory matrices.
-[Anndata](https://anndata.readthedocs.io/en/latest/) is a Python package that provides an annotated data matrix. It can use zarr as a storage format and Dask for certain computations.
-Internally the pipeline uses [scikit-allel](https://scikit-allel.readthedocs.io/en/stable/) to convert VCF files to the zarr format, and then with a custom script it converts the scikit-allel output to an anndata object that is serialised to the zarr format. This enormously simplifies data manipulations and minimises the chance for errors.
-
-Since the zarr anndata objects are produced by the pipeline in any case, I also save them as outputs for further exploration and for interfacing with other pipelines (e.g. GWAS pipeline).
