@@ -83,9 +83,8 @@ Estimates of the genetic and enviromental variances for each LOCO relatedness ma
 GWAS result as compressed tab-separated file with header line, one file for each chromosome and phenotype.
 
 <details markdown="1">
-<summary>Format description</summary>
+<summary>Column description</summary>
 
-The columns are:
 - `chr`: chromosome name
 - `pos`: position of the variant
 - `ref`: reference allele
