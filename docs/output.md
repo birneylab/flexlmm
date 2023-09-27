@@ -74,7 +74,7 @@ The columns are:
 
 ### Permutations
 
-For each permutation, the minimum _p_-value is collected in a data frame together with the number of tests performed for that permutationand the permutation ID (which is also the random seed used). One file per phenotype will be present.
+For each permutation, the minimum _p_-value is collected in a data frame together with the number of tests performed for that permutation and the permutation ID (which is also the random seed used). One file per phenotype will be present.
 
 <details markdown="1">
 <summary>Output files</summary>
