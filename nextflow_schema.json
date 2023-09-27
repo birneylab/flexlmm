@@ -31,7 +31,7 @@
                     "format": "file-path",
                     "mimetype": "text/tsv",
                     "fa_icon": "fas fa-file",
-                    "help_text": "The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. \n\nIID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).\n\nFor example:\n\n```\n#IID  qt1    bmi    site\n1110  2.3    22.22  site2\n2202  34.12  18.23  site1\n...\n```"
+                    "help_text": "The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. \n\nIID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).\n\nSee an [example file](assets/test_data/tsv/pheno.tsv)"
                 },
                 "covar": {
                     "type": "string",
