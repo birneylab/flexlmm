@@ -43,6 +43,8 @@ with `params.yaml` containing:
 vcf: './input.vcf'
 outdir: './results/'
 pheno: './input.pheno'
+null_model_formula: 'y ~ 1'
+model_formula: 'y ~ x'
 <...>
 ```
 
