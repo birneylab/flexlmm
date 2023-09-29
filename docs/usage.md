@@ -8,8 +8,8 @@ The typical command for running the pipeline is as follows:
 nextflow run birneylab/flexlmm \
   --vcf ./input.vcf \
   --pheno ./input.pheno \
-   --model_formula 'y ~ x' \
-   --null_model_formula 'y ~ 1' \
+  --model_formula 'y ~ x' \
+  --null_model_formula 'y ~ 1' \
   --outdir ./results \
   -profile docker
 ```
