@@ -120,7 +120,7 @@ Instead, the required files are all specified with dedicated parameters.
 You can run the pipeline using:
 
 ```bash
-nextflow run birneylab/stitchimpute \
+nextflow run birneylab/flexlmm \
    -profile <docker/singularity/.../institute> \
    --vcf input.vcf.gz \
    --pheno input.pheno \
