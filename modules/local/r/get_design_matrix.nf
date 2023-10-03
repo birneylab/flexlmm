@@ -89,13 +89,14 @@ process GET_DESIGN_MATRIX {
         df <- data.frame(IID = samples)
     }
 
+    rownames(df) <- df[["IID"]]
+
     fixed_vars <- all.vars(fixed_effects_formula)
     # this includes any covariate used (even if not in a gxe term) but it is fine, it
     # will just not be used downstream
     gxe_vars <- fixed_vars[fixed_vars != "x"]
     if ( length(gxe_vars) > 0 ){
         gxe_frame <- subset(df, select = gxe_vars)
-        rownames(gxe_frame) <- df[["IID"]]
     } else {
         gxe_frame <- data.frame(row.names = samples)
     }
@@ -115,7 +116,6 @@ process GET_DESIGN_MATRIX {
     saveRDS(perm_group, "${prefix}.perm_group.rds")
 
     C <- model.matrix(covariate_formula, data = df)
-    rownames(C) <- df[["IID"]]
     saveRDS(C, "${prefix}.covariate_mat.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
