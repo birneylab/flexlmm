@@ -11,7 +11,7 @@ process FIT_MODEL {
     path intercepts
 
     output:
-    tuple val(meta), path("*.gwas.tsv.gz") , emit: gwas
+    tuple val(meta), path("*.tsv.gwas.gz") , emit: gwas
 
     path "versions.yml"                    , emit: versions
 
@@ -83,7 +83,7 @@ process FIT_MODEL {
     fit_null <- .lm.fit(x = C, y = y)
     ll_null  <- stats:::logLik.lm(fit_null)
 
-    outname <- "${prefix}.gwas.tsv.gz"
+    outname <- "${prefix}.tsv.gwas.gz"
     out_con <- gzfile(outname, "w")
     header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval\\tbeta"
     writeLines(header, out_con)
@@ -195,7 +195,7 @@ process FIT_MODEL {
     def args        = task.ext.args ?: ''
     def prefix      = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.gwas.tsv.gz
+    touch ${prefix}.tsv.gwas.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
