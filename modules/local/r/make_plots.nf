@@ -46,7 +46,7 @@ process MANHATTAN {
         group_by(chr) %>%
         summarize(center = mean(pos_cum))
 
-    p <- ggplot(df, aes(x = pos_cum, y = -log10(lrt_p), color = as.factor(chr))) +
+    p <- ggplot(df, aes(x = pos_cum, y = -log10(pval), color = as.factor(chr))) +
         geom_point(size = 0.8, alpha = 0.75) +
         geom_hline(yintercept = -log10(perm_thr), color = "red") +
         geom_hline(yintercept = -log10(bonferroni_thr), color = "blue") +
@@ -143,10 +143,10 @@ process QQ {
     gwas_files <- list.files(pattern = "*.gwas.tsv.gz")
     df <- lapply(gwas_files, read_tsv) %>%
         bind_rows() %>%
-        arrange(lrt_p) %>%
+        arrange(pval) %>%
         reframe(
-            sample = -log10(lrt_p),
-            theoretical = -log10(qunif(ppoints(lrt_p)))
+            sample = -log10(pval),
+            theoretical = -log10(qunif(ppoints(pval)))
         )
 
     p <- ggplot(df, aes(x = theoretical, y = sample)) +
@@ -225,7 +225,7 @@ process RELATEDNESS {
     K <- matrix(K_vec, nrow = length(samples))
     K.clust <- hclust(as.dist(max(K) - K))
     vals <- c(min(K), mean(K), max(K))
-    if (unique(vals != 3)) {
+    if (length(unique(vals)) != 3) {
         vals <- c(-1, 0, 1)
     }
 

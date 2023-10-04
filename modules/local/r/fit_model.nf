@@ -85,7 +85,7 @@ process FIT_MODEL {
 
     outname <- "${prefix}.gwas.tsv.gz"
     out_con <- gzfile(outname, "w")
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tlrt_p\\tbeta"
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval\\tbeta"
     writeLines(header, out_con)
     nvars <- pgenlibr::GetVariantCt(pgen)
     pb <- txtProgressBar(1, nvars, style = 3)
@@ -149,7 +149,7 @@ process FIT_MODEL {
         ll_fit <- stats:::logLik.lm(fit)
         lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
         lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
-        p_lrt <- (
+        pval <- (
             if (lrt_df > 0) pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE) else NA
         )
 
@@ -162,7 +162,7 @@ process FIT_MODEL {
             alt,
             lrt_chisq,
             lrt_df,
-            p_lrt,
+            pval,
             beta
         )
         writeLines(lineout, out_con)
