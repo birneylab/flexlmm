@@ -26,7 +26,7 @@ process MANHATTAN {
     library("tidyverse")
     library("cowplot")
 
-    gwas_files <- list.files(pattern = "*.gwas.tsv.gz")
+    gwas_files <- list.files(pattern = "*.tsv.gwas.gz")
     df <- lapply(gwas_files, read_tsv) %>% bind_rows()
     df_p_min <- readRDS("${min_p}")
     perm_thr <- as.numeric(quantile(df_p_min[["min_p"]], ${p_thr}))
@@ -140,7 +140,7 @@ process QQ {
     library("tidyverse")
     library("cowplot")
 
-    gwas_files <- list.files(pattern = "*.gwas.tsv.gz")
+    gwas_files <- list.files(pattern = "*.tsv.gwas.gz")
     df <- lapply(gwas_files, read_tsv) %>%
         bind_rows() %>%
         arrange(pval) %>%

@@ -34,7 +34,7 @@ process GET_MIN_P_DISTRIBUTION {
 
     for ( i in 1:${nperms} ) {
         if (${nperms} > 1) setTxtProgressBar(pb, i)
-        all_files <- list.files(pattern = sprintf("perm%s.gwas.tsv.gz", i))
+        all_files <- list.files(pattern = sprintf("perm%s.tsv.gwas.gz", i))
         min_p <- 2
         n_snps <- 0
         for ( perm_file in all_files ) {
