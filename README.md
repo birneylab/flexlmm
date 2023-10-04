@@ -8,7 +8,7 @@
 ## Introduction
 
 **birneylab/flexlmm** is a bioinformatics pipeline that runs linear mixed models for Genome-Wide Association Studies.
-It is not particularly fast or different from other tools, but it is very flexible in the definition of the statistical model to be used and it performs permutations to correct for multiple testing and non-normal phenotypes.
+Its main advantage compared to similar tools is that it is very flexible in the definition of the statistical model to be used and it performs permutations to correct for multiple testing and non-normal phenotypes.
 _p_-values are evaluated with a [likelyhood ratio test](https://en.wikipedia.org/wiki/Likelihood-ratio_test) between a 'null model' and a 'real model'.
 Both models are specified by the user with the [R formula interface](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula).
 
