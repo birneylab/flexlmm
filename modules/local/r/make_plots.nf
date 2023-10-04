@@ -153,7 +153,8 @@ process QQ {
         geom_point(size = 1) +
         geom_abline(slope = 1, intercept = 0, color = "red") +
         theme_cowplot(18) +
-        labs(y = "Sample", x = "Theoretical")
+        labs(y = "Sample", x = "Theoretical") +
+        ggtitle("${prefix}")
 
     ggsave("${prefix}.${suffix}", p, bg = "white")
 
@@ -237,7 +238,8 @@ process RELATEDNESS {
         show_row_dend = FALSE,
         show_column_dend = FALSE,
         heatmap_legend_param = list(title = "Relatedness"),
-        use_raster = FALSE
+        use_raster = FALSE,
+        column_title = "${prefix}"
     )
     dev.off()
 
