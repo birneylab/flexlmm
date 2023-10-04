@@ -30,7 +30,7 @@ workflow PREPROCESSING {
     main:
     versions = Channel.empty()
 
-    VCF_TO_PGEN ( [ [id: "input"], vcf ] )
+    VCF_TO_PGEN ( [ [id: vcf.simpleName], vcf ] )
     VCF_TO_PGEN.out.pgen
     .join(
         VCF_TO_PGEN.out.psam, failOnMismatch: true, failOnDuplicate: true
@@ -56,7 +56,11 @@ workflow PREPROCESSING {
     }
 
     full_genome_pgen
-    .map { meta, pgen, pvar, psam -> [meta, pgen, pvar, psam, []] }
+    .map {
+        meta, pgen, pvar, psam ->
+        def new_meta = meta.clone()
+        new_meta.id = "full_genome"
+        [new_meta, pgen, pvar, psam, []] }
     .set { full_genome_grm_in }
 
     full_genome_pgen
@@ -65,12 +69,13 @@ workflow PREPROCESSING {
         meta, pgen, pvar, psam, chr ->
         def new_meta = meta.clone()
         new_meta.chr = chr
+        new_meta.id = "chr_${chr}"
         [new_meta, pgen, pvar, psam, chr]
     }
     .set { loco_grm_in }
 
     if ( freq ) {
-        ESTIMATE_FREQ ( [ [id: "freq"], freq ] )
+        ESTIMATE_FREQ ( [ [id: freq.simpleName], freq ] )
         ESTIMATE_FREQ.out.freq
         .set { freq }
         FULL_GRM ( full_genome_grm_in, freq )
@@ -84,7 +89,7 @@ workflow PREPROCESSING {
 
     TRANSFORM_PHENOTYPES ( full_genome_pgen.combine ( [ pheno ] ) )
     TRANSFORM_PHENOTYPES.out.pheno
-    .ifEmpty ( [ [id: "pheno"], pheno ] )
+    .ifEmpty ( [ [id: pheno.simpleName], pheno ] )
     .set { pheno }
 
     PHENO_TO_RDS ( pheno )
@@ -105,7 +110,11 @@ workflow PREPROCESSING {
 
     PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
     GET_DESIGN_MATRIX (
-        [ [id: "covar"], covar, qcovar],
+        [
+        [id: "${covar.simpleName ?: 'no_covar'}_${qcovar.simpleName ?: 'no_qcovar'}"],
+        covar,
+        qcovar
+        ],
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
         covariate_formula,
         fixed_effects_formula,
@@ -118,7 +127,7 @@ workflow PREPROCESSING {
         meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
         new_meta = meta.clone()
         new_meta.pheno = pheno_name
-        new_meta.id = "${meta.id}_${meta.chr}_${pheno_name}"
+        new_meta.id = "${meta.id}_${pheno_name}"
         [new_meta, grm_bin, grm_id, pheno, pheno_name]
     }
     .combine ( GET_DESIGN_MATRIX.out.C         .map { meta, C    -> C    } )
