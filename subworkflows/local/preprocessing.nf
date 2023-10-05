@@ -13,7 +13,7 @@ include { MATCH_SAMPLES        } from '../../modules/local/r/match_samples'
 
 def select_chr   = params.select_chr   ? ( params.select_chr as String   ).split(",") : null
 def select_pheno = params.select_pheno ? ( params.select_pheno as String ).split(",") : null
-def maf_min      = params.maf_min      ?: null
+def maf_min      = params.maf_min      ?: []
 
 
 workflow PREPROCESSING {
