@@ -13,6 +13,7 @@ include { MATCH_SAMPLES        } from '../../modules/local/r/match_samples'
 
 def select_chr   = params.select_chr   ? ( params.select_chr as String   ).split(",") : null
 def select_pheno = params.select_pheno ? ( params.select_pheno as String ).split(",") : null
+def maf_min      = params.maf_min      ?: null
 
 
 workflow PREPROCESSING {
@@ -30,7 +31,7 @@ workflow PREPROCESSING {
     main:
     versions = Channel.empty()
 
-    VCF_TO_PGEN ( [ [id: vcf.simpleName], vcf ] )
+    VCF_TO_PGEN ( [ [id: vcf.simpleName], vcf ], maf_min )
     VCF_TO_PGEN.out.pgen
     .join(
         VCF_TO_PGEN.out.psam, failOnMismatch: true, failOnDuplicate: true

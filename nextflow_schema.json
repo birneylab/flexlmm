@@ -55,6 +55,13 @@
                     "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf` is used.",
                     "format": "file-path"
                 },
+                "maf_min": {
+                    "type": "number",
+                    "fa_icon": "fas fa-check",
+                    "description": "Exclude from the analysis genetic variants with a Minor Allele Frequency (MAF) under this value",
+                    "minimum": 0,
+                    "maximum": 0.5
+                },
                 "select_chr": {
                     "type": "string",
                     "fa_icon": "fas fa-question",

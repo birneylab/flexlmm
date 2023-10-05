@@ -9,6 +9,7 @@ process VCF_TO_PGEN {
 
     input:
     tuple val(meta), path(vcf)
+    val maf_min
 
     output:
     tuple val(meta), path("*.pgen"    ) , emit: pgen
@@ -20,11 +21,12 @@ process VCF_TO_PGEN {
     task.ext.when == null || task.ext.when
 
     script:
-    def args   = task.ext.args  ?: ''
-    def args2  = task.ext.args2 ?: ''
-    def args3  = task.ext.args3 ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def mem_mb = task.memory.toMega()
+    def args       = task.ext.args  ?: ''
+    def args2      = task.ext.args2 ?: ''
+    def args3      = task.ext.args3 ?: ''
+    def prefix     = task.ext.prefix ?: "${meta.id}"
+    def mem_mb     = task.memory.toMega()
+    def maf_filter = maf_min ? "--maf ${maf_min}" : ""
     """
     plink2 \\
         --threads $task.cpus \\
@@ -32,6 +34,7 @@ process VCF_TO_PGEN {
         --set-all-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
+        ${maf_filter} \\
         --out $prefix \\
         $args \\
         --vcf $vcf $args2 \\
