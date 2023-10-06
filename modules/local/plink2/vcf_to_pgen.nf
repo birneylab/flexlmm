@@ -10,6 +10,7 @@ process VCF_TO_PGEN {
     input:
     tuple val(meta), path(vcf)
     val maf_min
+    val use_dosage
 
     output:
     tuple val(meta), path("*.pgen"    ) , emit: pgen
@@ -27,6 +28,7 @@ process VCF_TO_PGEN {
     def prefix     = task.ext.prefix ?: "${meta.id}"
     def mem_mb     = task.memory.toMega()
     def maf_filter = maf_min ? "--maf ${maf_min}" : ""
+    def use_dosage_flags = use_dosage ? "" : "fill-missing-from-dosage erase-dosage"
     """
     plink2 \\
         --threads $task.cpus \\
@@ -34,11 +36,11 @@ process VCF_TO_PGEN {
         --set-all-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
-        ${maf_filter} \\
+        $maf_filter \\
         --out $prefix \\
         $args \\
         --vcf $vcf $args2 \\
-        --make-pgen vzs $args3
+        --make-pgen vzs $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

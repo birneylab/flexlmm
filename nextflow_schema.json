@@ -62,6 +62,13 @@
                     "minimum": 0,
                     "maximum": 0.5
                 },
+                "use_dosage": {
+                    "type": "boolean",
+                    "default": "true",
+                    "fa_icon": "fas fa-check",
+                    "description": "Should genotype dosages be used or hard calls?",
+                    "help_text": "If set to true, the genotype dosages are converted to hard calls without missingness. If you want to use more advanced conversion criteria use the ext.args* slot of the VCF_TO_PGEN and FIT_MODEL processes."
+                },
                 "select_chr": {
                     "type": "string",
                     "fa_icon": "fas fa-question",

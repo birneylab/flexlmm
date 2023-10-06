@@ -9,6 +9,7 @@ process FIT_MODEL {
     tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(perm_group), path(pgen), path(psam), path(pvar), val(perm_seed)
     path fixed_effects_formula
     path intercepts
+    val use_dosage
 
     output:
     tuple val(meta), path("*.tsv.gwas.gz") , emit: gwas
@@ -23,6 +24,7 @@ process FIT_MODEL {
     def prefix     = task.ext.prefix ?: "${meta.id}"
     def do_permute = perm_seed ? "TRUE" : "FALSE"
     def perm_seed  = perm_seed ?: "NULL"
+    def pgenlibr_read_func = use_dosage ? "Read" : "ReadHardcalls"
     """
     #!/usr/bin/env Rscript
 
@@ -99,7 +101,7 @@ process FIT_MODEL {
     for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
 
-        pgenlibr::ReadHardcalls(pgen, var_frame[["x"]], i)
+        pgenlibr::${pgenlibr_read_func}(pgen, var_frame[["x"]], i)
 
         # df with all the math operations like (x == 1) evaluated
         curr_frame <- .External2(
