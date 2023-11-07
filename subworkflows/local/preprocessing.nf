@@ -113,7 +113,7 @@ workflow PREPROCESSING {
     PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
     GET_DESIGN_MATRIX (
         [
-        [id: "${covar.simpleName ?: 'no_covar'}_${qcovar.simpleName ?: 'no_qcovar'}"],
+        [id: "covar_${covar.simpleName ?: 'null'}_qcovar_${qcovar.simpleName ?: 'null'}"],
         covar,
         qcovar
         ],
