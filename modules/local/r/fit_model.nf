@@ -94,9 +94,19 @@ process FIT_MODEL {
 
     t <- terms(fixed_effects_formula)
     var_promise <- attr(t, "variables")
-    var_names <- attr(t, "term.labels")
+    var_names <- vapply(
+        # taken from deparse2 at
+        # https://github.com/wch/r-source/blob/79aae23ad4c14aa754abec853b6f3c6205bfcc34/src/library/stats/R/models.R#L450
+        var_promise,
+        function(x){
+            paste(deparse(x, backtick = TRUE, width.cutoff = 500L), collapse = " ")
+        },
+        ""
+    )[-1L]
     var_frame <- cbind(x = 0, gxe_frame)
     var_frame[["x"]] <- pgenlibr::Buf(pgen)
+    rownames <- .row_names_info(var_frame, 0L)
+    variables <- eval(var_promise, var_frame, NULL)
 
     for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
@@ -107,8 +117,8 @@ process FIT_MODEL {
         curr_frame <- .External2(
             stats:::C_modelframe,
             t,
-            rownames(var_frame),
-            eval(var_promise, var_frame, NULL),
+            rownames,
+            variables,
             var_names,
             NULL,
             NULL,
