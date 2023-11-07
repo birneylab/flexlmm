@@ -118,7 +118,7 @@
                     "type": "string",
                     "fa_icon": "fas fa-arrow-right",
                     "description": "R-style formula for the nested model that includes the variable of interest",
-                    "help_text": "Similar to `null_model_formula`. Must contain all the terms in `null_model_formula` plus at least an extra one. You can also include GxE terms (es. 'y ~ x + x:cov1 + cov1'), and dominance terms ('y ~ x + (x == 1) + cov1'). Arithmetic operations such as '(x == 1)' must be enclosed in parentheses."
+                    "help_text": "Similar to `null_model_formula`. Must contain all the terms in `null_model_formula` plus at least an extra one. You can also include GxE terms (es. 'y ~ x + x:cov1 + cov1'), and dominance terms ('y ~ x + I(x == 1) + cov1'). Arithmetic operations such as 'I(x == 1)' must be encapsulated in I() for proper evaluation."
                 },
                 "permutations": {
                     "type": "integer",

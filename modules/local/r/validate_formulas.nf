@@ -59,9 +59,6 @@ process VALIDATE_FORMULAS {
     extra_terms  <- setdiff(model_rhs, null_model_rhs)
     common_terms <- intersect(model_rhs, null_model_rhs)
 
-    extra_terms  <- paste0("(", extra_terms , ")")
-    common_terms <- paste0("(", common_terms, ")")
-
     fixed_effects <- reformulate(extra_terms)
     covariates    <- reformulate(common_terms)
 
