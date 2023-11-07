@@ -106,7 +106,6 @@ process FIT_MODEL {
     var_frame <- cbind(x = 0, gxe_frame)
     var_frame[["x"]] <- pgenlibr::Buf(pgen)
     rownames <- .row_names_info(var_frame, 0L)
-    variables <- eval(var_promise, var_frame, NULL)
 
     for (i in 1:nvars) {
         setTxtProgressBar(pb, i)
@@ -118,7 +117,7 @@ process FIT_MODEL {
             stats:::C_modelframe,
             t,
             rownames,
-            variables,
+            eval(var_promise, var_frame, NULL),
             var_names,
             NULL,
             NULL,
