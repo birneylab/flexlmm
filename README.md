@@ -14,7 +14,7 @@ Both models are specified by the user with the [R formula interface](https://www
 
 **Disclaimer**: this pipeline uses the nf-core template but it is not part of nf-core itself.
 
-![birneylab/stitchimpute_metro_map](docs/images/birneylab_flexlmm_drawing.png)
+![birneylab/flexlmm_metro_map](docs/images/birneylab_flexlmm_drawing.png)
 
 1. Convert vcf genotypes to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Compute the relatedness matrix for the whole genome and each LOCO subset ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
@@ -138,6 +138,19 @@ nextflow run birneylab/flexlmm \
 
 > **Warning**:
 > It is highly recommended to use the docker or singularity profile. Some processes do not have a working conda configuration.
+
+## Testing
+To run the pipeline on minimal test data, just execute the following:
+
+```
+nextflow run birneylab/flexlmm -profile test --outdir <OUTDIR>
+```
+This minimal command requires Docker to be available in your system.
+If you prefer, you can run the pipeline using conda or Singularity (choose one of them) instead with:
+
+```
+nextflow run birneylab/flexlmm -profile test,<conda|singularity> --outdir <OUTDIR>
+```
 
 ## Pipeline output
 

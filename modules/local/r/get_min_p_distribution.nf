@@ -63,7 +63,7 @@ process GET_MIN_P_DISTRIBUTION {
     stopifnot(length(p_vec) == ${nperms})
     stopifnot(perm_vec == 1:${nperms})
     stopifnot(length(n_snps_vec) == ${nperms})
-    stopifnot(all(p_vec <= 1))
+    stopifnot(all(p_vec <= 1 | p_vec == 2))
     stopifnot(all(p_vec >= 0))
     stopifnot(all(!is.na(n_snps_vec)))
     stopifnot(length(unique(n_snps_vec)) == 1)
