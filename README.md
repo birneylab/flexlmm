@@ -43,7 +43,7 @@ Both models are specified by the user with the [R formula interface](https://www
 
 ## To be implemented
 
-- Quantitative phenotypes (case-control studies)
+- Categorical phenotypes
 
 ## The formula interface
 
