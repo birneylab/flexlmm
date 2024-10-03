@@ -171,7 +171,7 @@ The main citation for `birneylab/flexlmm` is:
 >
 > **FlexLMM: a Nextflow linear mixed model framework for GWAS**
 >
-> Preprint on _arXiv_. https://doi.org/10.48550/ARXIV.2410.01533 
+> Preprint on _arXiv_. 2024 Oct 02. doi: [10.48550/ARXIV.2410.01533](https://doi.org/10.48550/ARXIV.2410.01533)
 
 You can cite the `nf-core` publication as follows:
 
