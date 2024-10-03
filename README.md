@@ -165,6 +165,12 @@ For more details about the output files and reports, please refer to the
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
+The main citation for `birneylab/flexlmm` is:
+
+> Saul Pierotti, Tomas Fitzgerald, Ewan Birney
+> **FlexLMM: a Nextflow linear mixed model framework for GWAS**
+> Preprint on arXiv. https://doi.org/10.48550/ARXIV.2410.01533 
+
 You can cite the `nf-core` publication as follows:
 
 > **The nf-core framework for community-curated bioinformatics pipelines.**
