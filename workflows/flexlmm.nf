@@ -21,15 +21,40 @@ WorkflowFLexlmm.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def checkPathParamList = [
-    params.vcf,
-    params.pheno
-]
-
-for (param in checkPathParamList) if (param) file(param, checkIfExists: true)
-
-def vcf   = file( params.vcf   )
-def pheno = file( params.pheno )
+// check correct genotype input
+def vcf    = params.vcf    ? file(params.vcf   , checkIfExists: true ) : null
+def bcf    = params.bcf    ? file(params.bcf   , checkIfExists: true ) : null
+def bgen   = params.bgen   ? file(params.bgen  , checkIfExists: true ) : null
+def sample = params.sample ? file(params.sample, checkIfExists: true ) : null
+def bed    = params.bed    ? file(params.bed   , checkIfExists: true ) : null
+def bim    = params.bim    ? file(params.bin   , checkIfExists: true ) : null
+def fam    = params.fam    ? file(params.fam   , checkIfExists: true ) : null
+def ped    = params.ped    ? file(params.ped   , checkIfExists: true ) : null
+def map_f  = params.map_f  ? file(params.map_f , checkIfExists: true ) : null
+def pgen   = params.pgen   ? file(params.pgen  , checkIfExists: true ) : null
+def psam   = params.psam   ? file(params.psam  , checkIfExists: true ) : null
+def pvar   = params.pvar   ? file(params.pvar  , checkIfExists: true ) : null
+if (
+    !(
+        (  pgen &&  psam &&  pvar && !bgen && !sample && !bed && !bim && !fam && !ped && !map_f && !vcf && !bcf) ||
+        ( !pgen && !psam && !pvar &&  bgen &&  sample && !bed && !bim && !fam && !ped && !map_f && !vcf && !bcf) ||
+        ( !pgen && !psam && !pvar && !bgen && !sample &&  bed &&  bim &&  fam && !ped && !map_f && !vcf && !bcf) ||
+        ( !pgen && !psam && !pvar && !bgen && !sample && !bed && !bim && !fam &&  ped &&  map_f && !vcf && !bcf) ||
+        ( !pgen && !psam && !pvar && !bgen && !sample && !bed && !bim && !fam && !ped && !map_f &&  vcf && !bcf) ||
+        ( !pgen && !psam && !pvar && !bgen && !sample && !bed && !bim && !fam && !ped && !map_f && !vcf &&  bcf)
+    )
+){
+    log.error (
+        "No suitable combination of input genotypes has been detected. This pipeline needs one of the following combinations and no additional genotype input files specified:\n" +
+        "\tvcf\n" +
+        "\tbcf\n" +
+        "\tbgen, gen, sample\n" +
+        "\tpgen, pvar, pvar\n" +
+        "\tbed, bim, fam\n" +
+        "\tped, map\n"
+    )
+}
+def pheno = file( params.pheno, checkIfExists: true )
 
 def null_model_formula = params.null_model_formula
 def model_formula      = params.model_formula
@@ -59,8 +84,8 @@ if ( params.quantile_normalise && params.standardise ) {
 //
 
 include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
-include { LMM            } from '../subworkflows/local/lmm'
-include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
+//include { LMM            } from '../subworkflows/local/lmm'
+//include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,6 +110,17 @@ workflow FLEXLMM {
 
     PREPROCESSING (
         vcf,
+        bcf,
+        bgen,
+        sample,
+        bed,
+        bim,
+        fam,
+        ped,
+        map_f,
+        pgen,
+        psam,
+        pvar,
         pheno,
         covar,
         qcovar,
@@ -94,27 +130,27 @@ workflow FLEXLMM {
         model_formula
     )
 
-    LMM (
-        PREPROCESSING.out.chr_pheno_pgen,
-        PREPROCESSING.out.model_terms,
-        PREPROCESSING.out.gxe_frame,
-        PREPROCESSING.out.perm_group,
-        PREPROCESSING.out.fixed_effects_formula,
-        PREPROCESSING.out.intercepts,
-        permutation_seeds
-    )
+    //LMM (
+    //    PREPROCESSING.out.chr_pheno_pgen,
+    //    PREPROCESSING.out.model_terms,
+    //    PREPROCESSING.out.gxe_frame,
+    //    PREPROCESSING.out.perm_group,
+    //    PREPROCESSING.out.fixed_effects_formula,
+    //    PREPROCESSING.out.intercepts,
+    //    permutation_seeds
+    //)
 
-    POSTPROCESSING (
-        LMM.out.gwas,
-        LMM.out.gwas_perm,
-        PREPROCESSING.out.all_grms,
-        nperms,
-        p_thr
-    )
+    //POSTPROCESSING (
+    //    LMM.out.gwas,
+    //    LMM.out.gwas_perm,
+    //    PREPROCESSING.out.all_grms,
+    //    nperms,
+    //    p_thr
+    //)
 
     versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
-    versions.mix ( LMM.out.versions            ) .set { versions }
-    versions.mix ( POSTPROCESSING.out.versions ) .set { versions }
+    //versions.mix ( LMM.out.versions            ) .set { versions }
+    //versions.mix ( POSTPROCESSING.out.versions ) .set { versions }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')

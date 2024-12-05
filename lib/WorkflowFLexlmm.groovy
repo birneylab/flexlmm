@@ -11,11 +11,8 @@ class WorkflowFlexlmm {
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-        if (!params.vcf) {
-            Nextflow.error "Vcf file not specified with e.g. '--vcf in.vcf.gz' or via a detectable config file."
-        }
         if (!params.pheno) {
-            Nextflow.error "Phenotype file not specified with e.g. '--pheno myfile.txt' or via a detectable config file."
+            log.error "Phenotype file not specified with e.g. '--pheno myfile.txt' or via a detectable config file."
         }
     }
 

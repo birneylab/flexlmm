@@ -5,25 +5,89 @@
     "description": "Flexible linear mixed model framework for Genome Wide Association Studies",
     "type": "object",
     "definitions": {
+        "genotype_options": {
+            "title": "Genotype options",
+            "type": "object",
+            "description": "Different format options for the input genotypes.",
+            "default": "",
+            "properties": {
+                "vcf": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file",
+                    "description": "Input genotypes in vcf format. Can be bgzip compressed.",
+                    "pattern": ".*.[vcf,vcf.gz]",
+                    "format": "file-path"
+                },
+                "bcf": {
+                    "type": "string",
+                    "description": "Input genotypes in bcf format. Can be bgzip compressed.",
+                    "fa_icon": "fas fa-file"
+                },
+                "bgen": {
+                    "type": "string",
+                    "description": "Input genotypes in Oxford bgen format. Requires also gen and sample files to be specified..",
+                    "fa_icon": "fas fa-file"
+                },
+                "sample": {
+                    "type": "string",
+                    "description": "sample file for Oxford bgen input format",
+                    "fa_icon": "fas fa-file"
+                },
+                "bed": {
+                    "type": "string",
+                    "description": "Input genotypes in bed format. Requires also bim and fam files to be specified.",
+                    "fa_icon": "fas fa-file"
+                },
+                "bim": {
+                    "type": "string",
+                    "description": "bim file for bed input format",
+                    "fa_icon": "fas fa-file"
+                },
+                "fam": {
+                    "type": "string",
+                    "description": "fam file for bed input format",
+                    "fa_icon": "fas fa-file"
+                },
+                "ped": {
+                    "type": "string",
+                    "description": "Input genotypes in ped format. Requires also map_f files to be specified.",
+                    "fa_icon": "fas fa-file"
+                },
+                "map_f": {
+                    "type": "string",
+                    "description": "map file for ped input format",
+                    "fa_icon": "fas fa-file"
+                },
+                "pgen": {
+                    "type": "string",
+                    "description": "Input genotypes in pgen format. Requires also pvar and psam files to be specified.",
+                    "fa_icon": "fas fa-file"
+                },
+                "psam": {
+                    "type": "string",
+                    "description": "psam file for pgen input format",
+                    "fa_icon": "fas fa-file"
+                },
+                "pvar": {
+                    "type": "string",
+                    "description": "pvar file for pgen input format",
+                    "fa_icon": "fas fa-file"
+                }
+            },
+            "help_text": "Only one combination among the following is allowed:\nvcf\nbcf\nbgen, gen, sample\npgen, pvar, pvar\nbed, bim, fam\nped, map"
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["outdir", "vcf", "pheno"],
+            "required": ["outdir", "pheno"],
             "properties": {
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
-                },
-                "vcf": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file",
-                    "description": "VCF file containing the sample genotypes. Can be bgzip compressed.",
-                    "pattern": ".*.[vcf,vcf.gz]",
-                    "format": "file-path"
                 },
                 "pheno": {
                     "type": "string",
@@ -64,7 +128,7 @@
                 },
                 "use_dosage": {
                     "type": "boolean",
-                    "default": "true",
+                    "default": true,
                     "fa_icon": "fas fa-check",
                     "description": "Should genotype dosages be used or hard calls?",
                     "help_text": "If set to true, the genotype dosages are converted to hard calls without missingness. If you want to use more advanced conversion criteria use the ext.args* slot of the VCF_TO_PGEN and FIT_MODEL processes."
@@ -311,6 +375,9 @@
         }
     },
     "allOf": [
+        {
+            "$ref": "#/definitions/genotype_options"
+        },
         {
             "$ref": "#/definitions/input_output_options"
         },
