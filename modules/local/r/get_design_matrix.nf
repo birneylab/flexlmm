@@ -11,16 +11,13 @@ process GET_DESIGN_MATRIX {
     input:
     tuple val(meta), path(covar), path(qcovar)
     path pheno
-    path covariate_formula
-    path fixed_effects_formula
+    path null_model
     val  permute_by
 
     output:
-    tuple val(meta), path("*.covariate_mat.rds") , emit: C
-    tuple val(meta), path("*.gxe_frame.rds")     , emit: gxe_frame
-    tuple val(meta), path("*.perm_group.rds")    , emit: perm_group
-    path "versions.yml"                          , emit: versions
-
+    tuple val(meta), path("X_null.rds")    , emit: x_null
+    tuple val(meta), path("perm_group.rds"), emit: perm_group
+    path "versions.yml"                    , emit: versions
     when:
     task.ext.when == null || task.ext.when
 
@@ -33,9 +30,10 @@ process GET_DESIGN_MATRIX {
     """
     #!/usr/bin/env Rscript
 
-    covariate_formula <- readRDS("${covariate_formula}")
-    fixed_effects_formula <- readRDS("${fixed_effects_formula}")
+    # [-2] extract the LHS only from the formula
+    null_model <- readRDS("${null_model}")[-2]
     samples <- rownames(readRDS("${pheno}"))
+    
     clean_colnames <- function(n){gsub("#", "", n)}
     remove_fid <- function(df){subset(df, select = (colnames(df) != "FID"))}
     remove_iid <- function(df){subset(df, select = (colnames(df) != "IID"))}
@@ -91,17 +89,6 @@ process GET_DESIGN_MATRIX {
 
     rownames(df) <- df[["IID"]]
 
-    fixed_vars <- all.vars(fixed_effects_formula)
-    # this includes any covariate used (even if not in a gxe term) but it is fine, it
-    # will just not be used downstream
-    gxe_vars <- fixed_vars[fixed_vars != "x"]
-    if ( length(gxe_vars) > 0 ){
-        gxe_frame <- subset(df, select = gxe_vars)
-    } else {
-        gxe_frame <- data.frame(row.names = samples)
-    }
-    saveRDS(gxe_frame, "${prefix}.gxe_frame.rds")
-
     if ( ${permute_by_set} ){
         permute_by <- '${permute_by}'
         if ( !(${load_covar}) ) stop("'permute_by' is set but no covariate file was provided")
@@ -113,10 +100,10 @@ process GET_DESIGN_MATRIX {
         perm_group <- rep(1, nrow(df))
     }
     names(perm_group) <- df[["IID"]]
-    saveRDS(perm_group, "${prefix}.perm_group.rds")
+    saveRDS(perm_group, "perm_group.rds")
 
-    C <- model.matrix(covariate_formula, data = df)
-    saveRDS(C, "${prefix}.covariate_mat.rds")
+    X_null <- model.matrix(null_model, data = df)
+    saveRDS(X_null, "X_null.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     system(
@@ -134,9 +121,8 @@ process GET_DESIGN_MATRIX {
     def args   = task.ext.args   ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.covariate_mat.rds
-    touch ${prefix}.gxe_frame.rds
-    touch ${prefix}.perm_group.rds
+    touch X_null.rds
+    touch perm_group.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -8,7 +8,7 @@ process MAKE_GRM {
         'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
 
     input:
-    tuple val(meta) , path(pgen), path(psam), path(pvar), val(chr_exclude)
+    tuple val(meta) , path(pgen), path(pvar), path(psam), val(chr_exclude)
     tuple val(meta2), path(freq)
 
     output:

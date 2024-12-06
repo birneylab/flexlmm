@@ -11,9 +11,8 @@ process VALIDATE_FORMULAS {
     val model_formula
 
     output:
-    path "*.C_model.rds"    , emit: covariates
-    path "*.X_model.rds"    , emit: fixed_effects
-    path "*.intercepts.rds" , emit: intercepts
+    path "model.rds"     , emit: model
+    path "null_model.rds", emit: null_model
 
     path "versions.yml"     , emit: versions
 
@@ -22,7 +21,6 @@ process VALIDATE_FORMULAS {
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "formula"
     """
     #!/usr/bin/env Rscript
 
@@ -56,18 +54,8 @@ process VALIDATE_FORMULAS {
         stop("The null_model_formula must be nested in the model_formula")
     }
 
-    extra_terms  <- setdiff(model_rhs, null_model_rhs)
-    common_terms <- intersect(model_rhs, null_model_rhs)
-
-    fixed_effects <- reformulate(extra_terms)
-    covariates    <- reformulate(common_terms)
-
-    message("Fixed effects:", deparse(fixed_effects))
-    message("Covariates:", deparse(covariates))
-
-    saveRDS(covariates, "${prefix}.C_model.rds")
-    saveRDS(fixed_effects, "${prefix}.X_model.rds")
-    saveRDS(intercepts, "${prefix}.intercepts.rds")
+    saveRDS(model, "model.rds")
+    saveRDS(null_model, "null_model.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     system(
@@ -83,13 +71,9 @@ process VALIDATE_FORMULAS {
 
     stub:
     def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "formula"
     """
-    touch ${prefix}.null_model.rds
-    touch ${prefix}.model.rds
-    touch ${prefix}.C_model.rds
-    touch ${prefix}.X_model.rds
-    touch ${prefix}.intercepts.rds
+    touch model.rds
+    touch null_model.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

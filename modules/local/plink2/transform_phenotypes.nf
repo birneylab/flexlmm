@@ -8,7 +8,7 @@ process TRANSFORM_PHENOTYPES {
         'biocontainers/plink2:2.00a3.7--h4ac6f70_4' }"
 
     input:
-    tuple val(meta), path(pgen), path(psam), path(pvar), path(pheno)
+    tuple val(meta), path(pgen), path(pvar), path(psam), path(pheno)
 
     output:
     tuple val(meta), path("*.cov") , emit: pheno

@@ -81,7 +81,10 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["outdir", "pheno"],
+            "required": [
+                "outdir",
+                "pheno"
+            ],
             "properties": {
                 "outdir": {
                     "type": "string",
@@ -116,8 +119,9 @@
                 "freq": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
-                    "description": "Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf` is used.",
-                    "format": "file-path"
+                    "description": "plink2-type frequency file for GRM calculations",
+                    "format": "file-path",
+                    "help_text": "Can be obtained with plink2 with the command `--freq`. Variants included should all be biallelic and have IDs matching the ones in the main genome file provided."
                 },
                 "maf_min": {
                     "type": "number",
@@ -203,7 +207,10 @@
                     "description": "Nominal significance threshold"
                 }
             },
-            "required": ["null_model_formula", "model_formula"]
+            "required": [
+                "null_model_formula",
+                "model_formula"
+            ]
         },
         "institutional_config_options": {
             "title": "Institutional config options",
@@ -313,7 +320,14 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ],
                     "hidden": true
                 },
                 "email_on_fail": {

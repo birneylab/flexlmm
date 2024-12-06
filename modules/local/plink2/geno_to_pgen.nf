@@ -31,7 +31,7 @@ process BGEN_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-all-var-ids @_#_\\\$r_\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\
@@ -95,7 +95,7 @@ process BCF_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-all-var-ids @_#_\\\$r_\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\
@@ -159,7 +159,7 @@ process VCF_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-all-var-ids @_#_\\\$r_\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\
@@ -223,7 +223,7 @@ process PGEN_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-all-var-ids @_#_\\\$r_\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\
@@ -287,7 +287,7 @@ process BED_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-all-var-ids @_#_\\\$r_\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\
@@ -351,7 +351,7 @@ process PED_TO_PGEN {
     plink2 \\
         --threads $task.cpus \\
         --memory $mem_mb \\
-        --set-all-var-ids @_#_\\\$r_\\\$a \\
+        --set-missing-var-ids @_#_\\\$r_\\\$a \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\

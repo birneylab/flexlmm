@@ -59,7 +59,8 @@ def pheno = file( params.pheno, checkIfExists: true )
 def null_model_formula = params.null_model_formula
 def model_formula      = params.model_formula
 
-def freq   = params.freq   ? file(params.freq  , checkIfExists: true) : []
+def freq_f = params.freq   ? file(params.freq  , checkIfExists: true) : []
+def freq   = freq_f ? [ [ id: freq_f.simpleName ], freq_f ] : [ [ id:null ], null ]
 def covar  = params.covar  ? file(params.covar , checkIfExists: true) : []
 def qcovar = params.qcovar ? file(params.qcovar, checkIfExists: true) : []
 
