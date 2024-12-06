@@ -21,7 +21,7 @@ process GET_CHR_NAMES {
     def args   = task.ext.args   ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    plink2 --zst-decompress $pvar | \\
+    cat $pvar | \\
     grep -v '^#' | \\
     cut -f1 | \\
     sort -u > \\

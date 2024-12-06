@@ -6,9 +6,9 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(y), path(C), path(L), path(gxe_frame), path(perm_group), path(pgen), path(psam), path(pvar), val(perm_seed)
-    path fixed_effects_formula
-    path intercepts
+    tuple val(meta), path(y), path(X), path(L), path(perm_group), path(pgen), path(pvar), path(psam), val(perm_seed), val(var_range)
+    path model
+    path null_model
     val use_dosage
 
     output:
@@ -29,23 +29,12 @@ process FIT_MODEL {
     #!/usr/bin/env Rscript
 
     y <- readRDS("${y}")
-    C <- readRDS("${C}")
+    X <- readRDS("${X}")
     L <- readRDS("${L}")
-    gxe_frame <- readRDS("${gxe_frame}")
     perm_group <- readRDS("${perm_group}")
 
-    fixed_effects_formula <- readRDS("${fixed_effects_formula}")
-    intercepts <- readRDS("${intercepts}")
-
-    if ( intercepts[["model"]] == 1 & intercepts[["null_model"]] == 1 ) {
-        drop_intercept <- TRUE
-    } else if ( intercepts[["model"]] == 1 & intercepts[["null_model"]] == 0 ) {
-        drop_intercept <- FALSE
-    } else if ( intercepts[["model"]] == 0 & intercepts[["null_model"]] == 0 ) {
-        drop_intercept <- FALSE
-    } else {
-        stop("Intercept is in null_model but not in model, models are not nested")
-    }
+    model <- readRDS("${model}")
+    null_model <- readRDS("${null_model}")
 
     psam <- read.table(
         "${psam}",
@@ -58,14 +47,13 @@ process FIT_MODEL {
     colnames(psam) <- clean_colnames(colnames(psam))
 
     stopifnot(all(!is.null(names(y))))
-    stopifnot(all(names(y) == rownames(C)))
+    stopifnot(all(names(y) == rownames(X)))
     stopifnot(all(names(y) == rownames(L)))
     stopifnot(all(names(y) == colnames(L)))
-    stopifnot(all(names(y) == rownames(gxe_frame)))
     stopifnot(all(names(y) == psam[["IID"]]))
     stopifnot(all(names(y) == names(perm_group)))
     stopifnot(
-        sum(is.na(L)) + sum(is.na(C)) + sum(is.na(y)) + sum(is.na(gxe_frame)) + sum(is.na(perm_group)) == 0
+        sum(is.na(L)) + sum(is.na(X)) + sum(is.na(y)) + sum(is.na(perm_group)) == 0
     )
 
     if ( ${do_permute} ) {
@@ -82,7 +70,7 @@ process FIT_MODEL {
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
 
-    fit_null <- .lm.fit(x = C, y = y)
+    fit_null <- .lm.fit(x = X, y = y)
     ll_null  <- stats:::logLik.lm(fit_null)
 
     outname <- "${prefix}.tsv.gwas.gz"

@@ -2,6 +2,7 @@ include {
     VCF_TO_PGEN; BCF_TO_PGEN; PGEN_TO_PGEN; PED_TO_PGEN; BED_TO_PGEN; BGEN_TO_PGEN
 } from '../../modules/local/plink2/geno_to_pgen'
 include { GET_CHR_NAMES        } from '../../modules/local/plink2/get_chr_names'
+include { GET_VAR_IDX          } from '../../modules/local/r/get_var_idx'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
 include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phenotypes'
@@ -48,27 +49,27 @@ workflow PREPROCESSING {
     // convert genotype input to pgen format
     if ( bgen && sample ){
         BGEN_TO_PGEN ( [ [id: bgen.simpleName], bgen, sample ], maf_min, use_dosage )
-        BGEN_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
+        BGEN_TO_PGEN.out.pgen_pvar_psam.set { pgen_pvar_psam }
         versions.mix ( BGEN_TO_PGEN.out.versions ) .set { versions }
     } else if ( bcf ) {
         BCF_TO_PGEN ( [ [id: bcf.simpleName], bcf ], maf_min, use_dosage )
-        BCF_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
+        BCF_TO_PGEN.out.pgen_pvar_psam.set { pgen_pvar_psam }
         versions.mix ( BCF_TO_PGEN.out.versions ) .set { versions }
     } else if ( vcf ) {
         VCF_TO_PGEN ( [ [id: vcf.simpleName], vcf ], maf_min, use_dosage )
-        VCF_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
+        VCF_TO_PGEN.out.pgen_pvar_psam.set { pgen_pvar_psam }
         versions.mix ( VCF_TO_PGEN.out.versions ) .set { versions }
     } else if ( bed && bim && fam ) {
         BED_TO_PGEN ( [ [id: bed.simpleName], bed, bim, fam ], maf_min, use_dosage )
-        BED_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
+        BED_TO_PGEN.out.pgen_pvar_psam.set { pgen_pvar_psam }
         versions.mix ( BED_TO_PGEN.out.versions ) .set { versions }
     } else if ( ped && map_f ) {
         PED_TO_PGEN ( [ [id: ped.simpleName], ped, map_f ], maf_min, use_dosage )
-        PED_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
+        PED_TO_PGEN.out.pgen_pvar_psam.set { pgen_pvar_psam }
         versions.mix ( PED_TO_PGEN.out.versions ) .set { versions }
     } else if ( pgen && psam && pvar ) {
         PGEN_TO_PGEN ( [ [id: pgen.simpleName], pgen, psam, pvar ], maf_min, use_dosage )
-        PGEN_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
+        PGEN_TO_PGEN.out.pgen_pvar_psam.set { pgen_pvar_psam }
         versions.mix ( PGEN_TO_PGEN.out.versions ) .set { versions }
     } else {
         error (
@@ -103,6 +104,7 @@ workflow PREPROCESSING {
     pgen_pvar_psam.map {
         meta, pgen, pvar, psam ->
         def new_meta = meta.clone()
+        new_meta.chr = "full_genome"
         new_meta.id = "full_genome"
         [new_meta, pgen, pvar, psam, []] }
     .set { full_genome_grm_in }
@@ -114,7 +116,7 @@ workflow PREPROCESSING {
         meta, pgen, pvar, psam, chr ->
         def new_meta = meta.clone()
         new_meta.chr = chr
-        new_meta.id = "chr_${chr}"
+        new_meta.id = "${meta.id}_${chr}"
         [new_meta, pgen, pvar, psam, chr]
     }
     .set { loco_grm_in }
@@ -122,6 +124,7 @@ workflow PREPROCESSING {
     // build full genome and LOCO GRMs
     FULL_GRM ( full_genome_grm_in, freq )
     LOCO_GRM ( loco_grm_in       , freq )
+    FULL_GRM.out.grm.mix ( LOCO_GRM.out.grm ).set { all_grms }
     
     // standardise or quantile normalise the phenotype if requested
     TRANSFORM_PHENOTYPES ( pgen_pvar_psam.combine ( [ pheno ] ) )
@@ -164,8 +167,7 @@ workflow PREPROCESSING {
     )
 
     // match samples among the different datastructures and drop samples with missing values
-    LOCO_GRM.out.grm
-    .combine ( pheno )
+    all_grms.combine ( pheno )
     .map {
         meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
         new_meta = meta.clone()
@@ -179,8 +181,18 @@ workflow PREPROCESSING {
     MATCH_SAMPLES ( match_samples_in )
     MATCH_SAMPLES.out.model_terms.set { model_terms }
     MATCH_SAMPLES.out.perm_group .set { perm_group  }
-
-    FULL_GRM.out.grm.mix ( LOCO_GRM.out.grm ).set { all_grms }
+    
+    // get list of pgen variant indexes to test per chromosome
+    pgen_pvar_psam.combine ( chr )
+    .map {
+        meta, pgen, pvar, psam, chr ->
+        def new_meta = meta.clone()
+        new_meta.id = "${meta.id}_${chr}"
+        new_meta.chr = chr
+        [ new_meta, pgen, pvar, psam, chr ]
+    }
+    .set { get_var_idx_in }
+    GET_VAR_IDX ( get_var_idx_in )
 
     // Gather versions of all tools used
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }

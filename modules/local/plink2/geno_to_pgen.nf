@@ -13,7 +13,7 @@ process BGEN_TO_PGEN {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.pgen"), path("*.pvar.zst"), path("*.psam"), emit: pgen_psam_pvar
+    tuple val(meta), path("*.pgen"), path("*.pvar"), path("*.psam"), emit: pgen_pvar_psam
     path "versions.yml"                 , emit: versions
 
     when:
@@ -38,7 +38,7 @@ process BGEN_TO_PGEN {
         --out $prefix \\
         $args \\
         --bgen ${bgen} ${args2} --sample ${sample} \\
-        --make-pgen vzs $args3 $use_dosage_flags
+        --make-pgen $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -53,7 +53,7 @@ process BGEN_TO_PGEN {
     """
     touch ${prefix}.pgen
     touch ${prefix}.psam
-    touch ${prefix}.pvar.zst
+    touch ${prefix}.pvar
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -77,7 +77,7 @@ process BCF_TO_PGEN {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.pgen"), path("*.pvar.zst"), path("*.psam"), emit: pgen_psam_pvar
+    tuple val(meta), path("*.pgen"), path("*.pvar"), path("*.psam"), emit: pgen_pvar_psam
     path "versions.yml"                 , emit: versions
 
     when:
@@ -102,7 +102,7 @@ process BCF_TO_PGEN {
         --out $prefix \\
         $args \\
         --bcf ${bcf} ${args2} \\
-        --make-pgen vzs $args3 $use_dosage_flags
+        --make-pgen $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -117,7 +117,7 @@ process BCF_TO_PGEN {
     """
     touch ${prefix}.pgen
     touch ${prefix}.psam
-    touch ${prefix}.pvar.zst
+    touch ${prefix}.pvar
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -141,7 +141,7 @@ process VCF_TO_PGEN {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.pgen"), path("*.pvar.zst"), path("*.psam"), emit: pgen_psam_pvar
+    tuple val(meta), path("*.pgen"), path("*.pvar"), path("*.psam"), emit: pgen_pvar_psam
     path "versions.yml"                 , emit: versions
 
     when:
@@ -166,7 +166,7 @@ process VCF_TO_PGEN {
         --out $prefix \\
         $args \\
         --vcf ${vcf} ${args2} \\
-        --make-pgen vzs $args3 $use_dosage_flags
+        --make-pgen $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -181,7 +181,7 @@ process VCF_TO_PGEN {
     """
     touch ${prefix}.pgen
     touch ${prefix}.psam
-    touch ${prefix}.pvar.zst
+    touch ${prefix}.pvar
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -205,7 +205,7 @@ process PGEN_TO_PGEN {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.out.pgen"), path("*.out.pvar.zst"), path("*.out.psam"), emit: pgen_psam_pvar
+    tuple val(meta), path("*.out.pgen"), path("*.out.pvar"), path("*.out.psam"), emit: pgen_pvar_psam
     path "versions.yml"                 , emit: versions
 
     when:
@@ -230,7 +230,7 @@ process PGEN_TO_PGEN {
         --out "${prefix}.out" \\
         $args \\
         --pgen ${pgen} ${args2} --psam ${psam} --pvar ${pvar} \\
-        --make-pgen vzs $args3 $use_dosage_flags
+        --make-pgen $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -245,7 +245,7 @@ process PGEN_TO_PGEN {
     """
     touch ${prefix}.pgen
     touch ${prefix}.psam
-    touch ${prefix}.pvar.zst
+    touch ${prefix}.pvar
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -269,7 +269,7 @@ process BED_TO_PGEN {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.pgen"), path("*.pvar.zst"), path("*.psam"), emit: pgen_psam_pvar
+    tuple val(meta), path("*.pgen"), path("*.pvar"), path("*.psam"), emit: pgen_pvar_psam
     path "versions.yml"                 , emit: versions
 
     when:
@@ -294,7 +294,7 @@ process BED_TO_PGEN {
         --out $prefix \\
         $args \\
         --bed ${bed} ${args2} --bim ${bim} --fam ${fam} \\
-        --make-pgen vzs $args3 $use_dosage_flags
+        --make-pgen $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -309,7 +309,7 @@ process BED_TO_PGEN {
     """
     touch ${prefix}.pgen
     touch ${prefix}.psam
-    touch ${prefix}.pvar.zst
+    touch ${prefix}.pvar
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -333,7 +333,7 @@ process PED_TO_PGEN {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.pgen"), path("*.pvar.zst"), path("*.psam"), emit: pgen_psam_pvar
+    tuple val(meta), path("*.pgen"), path("*.pvar"), path("*.psam"), emit: pgen_pvar_psam
     path "versions.yml"                 , emit: versions
 
     when:
@@ -358,7 +358,7 @@ process PED_TO_PGEN {
         --out $prefix \\
         $args \\
         --ped ${ped} ${args2} --map ${map_f} \\
-        --make-pgen vzs $args3 $use_dosage_flags
+        --make-pgen $args3 $use_dosage_flags
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -373,7 +373,7 @@ process PED_TO_PGEN {
     """
     touch ${prefix}.pgen
     touch ${prefix}.psam
-    touch ${prefix}.pvar.zst
+    touch ${prefix}.pvar
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -381,7 +381,3 @@ process PED_TO_PGEN {
     END_VERSIONS
     """
 }
-
-
-
-

@@ -6,7 +6,7 @@ process AIREML {
     container "saulpierotti-ebi/gaston"
 
     input:
-    tuple val(meta), path(K), path(y), path(C)
+    tuple val(meta), path(K), path(y), path(X)
 
     output:
     tuple val(meta), path("*.hsq.rds") , emit: hsq
@@ -23,15 +23,15 @@ process AIREML {
 
     K <- readRDS("${K}")
     y <- readRDS("${y}")
-    C <- readRDS("${C}")
+    X <- readRDS("${X}")
 
     stopifnot(all(!is.null(names(y))))
-    stopifnot(all(names(y) == rownames(C)))
+    stopifnot(all(names(y) == rownames(X)))
     stopifnot(all(names(y) == rownames(K)))
     stopifnot(all(names(y) == colnames(K)))
-    stopifnot(sum(is.na(K)) + sum(is.na(C)) + sum(is.na(y)) == 0)
+    stopifnot(sum(is.na(K)) + sum(is.na(X)) + sum(is.na(y)) == 0)
 
-    fit <- gaston::lmm.aireml(y, C, K, verbose = TRUE)
+    fit <- gaston::lmm.aireml(y, X, K, verbose = TRUE) 
     saveRDS(fit, "${prefix}.hsq.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]

@@ -85,7 +85,7 @@ if ( params.quantile_normalise && params.standardise ) {
 //
 
 include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
-//include { LMM            } from '../subworkflows/local/lmm'
+include { LMM            } from '../subworkflows/local/lmm'
 //include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
 
 /*
@@ -131,15 +131,14 @@ workflow FLEXLMM {
         model_formula
     )
 
-    //LMM (
-    //    PREPROCESSING.out.chr_pheno_pgen,
-    //    PREPROCESSING.out.model_terms,
-    //    PREPROCESSING.out.gxe_frame,
-    //    PREPROCESSING.out.perm_group,
-    //    PREPROCESSING.out.fixed_effects_formula,
-    //    PREPROCESSING.out.intercepts,
-    //    permutation_seeds
-    //)
+    LMM (
+        PREPROCESSING.out.pgen_pvar_psam,
+        PREPROCESSING.out.model_terms,
+        PREPROCESSING.out.perm_group,
+        PREPROCESSING.out.model,
+        PREPROCESSING.out.null_model,
+        permutation_seeds
+    )
 
     //POSTPROCESSING (
     //    LMM.out.gwas,
