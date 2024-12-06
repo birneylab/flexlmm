@@ -116,7 +116,7 @@ workflow PREPROCESSING {
         meta, pgen, pvar, psam, chr ->
         def new_meta = meta.clone()
         new_meta.chr = chr
-        new_meta.id = "${meta.id}_${chr}"
+        new_meta.id = chr
         [new_meta, pgen, pvar, psam, chr]
     }
     .set { loco_grm_in }
@@ -145,7 +145,15 @@ workflow PREPROCESSING {
     if ( select_pheno ) {
         pheno_names.filter { select_pheno.contains ( it ) }.set { pheno_names }
     }
-    PHENO_TO_RDS.out.pheno.combine ( pheno_names ).set { pheno }
+    PHENO_TO_RDS.out.pheno.combine ( pheno_names )
+    .map {
+        meta, pheno, pheno_name ->
+        def new_meta = meta.clone()
+        new_meta.pheno_name = pheno_name
+        new_meta.id = pheno_name
+        [ new_meta, pheno, pheno_name ]
+    }
+    .set { pheno }
 
     // check that the null model formula is nested into the model formula
     // and save them as RDS files
@@ -153,46 +161,48 @@ workflow PREPROCESSING {
     VALIDATE_FORMULAS.out.model     .set { model }
     VALIDATE_FORMULAS.out.null_model.set { null_model }
 
-    // get the null model design matrix
+    // get the null model design matrix, the full model frame (covar + qcovar), and the
+    // permutation grouping vector
     GET_DESIGN_MATRIX (
         [
-            [id: "covar_${covar.simpleName ?: 'null'}_qcovar_${qcovar.simpleName ?: 'null'}"],
+            [id: "covar_qcovar"],
             covar,
             qcovar
         ],
         // I just need pheno to get the sample names in case of missing covar and qcovar, so 1 is enough
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
+        model,
         null_model,
         permute_by
     )
-
-    // match samples among the different datastructures and drop samples with missing values
-    all_grms.combine ( pheno )
-    .map {
-        meta, grm_bin, grm_id, meta2, pheno, pheno_name ->
-        new_meta = meta.clone()
-        new_meta.pheno = pheno_name
-        new_meta.id = "${meta.id}_${pheno_name}"
-        [new_meta, grm_bin, grm_id, pheno, pheno_name]
-    }
-    .combine ( GET_DESIGN_MATRIX.out.x_null.map { meta, x_null  -> x_null } )
-    .combine ( GET_DESIGN_MATRIX.out.perm_group.map { meta, perm -> perm } )
-    .set { match_samples_in }
-    MATCH_SAMPLES ( match_samples_in )
-    MATCH_SAMPLES.out.model_terms.set { model_terms }
-    MATCH_SAMPLES.out.perm_group .set { perm_group  }
+    GET_DESIGN_MATRIX.out.x_null     .set { x_null      }
+    GET_DESIGN_MATRIX.out.model_frame.set { model_frame }
+    GET_DESIGN_MATRIX.out.perm_group .set { perm_group  }
     
     // get list of pgen variant indexes to test per chromosome
     pgen_pvar_psam.combine ( chr )
     .map {
         meta, pgen, pvar, psam, chr ->
         def new_meta = meta.clone()
-        new_meta.id = "${meta.id}_${chr}"
+        new_meta.id = chr
         new_meta.chr = chr
         [ new_meta, pgen, pvar, psam, chr ]
     }
     .set { get_var_idx_in }
     GET_VAR_IDX ( get_var_idx_in )
+    GET_VAR_IDX.out.var_idx.set { var_idx }
+
+    // input for aireml in lmm subworkflow
+    // TODO: for eQTL make the right matches between chr and pheno here
+    all_grms.combine ( pheno )
+    .map {
+        meta1, grm_bin, grm_id, meta2, pheno, pheno_name ->
+        def new_meta = meta1.clone()
+        new_meta.pheno_name = pheno_name
+        new_meta.id = "${meta1.id}_${pheno_name}"
+        [ new_meta, grm_bin, grm_id, pheno, pheno_name ]
+    }
+    .set { aireml_in }
 
     // Gather versions of all tools used
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
@@ -202,15 +212,17 @@ workflow PREPROCESSING {
     versions.mix ( PHENO_TO_RDS.out.versions         ) .set { versions }
     versions.mix ( VALIDATE_FORMULAS.out.versions    ) .set { versions }
     versions.mix ( GET_DESIGN_MATRIX.out.versions    ) .set { versions }
-    versions.mix ( MATCH_SAMPLES.out.versions        ) .set { versions }
+    versions.mix ( GET_VAR_IDX.out.versions          ) .set { versions }
 
     emit:
     pgen_pvar_psam        // channel: [ meta, pgen, pvar, psam ]
-    model_terms           // channel: [ meta, K, y, X ]
+    x_null                // channel: [ meta, x_null ]
+    model_frame           // channel: [ meta, model_frame ]
     perm_group            // channel: [ meta, perm_group ]
-    all_grms              // channel: [ meta, grm, grm_id ]
+    aireml_in             // channel: [ meta, grm, grm_id ]
     model                 // channel: formula_rds
     null_model            // channel: formula_rds
+    var_idx               // channel: var_idx_rds
 
     versions              // channel: [ versions.yml ]
 }

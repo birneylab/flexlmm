@@ -11,13 +11,15 @@ process GET_DESIGN_MATRIX {
     input:
     tuple val(meta), path(covar), path(qcovar)
     path pheno
+    path model
     path null_model
     val  permute_by
 
     output:
-    tuple val(meta), path("X_null.rds")    , emit: x_null
-    tuple val(meta), path("perm_group.rds"), emit: perm_group
-    path "versions.yml"                    , emit: versions
+    tuple val(meta), path("X_null.rds")      , emit: x_null
+    tuple val(meta), path("perm_group.rds")  , emit: perm_group
+    tuple val(meta), path("model_frame.rds") , emit: model_frame
+    path "versions.yml"                      , emit: versions
     when:
     task.ext.when == null || task.ext.when
 
@@ -32,6 +34,7 @@ process GET_DESIGN_MATRIX {
 
     # [-2] extract the LHS only from the formula
     null_model <- readRDS("${null_model}")[-2]
+    model <- readRDS("${model}")[-2]
     samples <- rownames(readRDS("${pheno}"))
     
     clean_colnames <- function(n){gsub("#", "", n)}
@@ -86,8 +89,10 @@ process GET_DESIGN_MATRIX {
         # in case of no covar and no qcovar
         df <- data.frame(IID = samples)
     }
-
     rownames(df) <- df[["IID"]]
+    df[["x"]] <- NA
+    model_frame <- model.frame(model, data = df)
+    saveRDS(model_frame, "model_frame.rds")
 
     if ( ${permute_by_set} ){
         permute_by <- '${permute_by}'
@@ -123,6 +128,7 @@ process GET_DESIGN_MATRIX {
     """
     touch X_null.rds
     touch perm_group.rds
+    touch model_frame.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,6 +1,6 @@
 include { AIREML                      } from '../../modules/local/r/aireml'
-include { CHOLESKY                    } from '../../modules/local/r/cholesky'
 include { DECORRELATE                 } from '../../modules/local/r/decorrelate'
+include { FIT_NULL_MODEL              } from '../../modules/local/r/fit_null_model'
 include { FIT_MODEL as FIT_MODEL_ORIG } from '../../modules/local/r/fit_model'
 include { FIT_MODEL as FIT_MODEL_PERM } from '../../modules/local/r/fit_model'
 
@@ -9,52 +9,43 @@ def use_dosage   = params.use_dosage
 workflow LMM {
     take:
     pgen_pvar_psam        // channel: [mandatory] [ meta, pgen, pvar, psam ]
-    model_terms           // channel: [mandatory] [ meta, K, y, X, var_range ]
+    x_null                // channel: [mandatory] [ meta, x_null ]
+    aireml_in             // channel: [mandatory] [ meta, grm_bin, grm_id, pheno, pheno_name ]
+    model_frame           // channel: [mandatory] [ meta, model_frame ]
     perm_group            // channel: [mandatory] [ meta, perm_group ]
     model                 // channel: [mandatory] formula_rds
     null_model            // channel: [mandatory] formula_rds
+    var_idx               // channel: [mandatory] var_idx_rds
     permutation_seeds     // channel: [optional ] permutation seeds
 
     main:
     versions = Channel.empty()
 
     // compute variance components for the random effects
-    AIREML ( model_terms )
+    AIREML ( aireml_in, x_null )
 
     // compute the resiudal covariance V = s2e I + s2g K from the estimated variance components
     // and decompose it with a cholesky decomposition V = L * t(L)
-    // L can then be used to decorrelate the residuals
-    model_terms
-    .join ( AIREML.out.hsq, failOnMismatch: true, failOnDuplicate: true )
+    // L is then used to decorrelate the residuals
+    //
     // drop full genome GRM from downstream steps, keep only LOCO
     // I want AIREML of full genome to get overall heritability
-    .filter { meta, K, y, X, hsq -> meta.chr != "full_genome" }
-    .set { cholesky_in }
-    CHOLESKY ( cholesky_in )
-
-    // solve X and y for L using an efficient triangular solve to rotate the model
-    // to an uncorrelated space
-    model_terms
-    // drop full genome GRM from downstream steps, keep only LOCO
-    // I want AIREML of full genome to get overall heritability
-    .filter { meta, K, y, X -> meta.chr != "full_genome" }
-    .map { meta, K, y, X -> [meta, y, X] }
-    .join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
-    .set { decorrelate_in }
+    AIREML.out.aireml.filter { meta, aireml -> meta.chr != "full_genome" }.set { decorrelate_in }
     DECORRELATE ( decorrelate_in )
 
-    // fit linear model to the uncorrelated data. This is equivalent to
-    // fitting a mixed model to the original data.
-    //DECORRELATE.out.mm_rotation
-    //.join ( CHOLESKY.out.chol_L, failOnMismatch: true, failOnDuplicate: true )
-    //.join ( perm_group,          failOnMismatch: true, failOnDuplicate: true )
-    //.join ( pgen_pvar_psam,      failOnMismatch: true, failOnDuplicate: true )
-    //.map {
-    //    meta, y, X, L, perm_group, pgen, psam, pvar ->
-    //    [meta, y, X, L, perm_group, pgen, psam, pvar, []]
-    //}
-    //.set { fit_model_in }
-    //FIT_MODEL_ORIG ( fit_model_in, model, null_model, use_dosage )
+    // fit the null model and calculate likelihoods and de-correlated residuals
+    FIT_NULL_MODEL (DECORRELATE.out.mm )
+
+    //// fit linear model to the uncorrelated data. This is equivalent to
+    //// fitting a mixed model to the original data.
+    //FIT_MODEL_ORIG (
+    //    DECORRELATE.out.mm.map { it + [[]] },
+    //    pgen_pvar_psam,
+    //    model,
+    //    model_frame,
+    //    perm_group,
+    //    use_dosage
+    //)
     //FIT_MODEL_ORIG.out.gwas.set { gwas }
 
     //fit_model_in

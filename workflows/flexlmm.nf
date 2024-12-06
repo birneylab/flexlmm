@@ -133,10 +133,13 @@ workflow FLEXLMM {
 
     LMM (
         PREPROCESSING.out.pgen_pvar_psam,
-        PREPROCESSING.out.model_terms,
+        PREPROCESSING.out.x_null,
+        PREPROCESSING.out.aireml_in,
+        PREPROCESSING.out.model_frame,
         PREPROCESSING.out.perm_group,
         PREPROCESSING.out.model,
         PREPROCESSING.out.null_model,
+        PREPROCESSING.out.var_idx,
         permutation_seeds
     )
 
@@ -148,7 +151,7 @@ workflow FLEXLMM {
     //    p_thr
     //)
 
-    versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
+    //versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
     //versions.mix ( LMM.out.versions            ) .set { versions }
     //versions.mix ( POSTPROCESSING.out.versions ) .set { versions }
 

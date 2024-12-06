@@ -11,10 +11,11 @@ process MATCH_SAMPLES {
         'biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(meta), path(grm_bin), path(grm_id), path(pheno), val(pheno_name), path(null_design_matrix), path(perm_group)
+    tuple val(meta), path(grm_bin), path(grm_id), path(pheno), val(pheno_name), path(null_design_matrix), path(perm_group), path(model_frame)
 
     output:
     tuple val(meta), path("*.K.rds"), path("*.y.rds"), path("*.X.rds") , emit: model_terms
+    tuple val(meta), path("*.model_frame.rds"), path("*.y.rds"), path("*.X.rds") , emit: model_terms
     tuple val(meta), path("*.perm_group.matched.rds")                  , emit: perm_group
     tuple val(meta), path("*.sample.id")                               , emit: sample_ids
     path "versions.yml"                                                , emit: versions
@@ -40,6 +41,7 @@ process MATCH_SAMPLES {
     X <- readRDS("${null_design_matrix}")
     y <- readRDS("${pheno}")[,"${pheno_name}"]
     perm_group <- readRDS("${perm_group}")
+    covar_qcovar <- readRDS("${covar_qcovar}")
 
     X <- X[apply(!is.na(X), all, MARGIN = 1), , drop = FALSE]
     y <- y[!is.na(y)]
@@ -48,11 +50,20 @@ process MATCH_SAMPLES {
     samples_X <- rownames(X)
     samples_y <- names(y)
     samples_perm_group <- names(perm_group)
+    samples_covar_qcovar <- rownames(covar_qcovar)
 
-    samples <- intersect(intersect(intersect(samples_K, samples_y), samples_X), samples_perm_group)
+    samples <- intersect(
+        intersect(
+            intersect(
+                intersect(samples_K, samples_y),
+                samples_X
+            ), samples_perm_group
+        ), samples_covar_qcovar
+    )
     X <- X[match(samples, rownames(X)), , drop = FALSE]
     y <- y[match(samples, names(y))]
     K <- K[match(samples, rownames(K)), match(samples, colnames(K))]
+    covar_qcovar <- covar_qcovar[match(samples, rownames(covar_qcovar)),]
     perm_group <- perm_group[match(samples, names(perm_group))]
 
     stopifnot(all(!is.null(names(y))))
@@ -60,8 +71,9 @@ process MATCH_SAMPLES {
     stopifnot(all(names(y) == rownames(K)))
     stopifnot(all(names(y) == colnames(K)))
     stopifnot(all(names(y) == names(perm_group)))
+    stopifnot(all(names(y) == rownames(covar_qcovar)))
     stopifnot(
-        sum(is.na(K)) + sum(is.na(C)) + sum(is.na(y)) + sum(is.na(perm_group)) == 0
+        sum(is.na(K)) + sum(is.na(C)) + sum(is.na(y)) + sum(is.na(perm_group)) + sum(is.na(covar_qcovar)) == 0
     )
 
     message(length(samples), " sample intersect in all sets and have no missing values")

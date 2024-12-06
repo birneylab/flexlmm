@@ -6,11 +6,12 @@ process AIREML {
     container "saulpierotti-ebi/gaston"
 
     input:
-    tuple val(meta), path(K), path(y), path(X)
+    tuple val(meta), path(grm_bin), path(grm_id), path(pheno), val(pheno_name)
+    tuple val(meta2), path(x_null)
 
     output:
-    tuple val(meta), path("*.hsq.rds") , emit: hsq
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("*.aireml.rds") , emit: aireml
+    path "versions.yml"                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,9 +22,28 @@ process AIREML {
     """
     #!/usr/bin/env Rscript
 
-    K <- readRDS("${K}")
-    y <- readRDS("${y}")
-    X <- readRDS("${X}")
+    samples_K <- read.table("${grm_id}", header = FALSE, check.names = FALSE)[,1]
+    K <- matrix(
+        readBin("${grm_bin}", what="numeric", n=length(samples_K)**2),
+        ncol = length(samples_K)
+    )
+    colnames(K) <- samples_K
+    rownames(K) <- samples_K
+    stopifnot(sum(is.na(K)) == 0)
+
+    y <- readRDS("${pheno}")[, "${pheno_name}"]
+    X <- readRDS("${x_null}")
+
+    X <- X[apply(!is.na(X), all, MARGIN = 1), , drop = FALSE]
+    y <- y[!is.na(y)]
+
+    samples_X <- rownames(X)
+    samples_y <- names(y)
+
+    samples <- intersect(intersect(samples_K, samples_y), samples_X)
+    X <- X[match(samples, rownames(X)), , drop = FALSE]
+    y <- y[match(samples, names(y))]
+    K <- K[match(samples, rownames(K)), match(samples, colnames(K))]
 
     stopifnot(all(!is.null(names(y))))
     stopifnot(all(names(y) == rownames(X)))
@@ -32,7 +52,7 @@ process AIREML {
     stopifnot(sum(is.na(K)) + sum(is.na(X)) + sum(is.na(y)) == 0)
 
     fit <- gaston::lmm.aireml(y, X, K, verbose = TRUE) 
-    saveRDS(fit, "${prefix}.hsq.rds")
+    saveRDS(list(fit = fit, K = K, y = y, X = X), "${prefix}.aireml.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_gaston <- utils::packageVersion("gaston")
@@ -52,7 +72,7 @@ process AIREML {
     def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.hsq.rds
+    touch ${prefix}.aireml.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

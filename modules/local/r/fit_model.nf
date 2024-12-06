@@ -1,4 +1,3 @@
-// checks that the models are nested and that the correct terms are used where required
 process FIT_MODEL {
     tag "$meta.id"
     label 'process_low'
@@ -6,14 +5,15 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(y), path(X), path(L), path(perm_group), path(pgen), path(pvar), path(psam), val(perm_seed), val(var_range)
+    tuple val(meta), path(mm), val(perm_seed)
+    tuple val(meta2), path(pgen), path(pvar), path(psam)
     path model
-    path null_model
+    path model_frame
+    path perm_group
     val use_dosage
 
     output:
     tuple val(meta), path("*.tsv.gwas.gz") , emit: gwas
-
     path "versions.yml"                    , emit: versions
 
     when:
@@ -28,13 +28,14 @@ process FIT_MODEL {
     """
     #!/usr/bin/env Rscript
 
-    y <- readRDS("${y}")
-    X <- readRDS("${X}")
-    L <- readRDS("${L}")
-    perm_group <- readRDS("${perm_group}")
+    l <- readRDS("${mm}")
+    y.mm <- l[["y"]]
+    X.mm.null <- l[["X"]]
+    L <- l[["L"]]
 
+    perm_group <- readRDS("${perm_group}")
     model <- readRDS("${model}")
-    null_model <- readRDS("${null_model}")
+    var_idx <- readRDS("${var_idx}")
 
     psam <- read.table(
         "${psam}",
@@ -46,14 +47,20 @@ process FIT_MODEL {
     clean_colnames <- function(n){gsub("#", "", n)}
     colnames(psam) <- clean_colnames(colnames(psam))
 
+    pvar_table <- read.table(
+        # header starts with # and comment line with ##,
+        # by removing the first # I make the header visible
+        text = sub("^#", "", readLines("${pvar}")), header = TRUE
+    )[var_idx,]
+
     stopifnot(all(!is.null(names(y))))
-    stopifnot(all(names(y) == rownames(X)))
-    stopifnot(all(names(y) == rownames(L)))
-    stopifnot(all(names(y) == colnames(L)))
-    stopifnot(all(names(y) == psam[["IID"]]))
-    stopifnot(all(names(y) == names(perm_group)))
+    stopifnot(all(names(y.mm) == rownames(X.mm)))
+    stopifnot(all(names(y.mm) == rownames(L)))
+    stopifnot(all(names(y.mm) == colnames(L)))
+    stopifnot(all(names(y.mm) == psam[["IID"]]))
+    stopifnot(all(names(y.mm) == names(perm_group)))
     stopifnot(
-        sum(is.na(L)) + sum(is.na(X)) + sum(is.na(y)) + sum(is.na(perm_group)) == 0
+        sum(is.na(L)) + sum(is.na(X.mm)) + sum(is.na(y.mm)) + sum(is.na(perm_group)) == 0
     )
 
     if ( ${do_permute} ) {
@@ -70,48 +77,25 @@ process FIT_MODEL {
     pvar <- pgenlibr::NewPvar("${pvar}")
     pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
 
-    fit_null <- .lm.fit(x = X, y = y)
+    fit_null <- .lm.fit(x = X.mm.null, y = y.mm)
     ll_null  <- stats:::logLik.lm(fit_null)
+    resid_null <- resid(fit_null)
 
     outname <- "${prefix}.tsv.gwas.gz"
     out_con <- gzfile(outname, "w")
     header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval\\tbeta"
     writeLines(header, out_con)
-    nvars <- pgenlibr::GetVariantCt(pgen)
+
+    nvars <- length(var_idx)
     pb <- txtProgressBar(1, nvars, style = 3)
-
-    t <- terms(fixed_effects_formula)
-    var_promise <- attr(t, "variables")
-    var_names <- vapply(
-        # taken from deparse2 at
-        # https://github.com/wch/r-source/blob/79aae23ad4c14aa754abec853b6f3c6205bfcc34/src/library/stats/R/models.R#L450
-        var_promise,
-        function(x){
-            paste(deparse(x, backtick = TRUE, width.cutoff = 500L), collapse = " ")
-        },
-        ""
-    )[-1L]
-    var_frame <- cbind(x = 0, gxe_frame)
-    var_frame[["x"]] <- pgenlibr::Buf(pgen)
-    rownames <- .row_names_info(var_frame, 0L)
-
-    for (i in 1:nvars) {
+    for (i in seq_along(var_idx)) {
         setTxtProgressBar(pb, i)
+        the_var_idx <- var_idx[[i]]
 
-        pgenlibr::${pgenlibr_read_func}(pgen, var_frame[["x"]], i)
+        pgenlibr::${pgenlibr_read_func}(pgen, var_frame[["x"]], the_var_idx)
 
         # df with all the math operations like (x == 1) evaluated
-        curr_frame <- .External2(
-            stats:::C_modelframe,
-            t,
-            rownames,
-            eval(var_promise, var_frame, NULL),
-            var_names,
-            NULL,
-            NULL,
-            NULL,
-            na.fail
-        )
+        X <- model.matrix(model, data = df)
 
         # computes contrasts and interactions
         X <- .External2(stats:::C_modelmatrix, t, curr_frame)
@@ -126,17 +110,14 @@ process FIT_MODEL {
         # forwardsolve(L, X) without the wrapper
         X_mm <- .Internal(backsolve(L, X, ncol(L), FALSE, FALSE))
 
-        if ( ${do_permute} ) X_mm <- X_mm[gt_order, , drop = FALSE]
-
         colnames(X_mm) <- X_names
         design_matrix <- cbind(X_mm, C)
 
-        var_id <- pgenlibr::GetVariantId(pvar, i)
-        var_info <- strsplit(var_id, '_')[[1]]
-        chr <- var_info[[1]]
-        pos <- var_info[[2]]
-        ref <- var_info[[3]]
-        alt <- var_info[[4]]
+        var_id <- pgenlibr::GetVariantId(pvar, the_var_id)
+        chr <- pvar_table[["CHROM"]]
+        pos <- pvar_table[["POS"]]
+        ref <- pvar_table[["REF"]]
+        alt <- pvar_table[["ALT"]]
 
         fit <- .lm.fit(x = design_matrix, y = y)
         beta <- paste(
