@@ -48,29 +48,29 @@ workflow PREPROCESSING {
     versions = Channel.empty()
     
     // convert genotype input to pgen format
-    if ( bgen && gen && sample ){
-        BGEN_TO_PGEN ( [ [id: bgen.simpleName], bgen, gen, sample ], maf_min, use_dosage )
-        BGEN_TO_PGEN.out.set { pgen_pvar_psam }
+    if ( bgen && sample ){
+        BGEN_TO_PGEN ( [ [id: bgen.simpleName], bgen, sample ], maf_min, use_dosage )
+        BGEN_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
         versions.mix ( BGEN_TO_PGEN.out.versions ) .set { versions }
     } else if ( bcf ) {
         BCF_TO_PGEN ( [ [id: bcf.simpleName], bcf ], maf_min, use_dosage )
-        BCF_TO_PGEN.out.set { pgen_pvar_psam }
+        BCF_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
         versions.mix ( BCF_TO_PGEN.out.versions ) .set { versions }
     } else if ( vcf ) {
         VCF_TO_PGEN ( [ [id: vcf.simpleName], vcf ], maf_min, use_dosage )
-        VCF_TO_PGEN.out.set { pgen_pvar_psam }
+        VCF_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
         versions.mix ( VCF_TO_PGEN.out.versions ) .set { versions }
-    } else if ( bed && bin && fam ) {
+    } else if ( bed && bim && fam ) {
         BED_TO_PGEN ( [ [id: bed.simpleName], bed, bim, fam ], maf_min, use_dosage )
-        BED_TO_PGEN.out.set { pgen_pvar_psam }
+        BED_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
         versions.mix ( BED_TO_PGEN.out.versions ) .set { versions }
     } else if ( ped && map_f ) {
-        PED_TO_PGEN ( [ [id: ped.simpleName], map_f ], maf_min, use_dosage )
-        PED_TO_PGEN.out.set { pgen_pvar_psam }
+        PED_TO_PGEN ( [ [id: ped.simpleName], ped, map_f ], maf_min, use_dosage )
+        PED_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
         versions.mix ( PED_TO_PGEN.out.versions ) .set { versions }
-    } else if ( pgen && pvar && psam ) {
-        PGEN_TO_PGEN ( [ [id: pgen.simpleName], pgen, pvar, psam ], maf_min, use_dosage )
-        PGEN_TO_PGEN.out.set { pgen_pvar_psam }
+    } else if ( pgen && psam && pvar ) {
+        PGEN_TO_PGEN ( [ [id: pgen.simpleName], pgen, psam, pvar ], maf_min, use_dosage )
+        PGEN_TO_PGEN.out.pgen_psam_pvar.set { pgen_pvar_psam }
         versions.mix ( PGEN_TO_PGEN.out.versions ) .set { versions }
     } else {
         error (
@@ -80,7 +80,7 @@ workflow PREPROCESSING {
             "bgen, gen, sample\n" +
             "pgen, pvar, pvar\n" +
             "bed, bim, fam\n" +
-            "ped, map\n"
+            "ped, map (parameter is called map_f)\n"
         )
     }
 
