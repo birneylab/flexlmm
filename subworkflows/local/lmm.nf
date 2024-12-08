@@ -40,7 +40,7 @@ workflow LMM {
     // fit linear model to the uncorrelated data. This is equivalent to
     // fitting a mixed model to the original data.
     DECORRELATE.out.mm.map { meta, mm -> [ meta.chr, meta, mm ] }
-    .join ( var_idx.map { meta, rds -> [ meta.chr, rds ] }, failOnMismatch: true, failOnDuplicate: true )
+    .combine ( var_idx.map { meta, rds -> [ meta.chr, rds ] }, by: 0 )
     .map { chr, meta, mm, var_idx -> [ meta, mm, var_idx ] }
     .join ( FIT_NULL_MODEL.out.null_model, failOnMismatch: true, failOnDuplicate: true )
     .set { fit_model_in }

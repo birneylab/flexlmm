@@ -195,7 +195,7 @@ workflow PREPROCESSING {
         meta1, grm_bin, grm_id, meta2, pheno, pheno_name ->
         def new_meta = meta1.clone()
         new_meta.pheno_name = pheno_name
-        new_meta.id = "${meta1.id}_${pheno_name}"
+        new_meta.id = "${meta1.chr}_${pheno_name}"
         [ new_meta, grm_bin, grm_id, pheno, pheno_name ]
     }
     .set { aireml_in }
