@@ -5,11 +5,10 @@ process FIT_MODEL {
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
     input:
-    tuple val(meta), path(mm), val(perm_seed)
+    tuple val(meta), path(mm), path(var_idx), path(null_model_fit), val(perm_seed)
     tuple val(meta2), path(pgen), path(pvar), path(psam)
     path model
-    path model_frame
-    path perm_group
+    tuple val(meta3), path(model_frame)
     val use_dosage
 
     output:
@@ -28,15 +27,18 @@ process FIT_MODEL {
     """
     #!/usr/bin/env Rscript
 
-    l <- readRDS("${mm}")
-    y.mm <- l[["y"]]
-    X.mm.null <- l[["X"]]
-    L <- l[["L"]]
-
-    perm_group <- readRDS("${perm_group}")
-    model <- readRDS("${model}")
+    l.mm <- readRDS("${mm}")
     var_idx <- readRDS("${var_idx}")
-
+    l.null <- readRDS("${null_model_fit}")
+    if (${do_permute}) set.seed(${perm_seed})
+    
+    pvar_table <- read.table(
+        # header starts with # and comment line with ##,
+        # by removing the first # I make the header visible
+        text = sub("^#", "", readLines("${pvar}")), header = TRUE
+    )[var_idx,]
+    pvar <- pgenlibr::NewPvar("${pvar}")
+    pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
     psam <- read.table(
         "${psam}",
         sep = "\\t",
@@ -47,103 +49,102 @@ process FIT_MODEL {
     clean_colnames <- function(n){gsub("#", "", n)}
     colnames(psam) <- clean_colnames(colnames(psam))
 
-    pvar_table <- read.table(
-        # header starts with # and comment line with ##,
-        # by removing the first # I make the header visible
-        text = sub("^#", "", readLines("${pvar}")), header = TRUE
-    )[var_idx,]
+    model <- readRDS("${model}")
+    model_frame_raw <- readRDS("${model_frame}")
 
-    stopifnot(all(!is.null(names(y))))
-    stopifnot(all(names(y.mm) == rownames(X.mm)))
+    y.mm <- l.mm[["y.mm"]]
+    X.mm.null <- l.mm[["X.mm"]]
+    L <- l.mm[["L"]]
+
+    ll.null <- l.null[["ll"]]
+    y.mm.pred <- l.null[["y.mm.pred"]]
+    e.p <- l.null[["e.p"]]
+    U1 <- l.null[["U1"]]
+    
+    samples <- intersect(intersect(psam[["IID"]], names(y.mm)), rownames(model_frame_raw))
+    pgen_order <- match(samples, psam[["IID"]])
+    X.mm.null <- X.mm.null[match(samples, rownames(X.mm.null)), , drop = FALSE]
+    y.mm <- y.mm[match(samples, names(y.mm))]
+    L <- L[match(samples, rownames(L)), match(samples, colnames(L))]
+    psam <- psam[pgen_order,]
+    y.mm.pred <- y.mm.pred[match(samples, names(y.mm.pred))]
+    model_frame_raw <- model_frame_raw[match(samples, rownames(model_frame_raw)),]
+
+    stopifnot(all(!is.null(names(y.mm))))
+    stopifnot(all(names(y.mm) == rownames(X.mm.null)))
     stopifnot(all(names(y.mm) == rownames(L)))
     stopifnot(all(names(y.mm) == colnames(L)))
     stopifnot(all(names(y.mm) == psam[["IID"]]))
-    stopifnot(all(names(y.mm) == names(perm_group)))
+    stopifnot(all(names(y.mm) == names(y.mm.pred)))
+    stopifnot(all(names(y.mm) == rownames(model_frame_raw)))
     stopifnot(
-        sum(is.na(L)) + sum(is.na(X.mm)) + sum(is.na(y.mm)) + sum(is.na(perm_group)) == 0
+        (
+            sum(is.na(L)) +
+            sum(is.na(X.mm.null)) +
+            sum(is.na(y.mm)) +
+            sum(is.na(psam[["IID"]])) +
+            sum(is.na(y.mm.pred)) +
+            sum(is.na(model_frame_raw))
+        ) == 0
     )
-
-    if ( ${do_permute} ) {
-        set.seed(${perm_seed})
-        gt_order <- 1:length(y)
-        for ( curr_group in unique(perm_group) ) {
-            gt_order[perm_group == curr_group] <- sample(
-                gt_order[perm_group == curr_group], replace = FALSE
-            )
-        }
-        set.seed(NULL)
+        
+    # generate synthetic phenotype by permuting the uncorrelated transformation
+    # of the residuals and fit the null model
+    # null model fit is not needed if not permuting because we can use the one
+    # obtained in the FIT_NULL_MODEL process
+    if (${do_permute}) {
+        y.mm <- y.mm.pred + drop(U1 %*% sample(e.p))
+        stopifnot(all(rownames(X.mm.null) == rownames(y.mm)))
+        fit <- .lm.fit(x = X.mm.null, y = y.mm)
+        ll.null <- stats:::logLik.lm(fit)
     }
-
-    pvar <- pgenlibr::NewPvar("${pvar}")
-    pgen <- pgenlibr::NewPgen("${pgen}", pvar = pvar)
-
-    fit_null <- .lm.fit(x = X.mm.null, y = y.mm)
-    ll_null  <- stats:::logLik.lm(fit_null)
-    resid_null <- resid(fit_null)
 
     outname <- "${prefix}.tsv.gwas.gz"
     out_con <- gzfile(outname, "w")
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval\\tbeta"
+    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval"
     writeLines(header, out_con)
+
+    buf <- pgenlibr::Buf(pgen)
 
     nvars <- length(var_idx)
     pb <- txtProgressBar(1, nvars, style = 3)
     for (i in seq_along(var_idx)) {
         setTxtProgressBar(pb, i)
         the_var_idx <- var_idx[[i]]
+        pgenlibr::${pgenlibr_read_func}(pgen, buf, the_var_idx)
+        model_frame_raw[["x"]] <- buf[pgen_order]
+        # needed to recompute expressions such as I(x == 1)
+        model_frame <- model.frame(model[-2], data = model_frame_raw)
+        X <- model.matrix(model[-2], data = model_frame)
+        X.mm <- forwardsolve(L, X)
+        colnames(X.mm) <- colnames(X)
+        rownames(X.mm) <- rownames(X)
 
-        pgenlibr::${pgenlibr_read_func}(pgen, var_frame[["x"]], the_var_idx)
+        id <- pgenlibr::GetVariantId(pvar, the_var_idx)
+        chr <- pvar_table[as.character(the_var_idx), "CHROM"]
+        pos <- pvar_table[as.character(the_var_idx), "POS"]
+        ref <- pvar_table[as.character(the_var_idx), "REF"]
+        alt <- pvar_table[as.character(the_var_idx), "ALT"]
 
-        # df with all the math operations like (x == 1) evaluated
-        X <- model.matrix(model, data = df)
-
-        # computes contrasts and interactions
-        X <- .External2(stats:::C_modelmatrix, t, curr_frame)
-
-        # drop the intercept since it is already in C, cannot drop before model.matrix so
-        # that contrast are calculated correctly
-        if ( drop_intercept ) X <- subset(X, select = -`(Intercept)`)
-
-        # names are lost in forwardsolve
-        X_names <- colnames(X)
-
-        # forwardsolve(L, X) without the wrapper
-        X_mm <- .Internal(backsolve(L, X, ncol(L), FALSE, FALSE))
-
-        colnames(X_mm) <- X_names
-        design_matrix <- cbind(X_mm, C)
-
-        var_id <- pgenlibr::GetVariantId(pvar, the_var_id)
-        chr <- pvar_table[["CHROM"]]
-        pos <- pvar_table[["POS"]]
-        ref <- pvar_table[["REF"]]
-        alt <- pvar_table[["ALT"]]
-
-        fit <- .lm.fit(x = design_matrix, y = y)
-        beta <- paste(
-            colnames(design_matrix),
-            fit[["coefficients"]],
-            collapse = ",",
-            sep = "~"
-        )
-        ll_fit <- stats:::logLik.lm(fit)
-        lrt_df <- attributes(ll_fit)[["df"]] - attributes(ll_null)[["df"]]
-        lrt_chisq <- 2 * as.numeric(ll_fit - ll_null)
+        stopifnot(all(rownames(X.mm) == rownames(y.mm)))
+        fit <- .lm.fit(x = X.mm, y = y.mm)
+        ll <- stats:::logLik.lm(fit)
+        lrt_df <- attributes(ll)[["df"]] - attributes(ll.null)[["df"]]
+        lrt_chisq <- 2 * as.numeric(ll - ll.null)
         pval <- (
             if (lrt_df > 0) pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE) else NA
         )
 
         lineout <- sprintf(
-            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
+            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
             chr,
             pos,
-            var_id,
+            id,
             ref,
             alt,
             lrt_chisq,
             lrt_df,
-            pval,
-            beta
+            pval
         )
         writeLines(lineout, out_con)
     }
@@ -155,7 +156,7 @@ process FIT_MODEL {
     # to make sure that the output has been written properly
     gwas <- read.table(outname, header = TRUE, sep = "\t")
     stopifnot(nrow(gwas) == nvars)
-    stopifnot(ncol(gwas) == 9)
+    stopifnot(ncol(gwas) == 8)
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_pgenlibr <- utils::packageVersion("pgenlibr")

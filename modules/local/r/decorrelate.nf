@@ -59,7 +59,11 @@ process DECORRELATE {
     y.mm <- forwardsolve(L, y)
     X.mm <- forwardsolve(L, X)
 
-    saveRDS(list(y = y.mm, X = X.mm, L = L), "${prefix}.mm.rds")
+    names(y.mm) <- names(y)
+    rownames(X.mm) <- rownames(X)
+    colnames(X.mm) <- colnames(X)
+
+    saveRDS(list(y.mm = y.mm, X.mm = X.mm, L = L), "${prefix}.mm.rds")
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     system(

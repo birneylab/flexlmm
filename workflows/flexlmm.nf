@@ -66,7 +66,6 @@ def qcovar = params.qcovar ? file(params.qcovar, checkIfExists: true) : []
 
 def permutation_seeds = params.permutations ? 1..params.permutations : []
 def nperms            = params.permutations ?: 0
-def permute_by        = params.permute_by   ?: []
 def p_thr             = params.p_thr
 
 if ( params.quantile_normalise && params.standardise ) {
@@ -126,7 +125,6 @@ workflow FLEXLMM {
         covar,
         qcovar,
         freq,
-        permute_by,
         null_model_formula,
         model_formula
     )
@@ -136,7 +134,6 @@ workflow FLEXLMM {
         PREPROCESSING.out.x_null,
         PREPROCESSING.out.aireml_in,
         PREPROCESSING.out.model_frame,
-        PREPROCESSING.out.perm_group,
         PREPROCESSING.out.model,
         PREPROCESSING.out.null_model,
         PREPROCESSING.out.var_idx,

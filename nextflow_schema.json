@@ -191,12 +191,6 @@
                     "fa_icon": "fas fa-list-ol",
                     "description": "Number of permutations to be performed"
                 },
-                "permute_by": {
-                    "type": "string",
-                    "fa_icon": "fas fa-mouse-pointer",
-                    "description": "Perform permutation within pre-defined groups",
-                    "help_text": "Must be a column name in `covar`. If specified, samples are exchaged in permutations only within the levels of the specified factor."
-                },
                 "p_thr": {
                     "type": "number",
                     "default": 0.05,

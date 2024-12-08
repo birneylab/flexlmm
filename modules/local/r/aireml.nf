@@ -34,13 +34,9 @@ process AIREML {
     y <- readRDS("${pheno}")[, "${pheno_name}"]
     X <- readRDS("${x_null}")
 
-    X <- X[apply(!is.na(X), all, MARGIN = 1), , drop = FALSE]
     y <- y[!is.na(y)]
 
-    samples_X <- rownames(X)
-    samples_y <- names(y)
-
-    samples <- intersect(intersect(samples_K, samples_y), samples_X)
+    samples <- intersect(samples_K, names(y))
     X <- X[match(samples, rownames(X)), , drop = FALSE]
     y <- y[match(samples, names(y))]
     K <- K[match(samples, rownames(K)), match(samples, colnames(K))]

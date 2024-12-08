@@ -12,7 +12,6 @@ workflow LMM {
     x_null                // channel: [mandatory] [ meta, x_null ]
     aireml_in             // channel: [mandatory] [ meta, grm_bin, grm_id, pheno, pheno_name ]
     model_frame           // channel: [mandatory] [ meta, model_frame ]
-    perm_group            // channel: [mandatory] [ meta, perm_group ]
     model                 // channel: [mandatory] formula_rds
     null_model            // channel: [mandatory] formula_rds
     var_idx               // channel: [mandatory] var_idx_rds
@@ -33,45 +32,55 @@ workflow LMM {
     AIREML.out.aireml.filter { meta, aireml -> meta.chr != "full_genome" }.set { decorrelate_in }
     DECORRELATE ( decorrelate_in )
 
-    // fit the null model and calculate likelihoods and de-correlated residuals
-    FIT_NULL_MODEL (DECORRELATE.out.mm )
+    // fit the null model and calculate likelihoods, fitted values, de-correlated residuals,
+    // and U1 matrix
+    FIT_NULL_MODEL ( DECORRELATE.out.mm )
 
-    //// fit linear model to the uncorrelated data. This is equivalent to
-    //// fitting a mixed model to the original data.
-    //FIT_MODEL_ORIG (
-    //    DECORRELATE.out.mm.map { it + [[]] },
-    //    pgen_pvar_psam,
-    //    model,
-    //    model_frame,
-    //    perm_group,
-    //    use_dosage
-    //)
-    //FIT_MODEL_ORIG.out.gwas.set { gwas }
+    // fit linear model to the uncorrelated data. This is equivalent to
+    // fitting a mixed model to the original data.
+    DECORRELATE.out.mm.map { meta, mm -> [ meta.chr, meta, mm ] }
+    .join ( var_idx.map { meta, rds -> [ meta.chr, rds ] }, failOnMismatch: true, failOnDuplicate: true )
+    .map { chr, meta, mm, var_idx -> [ meta, mm, var_idx ] }
+    .join ( FIT_NULL_MODEL.out.null_model, failOnMismatch: true, failOnDuplicate: true )
+    .set { fit_model_in }
+    FIT_MODEL_ORIG (
+        fit_model_in.map { it + [ [] ] },
+        pgen_pvar_psam,
+        model,
+        model_frame,
+        use_dosage
+    )
+    FIT_MODEL_ORIG.out.gwas.set { gwas }
 
-    //fit_model_in
-    //.combine ( permutation_seeds )
-    //.map {
-    //    meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, fake_seed, seed ->
-    //    def new_meta = meta.clone()
-    //    new_meta.id = "${meta.id}_perm${seed}"
-    //    new_meta.seed = seed
-    //    new_meta.is_perm = true
-    //    [new_meta, y, C, L, gxe_frame, perm_group, pgen, psam, pvar, seed]
-    //}
-    //.set { fit_model_perm_in }
-    //FIT_MODEL_PERM ( fit_model_perm_in, fixed_effects_formula, intercepts, use_dosage )
-    //FIT_MODEL_PERM.out.gwas.set { gwas_perm }
+    fit_model_in.combine ( permutation_seeds )
+    .map {
+        meta, mm, var_idx, null_model_fit, perm_seed ->
+        def new_meta = meta.clone()
+        new_meta.id = "${meta.id}_perm${perm_seed}"
+        new_meta.perm_seed = perm_seed
+        [ new_meta, mm, var_idx, null_model_fit, perm_seed ]
+    }
+    .set { fit_model_perm_in }
+    FIT_MODEL_PERM (
+        fit_model_perm_in,
+        pgen_pvar_psam,
+        model,
+        model_frame,
+        use_dosage
+    )
+    FIT_MODEL_PERM.out.gwas.set { gwas_perm }
 
-    //// Gather versions of all tools used
-    //versions.mix ( AIREML.out.versions         ) .set { versions }
-    //versions.mix ( CHOLESKY.out.versions       ) .set { versions }
-    //versions.mix ( DECORRELATE.out.versions    ) .set { versions }
-    //versions.mix ( FIT_MODEL_ORIG.out.versions ) .set { versions }
-    //versions.mix ( FIT_MODEL_PERM.out.versions ) .set { versions }
 
-    //emit:
-    //gwas      // channel: [ meta, gwas ]
-    //gwas_perm // channel: [ meta, gwas_perm ]
+    // Gather versions of all tools used
+    versions.mix ( AIREML.out.versions         ) .set { versions }
+    versions.mix ( DECORRELATE.out.versions    ) .set { versions }
+    versions.mix ( FIT_NULL_MODEL.out.versions ) .set { versions }
+    versions.mix ( FIT_MODEL_ORIG.out.versions ) .set { versions }
+    versions.mix ( FIT_MODEL_PERM.out.versions ) .set { versions }
 
-    //versions // channel: [ versions.yml ]
+    emit:
+    gwas      // channel: [ meta, gwas ]
+    gwas_perm // channel: [ meta, gwas_perm ]
+
+    versions // channel: [ versions.yml ]
 }

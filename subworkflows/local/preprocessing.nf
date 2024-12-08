@@ -9,7 +9,6 @@ include { TRANSFORM_PHENOTYPES } from '../../modules/local/plink2/transform_phen
 include { PHENO_TO_RDS         } from '../../modules/local/r/pheno_to_rds'
 include { VALIDATE_FORMULAS    } from '../../modules/local/r/validate_formulas'
 include { GET_DESIGN_MATRIX    } from '../../modules/local/r/get_design_matrix'
-include { MATCH_SAMPLES        } from '../../modules/local/r/match_samples'
 
 
 def select_chr   = params.select_chr   ? ( params.select_chr as String   ).split(",") : null
@@ -38,7 +37,6 @@ workflow PREPROCESSING {
     covar                  // value: [optional ] covariates
     qcovar                 // value: [optional ] covariates
     freq                   // value: [optional ] plink2 freq file
-    permute_by             // value: [optional ] permute_by factor
 
     null_model_formula_str // value: [mandatory] null model R formula
     model_formula_str      // value: [mandatory] model R formula
@@ -161,8 +159,7 @@ workflow PREPROCESSING {
     VALIDATE_FORMULAS.out.model     .set { model }
     VALIDATE_FORMULAS.out.null_model.set { null_model }
 
-    // get the null model design matrix, the full model frame (covar + qcovar), and the
-    // permutation grouping vector
+    // get the null model design matrix and the full model frame (covar + qcovar)
     GET_DESIGN_MATRIX (
         [
             [id: "covar_qcovar"],
@@ -172,12 +169,10 @@ workflow PREPROCESSING {
         // I just need pheno to get the sample names in case of missing covar and qcovar, so 1 is enough
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
         model,
-        null_model,
-        permute_by
+        null_model
     )
     GET_DESIGN_MATRIX.out.x_null     .set { x_null      }
     GET_DESIGN_MATRIX.out.model_frame.set { model_frame }
-    GET_DESIGN_MATRIX.out.perm_group .set { perm_group  }
     
     // get list of pgen variant indexes to test per chromosome
     pgen_pvar_psam.combine ( chr )
@@ -218,7 +213,6 @@ workflow PREPROCESSING {
     pgen_pvar_psam        // channel: [ meta, pgen, pvar, psam ]
     x_null                // channel: [ meta, x_null ]
     model_frame           // channel: [ meta, model_frame ]
-    perm_group            // channel: [ meta, perm_group ]
     aireml_in             // channel: [ meta, grm, grm_id ]
     model                 // channel: formula_rds
     null_model            // channel: formula_rds
