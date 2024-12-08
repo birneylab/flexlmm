@@ -1,5 +1,4 @@
 process MANHATTAN {
-    tag "$meta.id"
     label 'process_low'
 
     conda "r-base=4.3.1 r-tidyverse=2.0.0 r-cowplot=1.1.1"
@@ -114,7 +113,6 @@ process MANHATTAN {
 }
 
 process QQ {
-    tag "$meta.id"
     label 'process_low'
 
     conda "r-base=4.3.1 r-tidyverse=2.0.0 r-cowplot=1.1.1"
@@ -193,7 +191,6 @@ process QQ {
 
 
 process RELATEDNESS {
-    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::bioconductor-complexheatmap==2.16.0"

@@ -85,7 +85,7 @@ if ( params.quantile_normalise && params.standardise ) {
 
 include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
 include { LMM            } from '../subworkflows/local/lmm'
-//include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
+include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,13 +140,14 @@ workflow FLEXLMM {
         permutation_seeds
     )
 
-    //POSTPROCESSING (
-    //    LMM.out.gwas,
-    //    LMM.out.gwas_perm,
-    //    PREPROCESSING.out.all_grms,
-    //    nperms,
-    //    p_thr
-    //)
+    POSTPROCESSING (
+        LMM.out.gwas,
+        LMM.out.gwas_perm,
+        PREPROCESSING.out.full_genome_grm,
+        LMM.out.heritability,
+        nperms,
+        p_thr
+    )
 
     //versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
     //versions.mix ( LMM.out.versions            ) .set { versions }

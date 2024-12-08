@@ -123,6 +123,7 @@ workflow PREPROCESSING {
     FULL_GRM ( full_genome_grm_in, freq )
     LOCO_GRM ( loco_grm_in       , freq )
     FULL_GRM.out.grm.mix ( LOCO_GRM.out.grm ).set { all_grms }
+    FULL_GRM.out.grm.set { full_genome_grm }
     
     // standardise or quantile normalise the phenotype if requested
     TRANSFORM_PHENOTYPES ( pgen_pvar_psam.combine ( [ pheno ] ) )
@@ -217,6 +218,7 @@ workflow PREPROCESSING {
     model                 // channel: formula_rds
     null_model            // channel: formula_rds
     var_idx               // channel: var_idx_rds
+    full_genome_grm       // channel: [ meta, grb_bin, grm_id ]
 
     versions              // channel: [ versions.yml ]
 }

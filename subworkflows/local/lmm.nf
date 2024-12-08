@@ -22,6 +22,7 @@ workflow LMM {
 
     // compute variance components for the random effects
     AIREML ( aireml_in, x_null )
+    AIREML.out.aireml.filter { meta, aireml -> meta.chr == "full_genome" }.set { heritability }
 
     // compute the resiudal covariance V = s2e I + s2g K from the estimated variance components
     // and decompose it with a cholesky decomposition V = L * t(L)
@@ -70,7 +71,6 @@ workflow LMM {
     )
     FIT_MODEL_PERM.out.gwas.set { gwas_perm }
 
-
     // Gather versions of all tools used
     versions.mix ( AIREML.out.versions         ) .set { versions }
     versions.mix ( DECORRELATE.out.versions    ) .set { versions }
@@ -79,8 +79,9 @@ workflow LMM {
     versions.mix ( FIT_MODEL_PERM.out.versions ) .set { versions }
 
     emit:
-    gwas      // channel: [ meta, gwas ]
-    gwas_perm // channel: [ meta, gwas_perm ]
+    gwas          // channel: [ meta, gwas ]
+    gwas_perm     // channel: [ meta, gwas_perm ]
+    heritability  // channel: [ meta, gaston_rds ]
 
     versions // channel: [ versions.yml ]
 }

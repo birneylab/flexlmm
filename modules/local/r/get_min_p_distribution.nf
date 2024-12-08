@@ -39,7 +39,7 @@ process GET_MIN_P_DISTRIBUTION {
         n_snps <- 0
         for ( perm_file in all_files ) {
             con <- gzfile(perm_file, "r")
-            header <- readLines(con, n=1)
+            header <- readLines(con, n = 1)
             colnames <- strsplit(header, "\\t")[[1]]
             p_index <- which(colnames == "pval")
             stopifnot(length(p_index) == 1)
