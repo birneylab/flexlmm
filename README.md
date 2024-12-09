@@ -92,7 +92,7 @@ This is a fairly standard approach used for example [here](https://github.com/gr
 Permutations are run on the residuals from the null model OLS fit after the Cholesky rotation.
 Given the interdependence of the realised residuals due to the loss of degrees of freedom consequent to the estimation of the fixed effect coefficients, the permutation is not actually run on the residuals themselves, but on their projection to a lower dimensional space.
 A scrambled phenotype is generated from the fitted null model phenotype and the permuted residuals, and this is used to test each SNP defining the null p-value distribution.
-See (Abney M (2015) Permutation Testing in the Presence of Polygenic Variation, Genetic Epidemiology, 39, 249-258)[https://doi.org/10.1002/gepi.21893] and the (MVNpermute repository)[https://github.com/markabney/MVNpermute] for a more detailed explanation of this approach.
+See [Abney M (2015) Permutation Testing in the Presence of Polygenic Variation, Genetic Epidemiology, 39, 249-258](https://doi.org/10.1002/gepi.21893) and the [MVNpermute repository](https://github.com/markabney/MVNpermute) for a more detailed explanation of this approach.
 
 Significance thresholds for a given nominal significance level are reported using [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction) and Westfall–Young permutations (see [here](https://doi.org/10.1093/bioinformatics/btac455)).
 If $m$ permutations are performed, the significance threshold is set as the $t$ quantile of the empirical distribution given by the minimum p-values for each permutation (in total a set of $m$ p-values), where $t$ is the nominal significance desired.
