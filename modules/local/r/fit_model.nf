@@ -121,10 +121,10 @@ process FIT_MODEL {
         rownames(X.mm) <- rownames(X)
 
         id <- pgenlibr::GetVariantId(pvar, the_var_idx)
-        chr <- pvar_table[as.character(the_var_idx), "CHROM"]
-        pos <- pvar_table[as.character(the_var_idx), "POS"]
-        ref <- pvar_table[as.character(the_var_idx), "REF"]
-        alt <- pvar_table[as.character(the_var_idx), "ALT"]
+        chr <- pvar_table[i, "CHROM"]
+        pos <- pvar_table[i, "POS"]
+        ref <- pvar_table[i, "REF"]
+        alt <- pvar_table[i, "ALT"]
 
         stopifnot(all(rownames(X.mm) == rownames(y.mm)))
         fit <- .lm.fit(x = X.mm, y = y.mm)
