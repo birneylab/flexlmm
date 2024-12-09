@@ -2,6 +2,25 @@
 
 Flexible linear mixed model framework for Genome Wide Association Studies
 
+## Genotype options
+
+Different format options for the input genotypes.
+
+| Parameter | Description | Type | Default | Required | Hidden |
+|-----------|-----------|-----------|-----------|-----------|-----------|
+| `vcf` | Input genotypes in vcf format. Can be bgzip compressed. | `string` |  |  |  |
+| `bcf` | Input genotypes in bcf format. Can be bgzip compressed. | `string` |  |  |  |
+| `bgen` | Input genotypes in Oxford bgen format. Requires also gen and sample files to be specified.. | `string` |  |  |  |
+| `sample` | sample file for Oxford bgen input format | `string` |  |  |  |
+| `bed` | Input genotypes in bed format. Requires also bim and fam files to be specified. | `string` |  |  |  |
+| `bim` | bim file for bed input format | `string` |  |  |  |
+| `fam` | fam file for bed input format | `string` |  |  |  |
+| `ped` | Input genotypes in ped format. Requires also map_f files to be specified. | `string` |  |  |  |
+| `map_f` | map file for ped input format | `string` |  |  |  |
+| `pgen` | Input genotypes in pgen format. Requires also pvar and psam files to be specified. | `string` |  |  |  |
+| `psam` | psam file for pgen input format | `string` |  |  |  |
+| `pvar` | pvar file for pgen input format | `string` |  |  |  |
+
 ## Input/output options
 
 Define where the pipeline should find input data and save output data.
@@ -9,13 +28,12 @@ Define where the pipeline should find input data and save output data.
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
 | `outdir` | The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure. | `string` |  | True |  |
-| `vcf` | VCF file containing the sample genotypes. Can be bgzip compressed. | `string` |  | True |  |
 | `pheno` | Phenotype file in PLINK2 format <details><summary>Help</summary><small>The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. <br><br>IID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).<br><br>See an [example file](../assets/test_data/tsv/pheno.tsv)</small></details>| `string` |  | True |  |
 | `covar` | Categorical covariates. Same format as `pheno`. <details><summary>Help</summary><small>Columns cannot be named 'x', 'y', 'ID', '#ID', 'FID', or '#FID', or have the same name of columns in `qcovar` .<br><br>See an [example file](../assets/test_data/tsv/covar.tsv)</small></details>| `string` |  |  |  |
 | `qcovar` | Quantitative covariates. Same format as `pheno`. <details><summary>Help</summary><small>Columns cannot be named 'x', 'y', 'ID', '#ID', 'FID', or '#FID', or have the same name of columns in `covar` .<br><br>See an [example file](../assets/test_data/tsv/qcovar.tsv)</small></details>| `string` |  |  |  |
-| `freq` | Same format as `vcf`. Genotypes to use for estimating allele frequencies. If not provided `vcf` is used. | `string` |  |  |  |
+| `freq` | plink2-type frequency file for GRM calculations <details><summary>Help</summary><small>Can be obtained with plink2 with the command `--freq`. Variants included should all be biallelic and have IDs matching the ones in the main genome file provided.</small></details>| `string` |  |  |  |
 | `maf_min` | Exclude from the analysis genetic variants with a Minor Allele Frequency (MAF) under this value | `number` |  |  |  |
-| `use_dosage` | Should genotype dosages be used or hard calls? <details><summary>Help</summary><small>If set to true, the genotype dosages are converted to hard calls without missingness. If you want to use more advanced conversion criteria use the ext.args* slot of the VCF_TO_PGEN and FIT_MODEL processes.</small></details>| `boolean` | true |  |  |
+| `use_dosage` | Should genotype dosages be used or hard calls? <details><summary>Help</summary><small>If set to true, the genotype dosages are converted to hard calls without missingness. If you want to use more advanced conversion criteria use the ext.args* slot of the VCF_TO_PGEN and FIT_MODEL processes.</small></details>| `boolean` | True |  |  |
 | `select_chr` | Restrict analysis to a set of chromosomes <details><summary>Help</summary><small>Comma-separated string of chromosome names in `vcf`. If not specified all chromosomes are used. If a chromosome is specified still the rest of the genome is used to evaluate the LOCO relatedness matrix.<br><br>Example: '1,2,3'</small></details>| `string` |  |  |  |
 | `select_pheno` | Restrict analysis to a set of phenotypes <details><summary>Help</summary><small>Comma-separated string of column names in `pheno` to be used as phenotypes. If not specified all the columns of `pheno` are used.<br><br>Example: 'pheno1,pheno2'</small></details>| `string` |  |  |  |
 | `email` | Email address for completion summary. <details><summary>Help</summary><small>Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.</small></details>| `string` |  |  |  |
@@ -31,7 +49,6 @@ Define where the pipeline should find input data and save output data.
 | `null_model_formula` | R-style formula for the outer model that you want to use as a baseline. <details><summary>Help</summary><small>A string like 'y ~ cov1'. Here 'y' can be used to refer to the phenotype, and 'x' can be used to refer to the genotype. Column names in `covar` and `qcovar` can also be used. See https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/formula for more information on R formulas.</small></details>| `string` |  | True |  |
 | `model_formula` | R-style formula for the nested model that includes the variable of interest <details><summary>Help</summary><small>Similar to `null_model_formula`. Must contain all the terms in `null_model_formula` plus at least an extra one. You can also include GxE terms (es. 'y ~ x + x:cov1 + cov1'), and dominance terms ('y ~ x + I(x == 1) + cov1'). Arithmetic operations such as 'I(x == 1)' must be encapsulated in I() for proper evaluation.</small></details>| `string` |  | True |  |
 | `permutations` | Number of permutations to be performed | `integer` | 10 |  |  |
-| `permute_by` | Perform permutation within pre-defined groups <details><summary>Help</summary><small>Must be a column name in `covar`. If specified, samples are exchaged in permutations only within the levels of the specified factor.</small></details>| `string` |  |  |  |
 | `p_thr` | Nominal significance threshold | `number` | 0.05 |  |  |
 
 ## Institutional config options
@@ -74,3 +91,9 @@ Less common options for the pipeline, typically set in a config file.
 | `validationShowHiddenParams` | Show all params when using `--help` <details><summary>Help</summary><small>By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters.</small></details>| `boolean` |  |  | True |
 | `validationFailUnrecognisedParams` | Validation of parameters fails when an unrecognised parameter is found. <details><summary>Help</summary><small>By default, when an unrecognised parameter is found, it returns a warinig.</small></details>| `boolean` |  |  | True |
 | `validationLenientMode` | Validation of parameters in lenient more. <details><summary>Help</summary><small>Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode).</small></details>| `boolean` |  |  | True |
+
+## Other parameters
+
+| Parameter | Description | Type | Default | Required | Hidden |
+|-----------|-----------|-----------|-----------|-----------|-----------|
+| `maf_min_grm` |  | `number` | 0.1 |  |  |

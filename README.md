@@ -16,19 +16,22 @@ Both models are specified by the user with the [R formula interface](https://www
 
 ![birneylab/flexlmm_metro_map](docs/images/birneylab_flexlmm_drawing.png)
 
-1. Convert vcf genotypes to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
+1. Convert genotypes (from various formats, see the (parameter docs)[docs/parameters.md]) to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Compute the relatedness matrix for the whole genome and each LOCO subset ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Verify that the statistical model specified is nested in the null model ([`R language`](https://www.r-project.org/))
 1. Estimate variance components using the null model fixed effects and the relatedness matrix ([`gaston`](https://cran.r-project.org/web/packages/gaston/index.html))
 1. Compute the Cholesky decomposition of the phenotype variance-covariance matrix ([`R language`](https://www.r-project.org/))
 1. Remove the covariance structure from the phenotypes and fixed effect covariates ([`R language`](https://www.r-project.org/))
-1. Fit the null and complete models for each SNP, and compute a _p_-value using a likelyhood ratio test ([`R language`](https://www.r-project.org/))
-1. Fit the model and compute _p_-values for each permutation of the genotypes ([`R language`](https://www.r-project.org/))
-1. Compute the significance threshold using the Westfall–Young minP approach ([`R language`](https://www.r-project.org/))
-1. Make the final plots ([`ggplot2`](https://ggplot2.tidyverse.org/)):
+1. Fit the null and complete models for each SNP, and compute a _p_-value using a likelihood ratio test ([`R language`](https://www.r-project.org/))
+1. Fit the model and compute _p_-values for each permutation of the residuals ([`R language`](https://www.r-project.org/))
+1. Compute the genome-wide significance threshold using the Westfall–Young minP approach ([`R language`](https://www.r-project.org/))
+1. Make the final plots and outputs ([`ggplot2`](https://ggplot2.tidyverse.org/)):
    - Manhattan plot of the associations
    - Quantile-quantile plots
-   - Heatmap of the relatedness matrices ([`ComplexHeatmap`](https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html))
+   - Heatmap of the relatedness matrix ([`ComplexHeatmap`](https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html))
+   - Full-genome heritability estimates for each phenotype
+   - Empirical genome-wide null _p_-value distribution
+   - GWAS association results in a tsv format that can be directly loaded in [IGV](https://igv.org/)
 
 ## Capabilities
 
@@ -38,8 +41,6 @@ Both models are specified by the user with the [R formula interface](https://www
 - Can test for dominance and interactions of the genotype with fixed covariates (for example, to test for GxE and GxG)
 - Can standardize or quantile-normalize the phenotypes
 - Can include quantitative and/or categorical covariates
-- Permutations can be done within subgroups specified by a categorical covariate
-  - This is useful when distinct sub-populations are present, such as in the case of multiple F2 crosses
 
 ## To be implemented
 
@@ -78,6 +79,8 @@ null_model_formula: y ~ cov1
 
 This is because the null model contains the term `cov1` which is not present in the model, and thus the formulas are not nested.
 
+**NOTE:** the null model formula cannot contain the term `x` or functions of it. The covar and qcovar file cannot contain columns named `x` or `y`.
+
 ## Technical details
 
 This pipeline fits a Leave-One-Chromosome-Out (LOCO) mixed model using the 'null model' terms as fixed effects and the realised relatedness matrix as correlation matrix to estimate the variance components.
@@ -86,17 +89,17 @@ The square root of the variance-covariance matrix is determined via [Cholesky de
 Except for the fact that the fixed effect SNPs are not included in the variance components estimation (for performance reasons), fitting OLS to the rotated response and design matrix is mathematically equivalent to fitting Generalised Least Squares (i.e. fitting a mixed model) to the original response and design matrix.
 This is a fairly standard approach used for example [here](https://github.com/grimmlab/permGWAS).
 
-Permutations are run on the genotype vectors jointly, so that each genotype is permuted in the same way and linkage disequilibrium is maintained. Since phenotypes and covariates are not permuted, also their relationship is not altered.
-Genotype permutations are performed AFTER the Cholesky rotation, so that the relatedness structure is regressed out from the correct samples and only the residuals from this operation are permuted.
-This corresponds to a null hypothesis where the exchangeable quantities are the genotype identities when relatedness is accounted already for.
-See [here](https://doi.org/10.1186/s13059-021-02354-7) for an example of this approach being used in practice.
+Permutations are run on the residuals from the null model OLS fit after the Cholesky rotation.
+Given the interdependence of the realised residuals due to the loss of degrees of freedom consequent to the estimation of the fixed effect coefficients, the permutation is not actually run on the residuals themselves, but on their projection to a lower dimensional space.
+A scrambled phenotype is generated from the fitted null model phenotype and the permuted residuals, and this is used to test each SNP defining the null p-value distribution.
+See (Abney M (2015) Permutation Testing in the Presence of Polygenic Variation, Genetic Epidemiology, 39, 249-258)[https://doi.org/10.1002/gepi.21893] and the (MVNpermute repository)[https://github.com/markabney/MVNpermute] for a more detailed explanation of this approach.
 
 Significance thresholds for a given nominal significance level are reported using [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction) and Westfall–Young permutations (see [here](https://doi.org/10.1093/bioinformatics/btac455)).
 If $m$ permutations are performed, the significance threshold is set as the $t$ quantile of the empirical distribution given by the minimum p-values for each permutation (in total a set of $m$ p-values), where $t$ is the nominal significance desired.
 
 ## Integration with [birneylab/stitchimpute](https://github.com/birneylab/stitchimpute)
 
-In order to use a vcf file obtained from the **birneylab/stitchimpute** pipeline, activate the `stitch` profile with the flag `-profile stitch`.
+In order to use a genotype file obtained from the **birneylab/stitchimpute** pipeline, activate the `stitch` profile with the flag `-profile stitch`.
 This correctly loads the dosage information and fills missing genotypes.
 
 ## Birneylab-specific information
