@@ -16,7 +16,7 @@ Both models are specified by the user with the [R formula interface](https://www
 
 ![birneylab/flexlmm_metro_map](docs/images/birneylab_flexlmm_drawing.png)
 
-1. Convert genotypes (from various formats, see the (parameter docs)[docs/parameters.md]) to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
+1. Convert genotypes (from various formats, see the [parameter docs](docs/parameters.md)) to `pgen` format ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Compute the relatedness matrix for the whole genome and each LOCO subset ([`plink2`](https://www.cog-genomics.org/plink/2.0/))
 1. Verify that the statistical model specified is nested in the null model ([`R language`](https://www.r-project.org/))
 1. Estimate variance components using the null model fixed effects and the relatedness matrix ([`gaston`](https://cran.r-project.org/web/packages/gaston/index.html))
