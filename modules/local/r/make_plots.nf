@@ -27,8 +27,8 @@ process MANHATTAN {
 
     gwas_files <- list.files(pattern = "*.tsv.gwas.gz")
     df <- lapply(gwas_files, read_tsv) %>% bind_rows()
-    df_p_min <- readRDS("${min_p}")
-    perm_thr <- as.numeric(quantile(df_p_min[["min_p"]], ${p_thr}))
+    df_p_min <- read_tsv("${min_p}")
+    perm_thr <- as.numeric(quantile(df_p_min[["min_pval"]], ${p_thr}))
     bonferroni_thr <- ${p_thr} / nrow(df)
 
     cumsums <- df %>%

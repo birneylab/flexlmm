@@ -12,8 +12,8 @@ process FIT_MODEL {
     val use_dosage
 
     output:
-    tuple val(meta), path("*.tsv.gwas.gz") , emit: gwas
-    path "versions.yml"                    , emit: versions
+    tuple val(meta), path("*.${perm_seed ? 'perm.tsv.gz' : 'tsv.gwas.gz'}") , emit: out
+    path "versions.yml" , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,7 +30,6 @@ process FIT_MODEL {
     l.mm <- readRDS("${mm}")
     var_idx <- readRDS("${var_idx}")
     l.null <- readRDS("${null_model_fit}")
-    if (${do_permute}) set.seed(${perm_seed})
     
     pvar_table <- read.table(
         # header starts with # and comment line with ##,
@@ -48,6 +47,7 @@ process FIT_MODEL {
     )
     clean_colnames <- function(n){gsub("#", "", n)}
     colnames(psam) <- clean_colnames(colnames(psam))
+    buf <- pgenlibr::Buf(pgen)
 
     model <- readRDS("${model}")
     model_frame_raw <- readRDS("${model_frame}")
@@ -93,18 +93,26 @@ process FIT_MODEL {
     # null model fit is not needed if not permuting because we can use the one
     # obtained in the FIT_NULL_MODEL process
     if (${do_permute}) {
+        set.seed(${perm_seed})
         y.mm <- y.mm.pred + drop(U1 %*% sample(e.p))
         stopifnot(all(rownames(X.mm.null) == rownames(y.mm)))
         fit <- .lm.fit(x = X.mm.null, y = y.mm)
         ll.null <- stats:::logLik.lm(fit)
+
+        # an impossibly large value to initiate the variable
+        min_pval <- 2
+        # counter to be filled in in the for loop
+        nvars_tested <- 0
+
+        outname <- "${prefix}.perm.tsv.gz"
+        out_con <- gzfile(outname, "w")
+    } else {
+        # generate SNP-wise output only for non-permuted version
+        outname <- "${prefix}.tsv.gwas.gz"
+        out_con <- gzfile(outname, "w")
+        header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval"
+        writeLines(header, out_con)
     }
-
-    outname <- "${prefix}.tsv.gwas.gz"
-    out_con <- gzfile(outname, "w")
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval"
-    writeLines(header, out_con)
-
-    buf <- pgenlibr::Buf(pgen)
 
     nvars <- length(var_idx)
     pb <- txtProgressBar(1, nvars, style = 3)
@@ -120,12 +128,6 @@ process FIT_MODEL {
         colnames(X.mm) <- colnames(X)
         rownames(X.mm) <- rownames(X)
 
-        id <- pgenlibr::GetVariantId(pvar, the_var_idx)
-        chr <- pvar_table[i, "CHROM"]
-        pos <- pvar_table[i, "POS"]
-        ref <- pvar_table[i, "REF"]
-        alt <- pvar_table[i, "ALT"]
-
         stopifnot(all(rownames(X.mm) == rownames(y.mm)))
         fit <- .lm.fit(x = X.mm, y = y.mm)
         ll <- stats:::logLik.lm(fit)
@@ -135,28 +137,47 @@ process FIT_MODEL {
             if (lrt_df > 0) pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE) else NA
         )
 
-        lineout <- sprintf(
-            "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
-            chr,
-            pos,
-            id,
-            ref,
-            alt,
-            lrt_chisq,
-            lrt_df,
-            pval
-        )
-        writeLines(lineout, out_con)
+        if (${do_permute}) {
+            nvars_tested <- nvars_tested + 1
+            min_pval <- min(pval, min_pval, na.rm = TRUE)
+        } else {
+            id <- pgenlibr::GetVariantId(pvar, the_var_idx)
+            chr <- pvar_table[i, "CHROM"]
+            pos <- pvar_table[i, "POS"]
+            ref <- pvar_table[i, "REF"]
+            alt <- pvar_table[i, "ALT"]
+        
+            lineout <- sprintf(
+                "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
+                chr,
+                pos,
+                id,
+                ref,
+                alt,
+                lrt_chisq,
+                lrt_df,
+                pval
+            )
+            writeLines(lineout, out_con)
+        }
     }
 
     pgenlibr::ClosePgen(pgen)
-    close(out_con)
     close(pb)
 
-    # to make sure that the output has been written properly
-    gwas <- read.table(outname, header = TRUE, sep = "\t")
-    stopifnot(nrow(gwas) == nvars)
-    stopifnot(ncol(gwas) == 8)
+    if (${do_permute}) {
+        stopifnot(min_pval >= 0 && min_pval <= 1)
+        stopifnot(nvars_tested == nvars)
+        lineout <- sprintf("${perm_seed}\\t${meta.chr}\\t%s\\t%s", min_pval, nvars)
+        writeLines(lineout, out_con)
+        close(out_con)
+    } else {
+        close(out_con)
+        # to make sure that the output has been written properly
+        gwas <- read.table(outname, header = TRUE, sep = "\t")
+        stopifnot(nrow(gwas) == nvars)
+        stopifnot(ncol(gwas) == 8)
+    }
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_pgenlibr <- utils::packageVersion("pgenlibr")
@@ -176,7 +197,7 @@ process FIT_MODEL {
     def args        = task.ext.args ?: ''
     def prefix      = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.tsv.gwas.gz
+    touch ${prefix}.${perm_seed ? '.perm.tsv.gz' : '.tsv.gwas.gz'}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

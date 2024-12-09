@@ -51,7 +51,7 @@ workflow LMM {
         model_frame,
         use_dosage
     )
-    FIT_MODEL_ORIG.out.gwas.set { gwas }
+    FIT_MODEL_ORIG.out.out.set { gwas }
 
     fit_model_in.combine ( permutation_seeds )
     .map {
@@ -69,7 +69,7 @@ workflow LMM {
         model_frame,
         use_dosage
     )
-    FIT_MODEL_PERM.out.gwas.set { gwas_perm }
+    FIT_MODEL_PERM.out.out.set { gwas_perm }
 
     // Gather versions of all tools used
     versions.mix ( AIREML.out.versions         ) .set { versions }

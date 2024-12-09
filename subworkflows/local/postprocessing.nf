@@ -1,5 +1,5 @@
 include { COMPUTE_HERITABILITY       } from '../../modules/local/r/compute_heritability'
-include { GET_MIN_P_DISTRIBUTION     } from '../../modules/local/r/get_min_p_distribution'
+include { CAT_PERM; SUMMARISE_BY_CHR } from '../../modules/local/r/get_null_p_dist'
 include { MANHATTAN; QQ; RELATEDNESS } from '../../modules/local/r/make_plots'
 
 
@@ -20,17 +20,18 @@ workflow POSTPROCESSING {
     COMPUTE_HERITABILITY ( heritability.map { meta, rds -> rds }.collect() )
 
     gwas_perm.map {
-        meta, gwas ->
-        new_meta = [id: meta.pheno, pheno: meta.pheno]
-        [new_meta, gwas]
+        meta, perm ->
+        new_meta = [id: meta.pheno_name, pheno: meta.pheno_name]
+        [new_meta, perm]
     }
-    .groupTuple ()
+    .groupTuple ( by : 0 )
     .set { grouped_perms }
-    GET_MIN_P_DISTRIBUTION ( grouped_perms, nperms )
+    CAT_PERM ( grouped_perms )
+    SUMMARISE_BY_CHR ( CAT_PERM.out.min_p_dist, nperms )
 
     gwas.map {
         meta, gwas ->
-        new_meta = [id: meta.pheno, pheno: meta.pheno]
+        new_meta = [id: meta.pheno_name, pheno: meta.pheno_name]
         [new_meta, gwas]
     }
     .groupTuple ()
@@ -38,14 +39,15 @@ workflow POSTPROCESSING {
     QQ ( grouped_gwas )
 
     grouped_gwas
-    .join ( GET_MIN_P_DISTRIBUTION.out.min_p_dist, failOnMismatch: true, failOnDuplicate: true )
+    .join ( SUMMARISE_BY_CHR.out.min_p_dist, failOnMismatch: true, failOnDuplicate: true )
     .set { manhattan_in }
     MANHATTAN ( manhattan_in, p_thr )
 
-    versions.mix ( RELATEDNESS.out.versions            ) .set { versions }
-    versions.mix ( COMPUTE_HERITABILITY.out.versions   ) .set { versions }
-    versions.mix ( GET_MIN_P_DISTRIBUTION.out.versions ) .set { versions }
-    versions.mix ( MANHATTAN.out.versions              ) .set { versions }
+    versions.mix ( RELATEDNESS.out.versions          ) .set { versions }
+    versions.mix ( COMPUTE_HERITABILITY.out.versions ) .set { versions }
+    versions.mix ( CAT_PERM.out.versions             ) .set { versions }
+    versions.mix ( SUMMARISE_BY_CHR.out.versions     ) .set { versions }
+    versions.mix ( MANHATTAN.out.versions            ) .set { versions }
 
     emit:
 
