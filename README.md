@@ -42,9 +42,26 @@ Both models are specified by the user with the [R formula interface](https://www
 - Can standardize or quantile-normalize the phenotypes
 - Can include quantitative and/or categorical covariates
 
+## Input formats
+
+- Accepted genotype input formats:
+   - `vcf`
+   - `bcf`
+   - `bgen`
+   - `pgen/psam/pvar`
+   - `bed/bim/fam`
+   - `ped/map`
+- Phenotypes:
+   - [Plink2 format](https://www.cog-genomics.org/plink/2.0/input#pheno)
+- Covariates:
+   - [Plink2 format](https://www.cog-genomics.org/plink/2.0/input#covar)
+- Allele frequency:
+   - [Plink2 format](https://www.cog-genomics.org/plink/2.0/input#read_freq)
+
 ## To be implemented
 
 - Categorical phenotypes
+- eQTLs
 
 ## The formula interface
 
