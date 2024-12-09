@@ -74,7 +74,9 @@ process SUMMARISE_BY_CHR {
     chrs <- unique(df[["chr"]])
     perms <- unique(df[["permutations"]])
 
-    out <- aggregate(min_pval ~ permutation, data = df, FUN = min)
+    out1 <- aggregate(min_pval ~ permutation, data = df, FUN = min)
+    out2 <- aggregate(nvars ~ permutation, data = df, FUN = sum)
+    out <- merge(out1, out2, by = "permutation")
     stopifnot(nrow(out) == ${nperms})
     out_con <- gzfile("${prefix}.genome_wide_min_p.tsv.gz", "w")
     write.table(out, out_con, sep = "\\t", row.names = FALSE, col.names = TRUE)
