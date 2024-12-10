@@ -36,7 +36,7 @@ process AIREML {
 
     y <- y[!is.na(y)]
 
-    samples <- intersect(samples_K, names(y))
+    samples <- intersect(intersect(samples_K, names(y)), rownames(X))
     X <- X[match(samples, rownames(X)), , drop = FALSE]
     y <- y[match(samples, names(y))]
     K <- K[match(samples, rownames(K)), match(samples, colnames(K))]
