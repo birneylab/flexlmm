@@ -97,6 +97,27 @@
                     "fa_icon": "fas fa-file",
                     "help_text": "The first columns must be either FID/IID or just IID (in which case the FID is assumed to be 0). A primary header line is required and it should begin with 'FID', '#FID', 'IID', or '#IID'). Differently from the plink2 format, additional header lines (beginning with '#', not immediately followed by 'FID'/'IID') are NOT permitted before the primary header line. \n\nIID must match sample names in `vcf`. FID is tolerated but not used. Missing values should be specified as NA and not following plink2 conventions (i.e. -9 is NOT seen as missing).\n\nSee an [example file](../assets/test_data/tsv/pheno.tsv)"
                 },
+                 "window": {
+                    "type": "integer",
+                    "description": "The size of the window (in base pairs) for eQTL analysis.",
+                    "default": 100000,
+                    "fa_icon": "fas fa-ruler",
+                    "minimum": 1
+                },
+                "gtf": {
+                   "type": "string",
+                   "description": "Path to the GTF file for annotation. Provide the full file path or set to null if not used.",
+                   "default": null,
+                   "fa_icon": "fas fa-file",
+                   "format": "file-path",
+                   "pattern": ".*\\.(gtf|gtf.gz)"
+                },
+                "eqtl": {
+                   "type": "boolean",
+                   "description": "Toggle to enable or disable the eQTL sub-workflow.",
+                   "default": false,
+                   "fa_icon": "fas fa-toggle-on"
+                },
                 "covar": {
                     "type": "string",
                     "description": "Categorical covariates. Same format as `pheno`.",
