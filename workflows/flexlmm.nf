@@ -34,6 +34,11 @@ def map_f  = params.map_f  ? file(params.map_f , checkIfExists: true ) : null
 def pgen   = params.pgen   ? file(params.pgen  , checkIfExists: true ) : null
 def psam   = params.psam   ? file(params.psam  , checkIfExists: true ) : null
 def pvar   = params.pvar   ? file(params.pvar  , checkIfExists: true ) : null
+
+// eQTL-specific inputs
+def gtf    = params.gtf         ? file(params.gtf        , checkIfExists: true) : null
+def window = params.window      ?: 1000
+
 if (
     !(
         (  pgen &&  psam &&  pvar && !bgen && !sample && !bed && !bim && !fam && !ped && !map_f && !vcf && !bcf) ||
@@ -54,7 +59,8 @@ if (
         "\tped, map\n"
     )
 }
-def pheno = file( params.pheno, checkIfExists: true )
+
+def pheno = params.pheno   ?  file( params.pheno, checkIfExists: true ) : null
 
 def null_model_formula = params.null_model_formula
 def model_formula      = params.model_formula
@@ -86,6 +92,7 @@ if ( params.quantile_normalise && params.standardise ) {
 include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
 include { LMM            } from '../subworkflows/local/lmm'
 include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
+include { PREPROCESSING_EQTL } from '../subworkflows/local/preprocessing_eqtl'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,8 +114,32 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 workflow FLEXLMM {
     versions = Channel.empty ()
-
-    PREPROCESSING (
+    
+    if (params.eqtl) {
+      PREPROCESSING_EQTL(
+        vcf,
+        bcf,
+        bgen,
+        sample,
+        bed,
+        bim,
+        fam,
+        ped,
+        map_f,
+        pgen,
+        psam,
+        pvar,
+        pheno,
+        covar,
+        qcovar,
+        freq,
+        gtf,
+        window,
+        null_model_formula,
+        model_formula
+        )
+    } else {
+       PREPROCESSING (
         vcf,
         bcf,
         bgen,
@@ -148,7 +179,7 @@ workflow FLEXLMM {
         nperms,
         p_thr
     )
-
+    }
     //versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
     //versions.mix ( LMM.out.versions            ) .set { versions }
     //versions.mix ( POSTPROCESSING.out.versions ) .set { versions }
