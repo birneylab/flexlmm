@@ -93,6 +93,7 @@ include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
 include { LMM            } from '../subworkflows/local/lmm'
 include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
 include { PREPROCESSING_EQTL } from '../subworkflows/local/preprocessing_eqtl'
+include { LMM_EQTL } from '../subworkflows/local/lmm_eqtl'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,6 +138,24 @@ workflow FLEXLMM {
         window,
         null_model_formula,
         model_formula
+        )
+       LMM_EQTL (
+        PREPROCESSING_EQTL.out.pgen_pvar_psam,
+        PREPROCESSING_EQTL.out.x_null,
+        PREPROCESSING_EQTL.out.filtered_aireml_in,
+        PREPROCESSING_EQTL.out.model_frame,
+        PREPROCESSING_EQTL.out.model,
+        PREPROCESSING_EQTL.out.null_model,
+        PREPROCESSING_EQTL.out.var_idx,
+        permutation_seeds
+        )
+       POSTPROCESSING (
+        LMM_EQTL.out.gwas,
+        LMM_EQTL.out.gwas_perm,
+        PREPROCESSING_EQTL.out.full_genome_grm,
+        LMM_EQTL.out.heritability,
+        nperms,
+        p_thr
         )
     } else {
        PREPROCESSING (
