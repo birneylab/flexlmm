@@ -149,10 +149,8 @@ workflow FLEXLMM {
         PREPROCESSING_EQTL.out.null_model,
         PREPROCESSING_EQTL.out.var_idx,
         )
-       POSTPROCESSING_EQTL (
+      POSTPROCESSING_EQTL (
         LMM_EQTL.out.gwas,
-        PREPROCESSING_EQTL.out.full_genome_grm,
-        LMM_EQTL.out.heritability,
         p_thr
         )
     } else {
@@ -197,9 +195,9 @@ workflow FLEXLMM {
         p_thr
     )
     }
-    //versions.mix ( PREPROCESSING.out.versions  ) .set { versions }
-    //versions.mix ( LMM.out.versions            ) .set { versions }
-    //versions.mix ( POSTPROCESSING.out.versions ) .set { versions }
+    versions.mix ( PREPROCESSING_EQTL.out.versions  ) .set { versions }
+    versions.mix ( LMM_EQTL.out.versions            ) .set { versions }
+  //  versions.mix ( POSTPROCESSING_EQTL.out.versions ) .set { versions }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')
