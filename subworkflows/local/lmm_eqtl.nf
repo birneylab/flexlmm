@@ -1,8 +1,7 @@
 include { AIREML                      } from '../../modules/local/r/aireml'
 include { DECORRELATE                 } from '../../modules/local/r/decorrelate'
 include { FIT_NULL_MODEL              } from '../../modules/local/r/fit_null_model'
-include { FIT_MODEL as FIT_MODEL_ORIG_EQTL } from '../../modules/local/r/fit_model_eqtl'
-include { FIT_MODEL as FIT_MODEL_PERM_EQTL } from '../../modules/local/r/fit_model_eqtl'
+include { FIT_MODEL_EQTL } from '../../modules/local/r/fit_model_eqtl'
 
 def use_dosage   = params.use_dosage
 
@@ -15,7 +14,6 @@ workflow LMM_EQTL {
     model                 // channel: [mandatory] formula_rds
     null_model            // channel: [mandatory] formula_rds
     var_idx               // channel: [mandatory] var_idx_rds
-    permutation_seeds     // channel: [optional ] permutation seeds
 
     main:
     versions = Channel.empty()
@@ -44,44 +42,25 @@ workflow LMM_EQTL {
     .map { chr, meta, mm, var_idx -> [ meta, mm, var_idx ] }
     .join ( FIT_NULL_MODEL.out.null_model, failOnMismatch: true, failOnDuplicate: true )
     .set { fit_model_in }
-    FIT_MODEL_ORIG_EQTL (
-        fit_model_in.map { it + [ [] ] },
+    fit_model_in.view { "DEBUG fit_model_in : $it" }
+
+    FIT_MODEL_EQTL (
+        fit_model_in,
         pgen_pvar_psam,
         model,
         model_frame,
         use_dosage
     )
-    FIT_MODEL_ORIG_EQTL.out.out.set { gwas }
-
-    fit_model_in.combine ( permutation_seeds )
-    .map {
-        meta, mm, var_idx, null_model_fit, perm_seed ->
-        def new_meta = meta.clone()
-        new_meta.id = "${meta.id}_perm${perm_seed}"
-        new_meta.perm_seed = perm_seed
-        [ new_meta, mm, var_idx, null_model_fit, perm_seed ]
-    }
-    .set { fit_model_perm_in }
-
-    FIT_MODEL_PERM_EQTL (
-        fit_model_perm_in,
-        pgen_pvar_psam,
-        model,
-        model_frame,
-        use_dosage
-    )
-    FIT_MODEL_PERM_EQTL.out.out.set { gwas_perm }
+    FIT_MODEL_EQTL.out.out.set { gwas }
 
     // Gather versions of all tools used
     versions.mix ( AIREML.out.versions         ) .set { versions }
     versions.mix ( DECORRELATE.out.versions    ) .set { versions }
     versions.mix ( FIT_NULL_MODEL.out.versions ) .set { versions }
-    versions.mix ( FIT_MODEL_ORIG_EQTL.out.versions ) .set { versions }
-    versions.mix ( FIT_MODEL_PERM_EQTL.out.versions ) .set { versions }
+    versions.mix ( FIT_MODEL_EQTL.out.versions ) .set { versions }
 
     emit:
     gwas          // channel: [ meta, gwas ]
-    gwas_perm     // channel: [ meta, gwas_perm ]
     heritability  // channel: [ meta, gaston_rds ]
 
     versions // channel: [ versions.yml ]

@@ -89,12 +89,13 @@ if ( params.quantile_normalise && params.standardise ) {
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 
+
 include { PREPROCESSING  } from '../subworkflows/local/preprocessing'
 include { LMM            } from '../subworkflows/local/lmm'
 include { POSTPROCESSING } from '../subworkflows/local/postprocessing'
 include { PREPROCESSING_EQTL } from '../subworkflows/local/preprocessing_eqtl'
 include { LMM_EQTL } from '../subworkflows/local/lmm_eqtl'
-
+include { POSTPROCESSING_EQTL } from '../subworkflows/local/postprocessing_eqtl'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -147,14 +148,11 @@ workflow FLEXLMM {
         PREPROCESSING_EQTL.out.model,
         PREPROCESSING_EQTL.out.null_model,
         PREPROCESSING_EQTL.out.var_idx,
-        permutation_seeds
         )
-       POSTPROCESSING (
+       POSTPROCESSING_EQTL (
         LMM_EQTL.out.gwas,
-        LMM_EQTL.out.gwas_perm,
         PREPROCESSING_EQTL.out.full_genome_grm,
         LMM_EQTL.out.heritability,
-        nperms,
         p_thr
         )
     } else {
