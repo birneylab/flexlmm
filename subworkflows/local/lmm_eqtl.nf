@@ -1,7 +1,7 @@
 include { AIREML                      } from '../../modules/local/r/aireml'
 include { DECORRELATE                 } from '../../modules/local/r/decorrelate'
 include { FIT_NULL_MODEL              } from '../../modules/local/r/fit_null_model'
-include { FIT_MODEL_EQTL } from '../../modules/local/r/fit_model_eqtl'
+include { FIT_MODEL_EQTL              } from '../../modules/local/r/fit_model_eqtl'
 
 def use_dosage   = params.use_dosage
 
@@ -42,7 +42,6 @@ workflow LMM_EQTL {
     .map { chr, meta, mm, var_idx -> [ meta, mm, var_idx ] }
     .join ( FIT_NULL_MODEL.out.null_model, failOnMismatch: true, failOnDuplicate: true )
     .set { fit_model_in }
-    fit_model_in.view { "DEBUG fit_model_in : $it" }
 
     FIT_MODEL_EQTL (
         fit_model_in,
