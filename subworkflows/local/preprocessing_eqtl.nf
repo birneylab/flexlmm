@@ -241,7 +241,6 @@ workflow PREPROCESSING_EQTL {
         def chr = meta.chr
         chr_gene_map.get().containsKey(chr) && chr_gene_map.get()[chr]?.contains(pheno_name)
     }
-    .view { "DEBUG Filtered aireml_in with full_genome included: $it" }
     .set { filtered_aireml_in }
 
 
