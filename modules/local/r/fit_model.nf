@@ -110,7 +110,7 @@ process FIT_MODEL {
         # generate SNP-wise output only for non-permuted version
         outname <- "${prefix}.tsv.gwas.gz"
         out_con <- gzfile(outname, "w")
-        header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval"
+        header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval\\tbeta"
         writeLines(header, out_con)
     }
 
@@ -146,9 +146,15 @@ process FIT_MODEL {
             pos <- pvar_table[i, "POS"]
             ref <- pvar_table[i, "REF"]
             alt <- pvar_table[i, "ALT"]
+            beta <- paste(
+                colnames(X.mm),
+                coef(fit),
+                sep = "~",
+                collapse = ","
+            )
         
             lineout <- sprintf(
-                "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
+                "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
                 chr,
                 pos,
                 id,
@@ -156,7 +162,8 @@ process FIT_MODEL {
                 alt,
                 lrt_chisq,
                 lrt_df,
-                pval
+                pval,
+                beta
             )
             writeLines(lineout, out_con)
         }
@@ -176,7 +183,7 @@ process FIT_MODEL {
         # to make sure that the output has been written properly
         gwas <- read.table(outname, header = TRUE, sep = "\t")
         stopifnot(nrow(gwas) == nvars)
-        stopifnot(ncol(gwas) == 8)
+        stopifnot(ncol(gwas) == 9)
     }
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
