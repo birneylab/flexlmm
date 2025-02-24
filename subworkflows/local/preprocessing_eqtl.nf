@@ -2,7 +2,6 @@ include {
     VCF_TO_PGEN; BCF_TO_PGEN; PGEN_TO_PGEN; PED_TO_PGEN; BED_TO_PGEN; BGEN_TO_PGEN
 } from '../../modules/local/plink2/geno_to_pgen'
 include { GET_CHR_NAMES        } from '../../modules/local/plink2/get_chr_names'
-include { GET_VAR_IDX          } from '../../modules/local/r/get_var_idx'
 include { GET_VAR_IDX_EQTL     } from '../../modules/local/r/get_var_idx_eqtl'
 include { MAKE_GRM as LOCO_GRM } from '../../modules/local/plink2/make_grm'
 include { MAKE_GRM as FULL_GRM } from '../../modules/local/plink2/make_grm'
@@ -102,7 +101,7 @@ workflow PREPROCESSING_EQTL {
     if ( workflow.stubRun ){
         Channel.of ( ["stub_chr"] ).set { chr }
     }
-
+    
     // change the meta id and prepare full-genome GRM input
     pgen_pvar_psam.map {
         meta, pgen, pvar, psam ->
@@ -132,7 +131,7 @@ workflow PREPROCESSING_EQTL {
 
     // convert the expression table to a PLINK2-compatible phenotype file
     GENE_EXPR_TO_PHENO( pheno )
-    GENE_EXPR_TO_PHENO.out.gene_pheno.set { pheno }
+    GENE_EXPR_TO_PHENO.out.gene_pheno.set {pheno}
     
     // standardise or quantile normalise the phenotype if requested
     TRANSFORM_PHENOTYPES ( pgen_pvar_psam.combine ( pheno ) )
@@ -195,16 +194,24 @@ workflow PREPROCESSING_EQTL {
         [ new_meta, pgen, pvar, psam, chr ]
     }
     .set { get_var_idx_in }
-    
     pheno_names_combined = pheno_names.collect()
+
     GET_VAR_IDX_EQTL(get_var_idx_in,pheno_names_combined,window,gtf)
     GET_VAR_IDX_EQTL.out.var_idx.set { var_idx }
-
+   
     GET_VAR_IDX_EQTL.out.chr_pheno_map
+    .filter { meta, file_path ->
+        // Check if file_path is not empty beyond the header line
+        def is_not_empty = file_path.size() > 0 && file_path.text.split("\n").size() > 1
+        if (!is_not_empty) {
+            println "Skipping chromosome ${meta.chr} due to an empty var_idx file"
+        }
+        return is_not_empty
+    }
     .flatMap { meta, file_path ->
         def chr = meta.chr
         def genes = file_path.text.split("\n")[1..-1]
-            .collect { line -> line.split("\t")[1]?.trim() } 
+            .collect { line -> line.split("\t")[1]?.trim() }
             .findAll { it }
         genes.collect { gene -> [chr, gene] }
     }
@@ -221,7 +228,7 @@ workflow PREPROCESSING_EQTL {
         acc
     }
     .set { chr_gene_map }  // creates a map: [chr: [gene1, gene2, ...]]
-    
+
     // input for aireml in lmm subworkflow
     all_grms.combine ( pheno )
     .map {
@@ -242,11 +249,9 @@ workflow PREPROCESSING_EQTL {
         chr_gene_map.get().containsKey(chr) && chr_gene_map.get()[chr]?.contains(pheno_name)
     }
     .set { filtered_aireml_in }
-
-
+    
     // Gather versions of all tools used
     versions.mix ( GET_CHR_NAMES.out.versions        ) .set { versions }
-    versions.mix ( FULL_GRM.out.versions             ) .set { versions }
     versions.mix ( LOCO_GRM.out.versions             ) .set { versions }
     versions.mix ( GENE_EXPR_TO_PHENO.out.versions   ).set  { versions }
     versions.mix ( TRANSFORM_PHENOTYPES.out.versions ) .set { versions }
@@ -263,7 +268,6 @@ workflow PREPROCESSING_EQTL {
     model                 // channel: formula_rds
     null_model            // channel: formula_rds
     var_idx               // channel: var_idx_rds
-    full_genome_grm       // channel: [ meta, grb_bin, grm_id ]
 
     versions              // channel: [ versions.yml ]
 }
