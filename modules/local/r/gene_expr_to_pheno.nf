@@ -8,8 +8,8 @@ process GENE_EXPR_TO_PHENO {
     path(pheno)
 
     output:
-    path "phenotypes.tsv", emit: gene_pheno
-    path "versions.yml", emit: versions
+    path("phenotypes.tsv"), emit: gene_pheno
+    path("versions.yml"), emit: versions
 
     script:
     """
