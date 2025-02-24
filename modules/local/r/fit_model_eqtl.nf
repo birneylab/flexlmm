@@ -1,7 +1,7 @@
 
 process FIT_MODEL_EQTL {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_high'
 
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
@@ -33,6 +33,12 @@ process FIT_MODEL_EQTL {
     # eQTL addition: convert var_idx to a numeric list matching the correct gene_pheno    
     target_gene <- "${meta.pheno_name}"  # Pass the gene name as a string
     relevant_snps <- var_idx[var_idx[[1]] == target_gene, 2]  # First column is gene_id, second is snps
+
+    # eQTL addition: exit early if no mapped SNPs exist
+    if (is.null(relevant_snps) || length(relevant_snps) == 0 || all(is.na(relevant_snps))) {
+         cat("SKIPPED GENE:", target_gene, "- No SNPs found\n")
+         quit(save = "no", status = 0)
+    }
 
     pvar_table <- read.table(
         # header starts with # and comment line with ##,
@@ -71,7 +77,7 @@ process FIT_MODEL_EQTL {
     L <- L[match(samples, rownames(L)), match(samples, colnames(L))]
     psam <- psam[pgen_order,]
     y.mm.pred <- y.mm.pred[match(samples, names(y.mm.pred))]
-    model_frame_raw <- model_frame_raw[match(samples, rownames(model_frame_raw)),]
+    model_frame_raw <- model_frame_raw[match(samples, rownames(model_frame_raw)), , drop = F]
 
     stopifnot(all(!is.null(names(y.mm))))
     stopifnot(all(names(y.mm) == rownames(X.mm.null)))
@@ -98,21 +104,33 @@ process FIT_MODEL_EQTL {
     writeLines(header, out_con)
 
     nvars <- length(relevant_snps)
-    pb <- txtProgressBar(1, nvars, style = 3)
+   # pb <- txtProgressBar(1, nvars, style = 3)
+    skipped_vars <- 0
     for (i in seq_along(relevant_snps)) {
-        setTxtProgressBar(pb, i)
+      #  setTxtProgressBar(pb, i)
         the_var_idx <- relevant_snps[[i]]
         pgenlibr::${pgenlibr_read_func}(pgen, buf, the_var_idx)
         model_frame_raw[["x"]] <- buf[pgen_order]
         # needed to recompute expressions such as I(x == 1)
         model_frame <- model.frame(model[-2], data = model_frame_raw)
         X <- model.matrix(model[-2], data = model_frame)
-        X.mm <- forwardsolve(L, X)
+        # drop samples with NAs
+        valid_samples <- rownames(X) %in% names(y.mm) & !is.na(y.mm[rownames(X)])
+        if (sum(valid_samples) < 2) {
+          cat("Skipping iteration", i, "due to insufficient valid samples.\n")
+          skipped_vars <- skipped_vars + 1
+          next
+        }
+        # subset matrices
+        X <- X[valid_samples, , drop = FALSE]
+        y.mm_subset <- y.mm[rownames(X)]
+        L_subset <- L[rownames(X), rownames(X), drop = FALSE]
+        X.mm <- forwardsolve(L_subset, X)
         colnames(X.mm) <- colnames(X)
         rownames(X.mm) <- rownames(X)
 
-        stopifnot(all(rownames(X.mm) == rownames(y.mm)))
-        fit <- .lm.fit(x = X.mm, y = y.mm)
+        stopifnot(all(rownames(X.mm) == names(y.mm_subset)))
+        fit <- .lm.fit(x = X.mm, y = y.mm_subset)
         ll <- stats:::logLik.lm(fit)
         lrt_df <- attributes(ll)[["df"]] - attributes(ll.null)[["df"]]
         lrt_chisq <- 2 * as.numeric(ll - ll.null)
@@ -141,12 +159,12 @@ process FIT_MODEL_EQTL {
     }
 
     pgenlibr::ClosePgen(pgen)
-    close(pb)
+    # close(pb)
 
     close(out_con)
     # to make sure that the output has been written properly
     gwas <- read.table(outname, header = TRUE, sep = "\t")
-    stopifnot(nrow(gwas) == nvars)
+    stopifnot(nrow(gwas) == nvars - skipped_vars)
     stopifnot(ncol(gwas) == 8)
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
