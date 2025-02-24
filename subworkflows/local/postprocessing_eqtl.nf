@@ -1,5 +1,5 @@
-include { MANHATTAN; QQ      } from '../../modules/local/r/plots_eqtl'
 include { COMBINE_EQTL_FILES } from '../../modules/local/r/combine_eqtl_files'
+include { MANHATTAN; QQ      } from '../../modules/local/r/plots_eqtl'
 
 workflow POSTPROCESSING_EQTL {
     take:
@@ -10,21 +10,21 @@ workflow POSTPROCESSING_EQTL {
     versions = Channel.empty()
 
     // Extract only file paths and ensure they are collected as a list
-    gwas.map { it[1] }  // Extract only the file path (second element)
+    // and then convert list into a single space-separated string
+    gwas.map { it[1] }
     .collect()
-    .map { file_list -> tuple(*file_list) }
+    .map { file_list -> file_list.join(" ") }
     .set { gwas_file_paths }
+    
+    // Ensure COMBINE_EQTL_FILES runs once per batch
+    COMBINE_EQTL_FILES( gwas_file_paths )
+    .set { combined_gwas }  // Final combined file
 
-    // Pass extracted file p aths to the COMBINE_EQTL_FILES process
-    COMBINE_EQTL_FILES(gwas_file_paths)
-    .set { combined_gwas }
-    combined_gwas.view { "DEBUG combined_gwas: $it" }
+    QQ ( combined_gwas )
 
-    QQ(combined_gwas)
+    MANHATTAN ( combined_gwas, p_thr )
 
-    MANHATTAN(combined_gwas, p_thr)
-
-    versions.mix ( MANHATTAN.out.versions            ) .set { versions }
+    versions.mix ( MANHATTAN.out.versions ) .set { versions }
 
     emit:
 

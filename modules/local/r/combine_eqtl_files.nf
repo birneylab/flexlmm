@@ -6,7 +6,7 @@ process COMBINE_EQTL_FILES {
     container "saulpierotti-ebi/r_plotting:0.1"
 
     input:
-    path gwas_files
+    val gwas_files
 
     output:
     path "final_combined_gwas.tsv.gz"
@@ -17,7 +17,7 @@ process COMBINE_EQTL_FILES {
 
     library(data.table)
 
-    gwas_files <- list.files(pattern="*.tsv.gwas.gz", full.names=TRUE)
+    gwas_files <- strsplit("${gwas_files}", " ")[[1]]
 
     combined_list <- list()
 
