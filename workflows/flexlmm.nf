@@ -153,7 +153,7 @@ workflow FLEXLMM {
         LMM_EQTL.out.gwas,
         p_thr
         )
-    } else {
+      } else {
        PREPROCESSING (
         vcf,
         bcf,
@@ -197,7 +197,7 @@ workflow FLEXLMM {
     }
     versions.mix ( PREPROCESSING_EQTL.out.versions  ) .set { versions }
     versions.mix ( LMM_EQTL.out.versions            ) .set { versions }
-  //  versions.mix ( POSTPROCESSING_EQTL.out.versions ) .set { versions }
+    versions.mix ( POSTPROCESSING_EQTL.out.versions ) .set { versions }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions.unique().collectFile(name: 'collated_versions.yml')
