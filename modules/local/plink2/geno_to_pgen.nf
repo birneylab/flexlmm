@@ -160,6 +160,7 @@ process VCF_TO_PGEN {
         --threads $task.cpus \\
         --memory $mem_mb \\
         --set-missing-var-ids @_#_\\\$r_\\\$a \\
+        --new-id-max-allele-len 1000 \\
         --min-alleles 2 \\
         --max-alleles 2 \\
         $maf_filter \\
