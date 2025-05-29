@@ -1,5 +1,4 @@
 process MANHATTAN {
-    label 'process_low'
 
     conda "r-base=4.3.1 r-tidyverse=2.0.0 r-cowplot=1.1.1"
     container "saulpierotti-ebi/r_plotting:0.1"
@@ -76,7 +75,6 @@ process MANHATTAN {
 
 
 process QQ {
-    label 'process_low'
 
     conda "r-base=4.3.1 r-tidyverse=2.0.0 r-cowplot=1.1.1"
     container "saulpierotti-ebi/r_plotting:0.1"
@@ -102,6 +100,10 @@ process QQ {
             sample = -log10(pval),
             theoretical = -log10(qunif(ppoints(pval)))
         )
+    
+    # Calculate lambda (genomic inflation factor)
+    df\$chi_sq <- qchisq(df\$pval, df = 1, lower.tail = FALSE)
+    lambda <- median(df\$chi_sq) / 0.456  # 0.456 is expected median for df=1
 
     # QQ plot
     p <- ggplot(df, aes(x = theoretical, y = sample)) +
@@ -109,7 +111,10 @@ process QQ {
         geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
         theme_minimal() +
         labs(y = "Observed -log10(p)", x = "Expected -log10(p)") +
-        ggtitle("Q-Q Plot for eQTL GWAS")
+        ggtitle("Q-Q Plot") +
+        annotate("text", x = max(df\$theoretical) * 0.7, y = max(df\$sample) * 0.9, 
+                 label = sprintf("λ = %.3f", lambda), 
+                 size = 6, color = "blue") 
 
     # Save plot
     ggsave("qq_plot.png", width = 8, height = 8, bg = "white")
