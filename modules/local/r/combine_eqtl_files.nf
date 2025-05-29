@@ -1,7 +1,6 @@
 process COMBINE_EQTL_FILES {
 
-    label 'process_low'
-
+    
     conda "r-base=4.3.1 r-tidyverse=2.0.0 r-cowplot=1.1.1"
     container "saulpierotti-ebi/r_plotting:0.1"
 
@@ -9,7 +8,7 @@ process COMBINE_EQTL_FILES {
     val gwas_files
 
     output:
-    path "final_combined_gwas.tsv.gz"
+    path "final_combined_gwas.tsv.gz" , emit: eqtl
 
     script:
     """
