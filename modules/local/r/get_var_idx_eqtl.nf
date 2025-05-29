@@ -1,6 +1,6 @@
 process GET_VAR_IDX_EQTL {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_medium'
 
     conda "r-base=4.3.1 r-tidyverse=2.0.0"
     container "saulpierotti-ebi/r_plotting:0.1"

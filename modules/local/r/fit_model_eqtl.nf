@@ -1,7 +1,7 @@
 
 process FIT_MODEL_EQTL {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_medium'
 
     container 'saulpierotti-ebi/pgenlibr@sha256:0a606298c94eae8d5f6baa76aa1234fa5e7072513615d092f169029eacee5b60'
 
