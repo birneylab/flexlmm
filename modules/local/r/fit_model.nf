@@ -22,7 +22,7 @@ process FIT_MODEL {
     def args       = task.ext.args ?: ''
     def prefix     = task.ext.prefix ?: "${meta.id}"
     def do_permute = perm_seed ? "TRUE" : "FALSE"
-    def perm_seed  = perm_seed ?: "NULL"
+    def the_perm_seed  = perm_seed ?: "NULL"
     def pgenlibr_read_func = use_dosage ? "Read" : "ReadHardcalls"
     """
     #!/usr/bin/env Rscript
@@ -93,7 +93,7 @@ process FIT_MODEL {
     # null model fit is not needed if not permuting because we can use the one
     # obtained in the FIT_NULL_MODEL process
     if (${do_permute}) {
-        set.seed(${perm_seed})
+        set.seed(${the_perm_seed})
         y.mm <- y.mm.pred + drop(U1 %*% sample(e.p))
         stopifnot(all(rownames(X.mm.null) == rownames(y.mm)))
         fit <- .lm.fit(x = X.mm.null, y = y.mm)
@@ -175,7 +175,7 @@ process FIT_MODEL {
     if (${do_permute}) {
         stopifnot(min_pval >= 0 && min_pval <= 1)
         stopifnot(nvars_tested == nvars)
-        lineout <- sprintf("${perm_seed}\\t${meta.chr}\\t%s\\t%s", min_pval, nvars)
+        lineout <- sprintf("${the_perm_seed}\\t${meta.chr}\\t%s\\t%s", min_pval, nvars)
         writeLines(lineout, out_con)
         close(out_con)
     } else {
