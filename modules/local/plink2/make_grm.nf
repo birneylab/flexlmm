@@ -24,7 +24,7 @@ process MAKE_GRM {
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def mem_mb      = task.memory.toMega()
     def exclude_cmd = chr_exclude ? "--not-chr ${chr_exclude}" : ""
-    def freq_cmd    = freq ? "--read-freq ${freq}" : ""
+    def freq_cmd    = freq.name != "dummy_file.txt" ? "--read-freq ${freq}" : ""
     """
     plink2 \\
         --threads $task.cpus \\
