@@ -1,0 +1,2 @@
+This is a dummy file used as a placeholder.
+Do not name any of your input files as dummy_file.txt
