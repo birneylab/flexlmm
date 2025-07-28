@@ -33,6 +33,7 @@ process GET_DESIGN_MATRIX {
     clean_colnames <- function(n){
         n[n == "#IID"] <- "IID"
         n[n == "#FID"] <- "FID"
+        return(n)
     }
     filter_samples <- function(df, samples){
         df[df[["IID"]] %in% samples, ]
