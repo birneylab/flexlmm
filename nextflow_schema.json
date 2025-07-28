@@ -81,10 +81,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "outdir",
-                "pheno"
-            ],
+            "required": ["outdir", "pheno"],
             "properties": {
                 "outdir": {
                     "type": "string",
@@ -199,32 +196,9 @@
                     "default": 0.05,
                     "fa_icon": "fas fa-arrow-right",
                     "description": "Nominal significance threshold"
-                },
-                "maf_min_grm": {
-                    "type": "number",
-                    "default": 0.1,
-                    "fa_icon": "fas fa-arrow-right",
-                    "description": "Minum MAF for SNPs used in computing the GRM"
-                },
-                "min_allowed_eig": {
-                    "type": "number",
-                    "default": -0.01,
-                    "fa_icon": "fas fa-arrow-right",
-                    "description": "Minimum eigenvalue of the phenotype covariance matrix allowed before an error is raised",
-                    "help_text": "Small negative eigenvalues are possible in the covariance matrix due to numerical precision, but they are not allowed in the cholesky decomposition. This parameter sets the tolerance limit for negative eigenvalues."
-                },
-                "eig_replacement": {
-                    "type": "number",
-                    "default": 0.000001,
-                    "fa_icon": "fas fa-arrow-right",
-                    "description": "Replacement value for negative eigenvalues of the phenotype covariance matrix",
-                    "help_text": "What should negative eigenvalues be replaced with? Should be a small positive value."
                 }
             },
-            "required": [
-                "null_model_formula",
-                "model_formula"
-            ]
+            "required": ["null_model_formula", "model_formula"]
         },
         "institutional_config_options": {
             "title": "Institutional config options",
@@ -334,14 +308,7 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -404,22 +371,36 @@
     },
     "allOf": [
         {
-            "$ref": "#/$defs/genotype_options"
+            "$ref": "#/definitions/genotype_options"
         },
         {
-            "$ref": "#/$defs/input_output_options"
+            "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/$defs/statistical_parameters"
+            "$ref": "#/definitions/statistical_parameters"
         },
         {
-            "$ref": "#/$defs/institutional_config_options"
+            "$ref": "#/definitions/institutional_config_options"
         },
         {
-            "$ref": "#/$defs/max_job_request_options"
+            "$ref": "#/definitions/max_job_request_options"
         },
         {
-            "$ref": "#/$defs/generic_options"
+            "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "maf_min_grm": {
+            "type": "number",
+            "default": 0.1
+        },
+        "min_allowed_eig": {
+            "type": "number",
+            "default": -0.01
+        },
+        "eig_replacement": {
+            "type": "number",
+            "default": 1e-6
+        }
+    }
 }
