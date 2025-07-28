@@ -48,6 +48,7 @@ process FIT_MODEL {
     clean_colnames <- function(n){
         n[n == "#IID"] <- "IID"
         n[n == "#FID"] <- "FID"
+        return(n)
     }
     colnames(psam) <- clean_colnames(colnames(psam))
     buf <- pgenlibr::Buf(pgen)
