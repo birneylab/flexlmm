@@ -167,8 +167,10 @@ workflow PREPROCESSING {
             covar,
             qcovar
         ],
-        // I just need pheno to get the sample names in case of missing covar and qcovar, so 1 is enough
+        // I just need pheno to get the sample names, so 1 is enough
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
+        // to get sample names from psam
+        pgen_pvar_psam.map { meta, pgen, pvar, psam -> psam }.first(),
         model,
         null_model
     )

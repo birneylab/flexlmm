@@ -45,7 +45,10 @@ process FIT_MODEL {
         comment.char = "",
         check.names = FALSE
     )
-    clean_colnames <- function(n){gsub("#", "", n)}
+    clean_colnames <- function(n){
+        n[n == "#IID"] <- "IID"
+        n[n == "#FID"] <- "FID"
+    }
     colnames(psam) <- clean_colnames(colnames(psam))
     buf <- pgenlibr::Buf(pgen)
 
