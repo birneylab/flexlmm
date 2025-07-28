@@ -61,13 +61,10 @@ process FIT_MODEL {
     e.p <- l.null[["e.p"]]
     U1 <- l.null[["U1"]]
     
-    samples <- intersect(intersect(psam[["IID"]], names(y.mm)), rownames(model_frame_raw))
+    # samples in y.mm are already intersected with psam[["IID"]] in aireml step when they are matched with the GRM, so no risk of NA here
+    samples <- names(y.mm)
     pgen_order <- match(samples, psam[["IID"]])
-    X.mm.null <- X.mm.null[match(samples, rownames(X.mm.null)), , drop = FALSE]
-    y.mm <- y.mm[match(samples, names(y.mm))]
-    L <- L[match(samples, rownames(L)), match(samples, colnames(L))]
     psam <- psam[pgen_order,]
-    y.mm.pred <- y.mm.pred[match(samples, names(y.mm.pred))]
     model_frame_raw <- model_frame_raw[match(samples, rownames(model_frame_raw)),]
 
     stopifnot(all(!is.null(names(y.mm))))

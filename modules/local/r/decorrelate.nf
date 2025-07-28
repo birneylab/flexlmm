@@ -52,13 +52,23 @@ process DECORRELATE {
 
     # phenotype variance/covariance matrix
     V <- s2g * K + diag(s2e, dim(K))
-    L <- t(chol(V)) # R returns the upper Cholesky triangle
-    colnames(L) <- colnames(K)
-    rownames(L) <- rownames(K)
+
+    # try a normal cholesky decomposition first
+    L <- try(t(chol(V)))
+    if (inherits(L, "try-error")) {
+        # if the cholesky decomposition fails, force V to be positive definite
+        # by flipping negative eigenvalues
+        V.eig <- eigen(V, symmetric = TRUE)
+        message("Forcing V to be positive definite by flipping negative eigenvalues")
+        message(sprintf("eigenvalues flipped: %d", sum(V.eig$values < 0)))
+        message(sprintf("min eigenvalue: %f", min(V.eig$values)))
+        stopifnot(all(V.eig$values >= ${param.min_eig}))
+        V <- V.eig$vectors %*% diag(abs(V.eig$values)) %*% t(V.eig$vectors)
+        L <- t(chol(V))
+    }
 
     y.mm <- forwardsolve(L, y)
     X.mm <- forwardsolve(L, X)
-
     names(y.mm) <- names(y)
     rownames(X.mm) <- rownames(X)
     colnames(X.mm) <- colnames(X)
