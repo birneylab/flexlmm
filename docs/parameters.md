@@ -50,6 +50,9 @@ Define where the pipeline should find input data and save output data.
 | `model_formula` | R-style formula for the nested model that includes the variable of interest <details><summary>Help</summary><small>Similar to `null_model_formula`. Must contain all the terms in `null_model_formula` plus at least an extra one. You can also include GxE terms (es. 'y ~ x + x:cov1 + cov1'), and dominance terms ('y ~ x + I(x == 1) + cov1'). Arithmetic operations such as 'I(x == 1)' must be encapsulated in I() for proper evaluation.</small></details>| `string` |  | True |  |
 | `permutations` | Number of permutations to be performed | `integer` | 10 |  |  |
 | `p_thr` | Nominal significance threshold | `number` | 0.05 |  |  |
+| `maf_min_grm` | Minum MAF for SNPs used in computing the GRM | `number` | 0.1 |  |  |
+| `min_allowed_eig` | Minimum eigenvalue of the phenotype covariance matrix allowed before an error is raised <details><summary>Help</summary><small>Small negative eigenvalues are possible in the covariance matrix due to numerical precision, but they are not allowed in the cholesky decomposition. This parameter sets the tolerance limit for negative eigenvalues.</small></details>| `number` | -0.01 |  |  |
+| `eig_replacement` | Replacement value for negative eigenvalues of the phenotype covariance matrix <details><summary>Help</summary><small>What should negative eigenvalues be replaced with? Should be a small positive value.</small></details>| `number` | 1e-06 |  |  |
 
 ## Institutional config options
 
@@ -91,9 +94,3 @@ Less common options for the pipeline, typically set in a config file.
 | `validationShowHiddenParams` | Show all params when using `--help` <details><summary>Help</summary><small>By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters.</small></details>| `boolean` |  |  | True |
 | `validationFailUnrecognisedParams` | Validation of parameters fails when an unrecognised parameter is found. <details><summary>Help</summary><small>By default, when an unrecognised parameter is found, it returns a warinig.</small></details>| `boolean` |  |  | True |
 | `validationLenientMode` | Validation of parameters in lenient more. <details><summary>Help</summary><small>Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode).</small></details>| `boolean` |  |  | True |
-
-## Other parameters
-
-| Parameter | Description | Type | Default | Required | Hidden |
-|-----------|-----------|-----------|-----------|-----------|-----------|
-| `maf_min_grm` |  | `number` | 0.1 |  |  |

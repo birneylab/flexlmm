@@ -57,12 +57,13 @@ process DECORRELATE {
     L <- try(t(chol(V)))
     if (inherits(L, "try-error")) {
         # if the cholesky decomposition fails, force V to be positive definite
-        # by flipping negative eigenvalues
+        # by zeroing negative eigenvalues
         V.eig <- eigen(V, symmetric = TRUE)
-        message("Forcing V to be positive definite by flipping negative eigenvalues")
+        message("Forcing V to be positive definite by zeroing eigenvalues")
         message(sprintf("eigenvalues flipped: %d", sum(V.eig$values < 0)))
         message(sprintf("min eigenvalue: %f", min(V.eig$values)))
-        stopifnot(all(V.eig$values >= ${param.min_eig}))
+        stopifnot(all(V.eig$values > ${params.min_allowed_eig}))
+        V.eig$values[V.eig$values <= 0] <- ${params.eig_replacement}
         V <- V.eig$vectors %*% diag(abs(V.eig$values)) %*% t(V.eig$vectors)
         L <- t(chol(V))
     }
