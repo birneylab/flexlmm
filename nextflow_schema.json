@@ -392,15 +392,20 @@
     "properties": {
         "maf_min_grm": {
             "type": "number",
-            "default": 0.1
+            "default": 0.01,
+            "description": "MAF threshold for GRM calculation",
+            "help_text": "Small MAF SNPs cause numerical instability in variance stabilisation, see PLINK2 --make-rel documentation."
         },
         "min_allowed_eig": {
             "type": "number",
-            "default": -0.01
+            "default": -1e-6,
+            "help_text": "Small negative eigenvalues in the GRM are possible due to numerical precision.",
+            "description": "Allow small negative GRM eigenvalues up to this value"
         },
         "eig_replacement": {
             "type": "number",
-            "default": 1e-6
+            "default": 1e-10,
+            "description": "Value to use as replacement for negative GRM eigenvalues"
         }
     }
 }

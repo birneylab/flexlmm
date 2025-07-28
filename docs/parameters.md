@@ -96,6 +96,6 @@ Less common options for the pipeline, typically set in a config file.
 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| `maf_min_grm` |  | `number` | 0.1 |  |  |
-| `min_allowed_eig` |  | `number` | -0.01 |  |  |
-| `eig_replacement` |  | `number` | 1e-06 |  |  |
+| `maf_min_grm` | MAF threshold for GRM calculation <details><summary>Help</summary><small>Small MAF SNPs cause numerical instability in variance stabilisation, see PLINK2 --make-rel documentation.</small></details>| `number` | 0.01 |  |  |
+| `min_allowed_eig` | Allow small negative GRM eigenvalues up to this value <details><summary>Help</summary><small>Small negative eigenvalues in the GRM are possible due to numerical precision.</small></details>| `number` | -1e-06 |  |  |
+| `eig_replacement` | Value to use as replacement for negative GRM eigenvalues | `number` | 1e-10 |  |  |
