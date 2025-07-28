@@ -11,6 +11,7 @@ process GET_DESIGN_MATRIX {
     input:
     tuple val(meta), path(covar), path(qcovar)
     path pheno
+    path psam
     path model
     path null_model
 
@@ -29,32 +30,30 @@ process GET_DESIGN_MATRIX {
     """
     #!/usr/bin/env Rscript
 
+    clean_colnames <- function(n){
+        n[n == "#IID"] <- "IID"
+        n[n == "#FID"] <- "FID"
+    }
+    filter_samples <- function(df, samples){
+        df[df[["IID"]] %in% samples, ]
+    }
+
     # [-2] extract the LHS only from the formula
     null_model <- readRDS("${null_model}")[-2]
     model <- readRDS("${model}")[-2]
-    samples <- rownames(readRDS("${pheno}"))
+    pheno_samples <- rownames(readRDS("${pheno}"))
+    psam <- read.table(
+        "${psam}",
+        sep = "\\t",
+        header = TRUE,
+        comment.char = "",
+        check.names = FALSE
+    )
+    colnames(psam) <- clean_colnames(colnames(psam))
+    samples <- intersect(pheno_samples, psam[["IID"]])
     
-    clean_colnames <- function(n){gsub("#", "", n)}
     remove_fid <- function(df){subset(df, select = (colnames(df) != "FID"))}
     remove_iid <- function(df){subset(df, select = (colnames(df) != "IID"))}
-
-    if ( ${load_covar} ){
-        covar <- read.table("${covar}" ,
-            header = TRUE,
-            sep = "\\t",
-            check.names = FALSE,
-            colClasses = "character",
-            comment.char = ""
-        )
-
-        colnames(covar) <- clean_colnames(colnames(covar))
-        covar <- remove_fid(covar)
-
-        covar <- cbind(
-            subset(covar, select = (colnames(covar) == "IID")),
-            lapply(remove_iid(covar), as.factor)
-        )
-    }
 
     if ( ${load_qcovar} ){
         qcovar <- read.table(
@@ -68,10 +67,35 @@ process GET_DESIGN_MATRIX {
 
         colnames(qcovar) <- clean_colnames(colnames(qcovar))
         qcovar <- remove_fid(qcovar)
+        samples <- intersect(samples, qcovar[["IID"]])
+    }
 
+    if ( ${load_covar} ){
+        covar <- read.table("${covar}" ,
+            header = TRUE,
+            sep = "\\t",
+            check.names = FALSE,
+            colClasses = "character",
+            comment.char = ""
+        )
+        colnames(covar) <- clean_colnames(colnames(covar))
+        covar <- remove_fid(covar)
+        samples <- intersect(samples, covar[["IID"]])
+    }
+
+    if ( ${load_qcovar} ){
+        qcovar <- filter_samples(qcovar, samples)
         qcovar <- cbind(
             subset(qcovar, select = (colnames(qcovar) == "IID")),
             lapply(remove_iid(qcovar), as.numeric)
+        )
+    }
+
+    if ( ${load_covar} ){
+        covar <- filter_samples(covar, samples)
+        covar <- cbind(
+            subset(covar, select = (colnames(covar) == "IID")),
+            lapply(remove_iid(covar), as.factor)
         )
     }
 
