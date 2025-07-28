@@ -91,6 +91,8 @@ process GET_DESIGN_MATRIX {
     df[["x"]] <- -200 # needed to compute the right model frame
     
     model_frame <- model.frame(model, data = df)
+    # remove samples that are not in the pheno file to avoid unused factor levels in the model frame
+    model_frame <- model_frame[rownames(model_frame) %in% samples,]
     X_null <- model.matrix(null_model, data = model_frame)
 
     saveRDS(model_frame, "model_frame.rds")
