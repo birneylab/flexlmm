@@ -52,7 +52,9 @@ process FIT_NULL_MODEL {
     # V is symmetric and idempotent (V^2 = V) so all the eigenvalues are either 0 or 1. 
     # I do SVD and keep only eigenvalues of 1 and since eigenvalues are 1 sqrt(V) = V
     # U1 is V with the 0 eigenvalues and corresponding eigenvectors removed
-    V.eig <- eigen(V)
+    # if symmetric = FALSE, numerical errors can cause small complex eigenvalues
+    # and fail when filtering at > 0.9
+    V.eig <- eigen(V, symmetric = TRUE)
     U1 <- V.eig[["vectors"]][, V.eig[["values"]] > 0.9]
     
     # decorrelate the residual vector to get permutable residuals
