@@ -46,11 +46,15 @@ process FIT_NULL_MODEL {
 
     # this is the resiudal covariance matrix V
     I <- diag(length(y.mm))
-    H <- X.mm %*% solve(t(X.mm) %*% X.mm, t(X.mm)) # hat matrix
+    # compute the hat matrix with QR decomposition for numerical stability
+    # H = X(X^t X)^(-1)X^t simplifies to H = QQ^t when X=QR
+    # see https://stackoverflow.com/questions/9071020/compute-projection-hat-matrix-via-qr-factorization-svd-and-cholesky-factoriz
+    Q <- qr.Q(qr(X.mm))
+    H <- tcrossprod(Q) # same as Q %*% t(Q)
     V <- I - H
 
     # V is symmetric and idempotent (V^2 = V) so all the eigenvalues are either 0 or 1. 
-    # I do SVD and keep only eigenvalues of 1 and since eigenvalues are 1 sqrt(V) = V
+    # I do eigendecomposition and keep only eigenvalues of 1 and since eigenvalues are 1 sqrt(V) = V
     # U1 is V with the 0 eigenvalues and corresponding eigenvectors removed
     # if symmetric = FALSE, numerical errors can cause small complex eigenvalues
     # and fail when filtering at > 0.9
