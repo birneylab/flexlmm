@@ -1,6 +1,7 @@
 process BGEN_TO_PGEN {
     tag "$meta.id"
     label 'process_low'
+    label 'PGEN_GENERATION'
 
     conda "bioconda::plink2=2.00a3.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -65,6 +66,7 @@ process BGEN_TO_PGEN {
 process BCF_TO_PGEN {
     tag "$meta.id"
     label 'process_low'
+    label 'PGEN_GENERATION'
 
     conda "bioconda::plink2=2.00a3.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -129,6 +131,7 @@ process BCF_TO_PGEN {
 process VCF_TO_PGEN {
     tag "$meta.id"
     label 'process_low'
+    label 'PGEN_GENERATION'
 
     conda "bioconda::plink2=2.00a3.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -193,6 +196,7 @@ process VCF_TO_PGEN {
 process PGEN_TO_PGEN {
     tag "$meta.id"
     label 'process_low'
+    label 'PGEN_GENERATION'
 
     conda "bioconda::plink2=2.00a3.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -257,6 +261,7 @@ process PGEN_TO_PGEN {
 process BED_TO_PGEN {
     tag "$meta.id"
     label 'process_low'
+    label 'PGEN_GENERATION'
 
     conda "bioconda::plink2=2.00a3.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -321,6 +326,7 @@ process BED_TO_PGEN {
 process PED_TO_PGEN {
     tag "$meta.id"
     label 'process_low'
+    label 'PGEN_GENERATION'
 
     conda "bioconda::plink2=2.00a3.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
