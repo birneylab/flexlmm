@@ -178,6 +178,7 @@ workflow PREPROCESSING_EQTL {
         ],
         // I just need pheno to get the sample names in case of missing covar and qcovar, so 1 is enough
         PHENO_TO_RDS.out.pheno.map { meta, pheno -> pheno }.first(),
+        pgen_pvar_psam.map { meta, pgen, pvar, psam -> psam },
         model,
         null_model
     )

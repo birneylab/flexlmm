@@ -54,7 +54,9 @@ process FIT_MODEL_EQTL {
         comment.char = "",
         check.names = FALSE
     )
-    clean_colnames <- function(n){gsub("#", "", n)}
+    clean_colnames <- function(n){
+        return(gsub("#", "", n))
+    }
     colnames(psam) <- clean_colnames(colnames(psam))
     buf <- pgenlibr::Buf(pgen)
 
@@ -100,7 +102,7 @@ process FIT_MODEL_EQTL {
     # generate SNP-wise output only for non-permuted version
     outname <- "${prefix}.tsv.gwas.gz"
     out_con <- gzfile(outname, "w")
-    header <- "chr\\tpos\\tid\\tref\\talt\\tlrt_chisq\\tlrt_df\\tpval"
+    header <- "chr\tpos\tid\tref\talt\tlrt_chisq\tlrt_df\tpval\tbeta"
     writeLines(header, out_con)
 
     nvars <- length(relevant_snps)
@@ -144,17 +146,25 @@ process FIT_MODEL_EQTL {
         ref <- pvar_table[i, "REF"]  
         alt <- pvar_table[i, "ALT"]
         
+        beta <- paste(
+            colnames(X.mm),
+            coef(fit),
+            sep = "~",
+            collapse = ","
+        )
+
         lineout <- sprintf(
-              "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s",
-               chr,
-               pos,
-               id,
-               ref,
-               alt,
-               lrt_chisq,
-               lrt_df,
-               pval
-           )
+            "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
+            chr,
+            pos,
+            id,
+            ref,
+            alt,
+            lrt_chisq,
+            lrt_df,
+            pval,
+            beta
+        )
         writeLines(lineout, out_con)
     }
 
@@ -165,7 +175,7 @@ process FIT_MODEL_EQTL {
     # to make sure that the output has been written properly
     gwas <- read.table(outname, header = TRUE, sep = "\t")
     stopifnot(nrow(gwas) == nvars - skipped_vars)
-    stopifnot(ncol(gwas) == 8)
+    stopifnot(ncol(gwas) == 9)
 
     ver_r <- strsplit(as.character(R.version["version.string"]), " ")[[1]][3]
     ver_pgenlibr <- utils::packageVersion("pgenlibr")
