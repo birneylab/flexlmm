@@ -217,6 +217,17 @@
                     "default": 0.05,
                     "fa_icon": "fas fa-arrow-right",
                     "description": "Nominal significance threshold"
+                },
+                "min_allowed_eig": {
+                    "type": "number",
+                    "default": -1e-6,
+                    "help_text": "Small negative eigenvalues in the GRM are possible due to numerical precision.",
+                    "description": "Allow small negative GRM eigenvalues up to this value"
+                },
+                "eig_replacement": {
+                    "type": "number",
+                    "default": 1e-10,
+                    "description": "Value to use as replacement for negative GRM eigenvalues"
                 }
             },
             "required": ["null_model_formula", "model_formula"]

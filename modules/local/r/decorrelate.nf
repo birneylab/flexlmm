@@ -50,9 +50,29 @@ process DECORRELATE {
     s2g <- fit[["tau"]]
     s2e <- fit[["sigma2"]]
 
-    # phenotype variance/covariance matrix
-    V <- s2g * K + diag(s2e, dim(K))
-    L <- t(chol(V)) # R returns the upper Cholesky triangle
+    # Correct K if it has negative eigenvalues (numerical noise in GRM)
+    eig_K <- eigen(K, symmetric = TRUE)
+    n_negative <- sum(eig_K\$values < 0)
+    if (n_negative > 0) {
+        min_eig_K <- min(eig_K\$values)
+        stopifnot(min_eig_K >= ${params.min_allowed_eig})
+        message(sprintf("Gene %s: K has %d negative eigenvalues (min: %.6e), applying ridge correction",
+                        "${meta.id}", n_negative, min_eig_K))
+        K <- K + diag(abs(min_eig_K) + 1e-6, nrow(K))
+    }
+
+    V <- s2g * K + diag(s2e, nrow(K))
+    L <- try(t(chol(V)), silent = TRUE)
+
+    if (inherits(L, "try-error")) {
+        V.eig <- eigen(V, symmetric = TRUE)
+        message(sprintf("Gene %s: Cholesky failed after K correction (V min eigenvalue: %.6e), correcting V",
+                        "${meta.id}", min(V.eig\$values)))
+        V.eig\$values[V.eig\$values <= 0] <- ${params.eig_replacement}
+        V <- V.eig\$vectors %*% diag(V.eig\$values) %*% t(V.eig\$vectors)
+        L <- t(chol(V))
+    }
+
     colnames(L) <- colnames(K)
     rownames(L) <- rownames(K)
 
