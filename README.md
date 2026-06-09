@@ -58,10 +58,18 @@ Both models are specified by the user with the [R formula interface](https://www
 - Allele frequency:
    - [Plink2 format](https://www.cog-genomics.org/plink/2.0/input#read_freq)
 
+## eQTL Analysis
+
+**eQTL mode is now available!** Run the pipeline in eQTL mode to detect SNP-gene associations for expression phenotypes. See the [eQTL documentation](docs/eqtl.md) for details.
+
+```bash
+nextflow run main.nf -profile birneylab --eqtl --pheno expression.tsv --gtf genes.gtf ...
+```
+
+
 ## To be implemented
 
 - Categorical phenotypes
-- eQTLs
 
 ## The formula interface
 
